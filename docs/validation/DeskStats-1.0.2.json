@@ -1,0 +1,27 @@
+{
+  "Installer": "D:\\a\\deskstats\\deskstats\\artifacts\\DeskStats-Setup-1.0.2.exe",
+  "SHA256": "FE78D3123F5C4BFD4A787F57E6A49A75005A6D4F07272B1AA27D195F0418A3D8",
+  "ExitCode": 0,
+  "InstallSucceeded": true,
+  "AppName": "DeskStats",
+  "AppNameMatches": true,
+  "Publisher": "DeskStats Project (GPLv3)",
+  "PublisherMatches": true,
+  "Version": "1.0.2",
+  "VersionMatches": true,
+  "AppPresent": true,
+  "UninstallCommandPresent": true,
+  "SilentUninstallCommandPresent": true,
+  "Log": "D:\\a\\deskstats\\deskstats\\artifacts\\store-validation\\20261017-151420-install.log",
+  "NewInstalledApps": [
+    {
+      "PSPath": "Microsoft.PowerShell.Core\\Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{3F0A2E9C-7B1D-4C5A-8F6E-2D9B0A1C4E5F}_is1",
+      "DisplayName": "DeskStats",
+      "Publisher": "DeskStats Project (GPLv3)",
+      "DisplayVersion": "1.0.2"
+    }
+  ],
+  "NoExtraInstalledApps": true,
+  "ExactlyOneDeskStatsEntry": true,
+  "Passed": true
+}
