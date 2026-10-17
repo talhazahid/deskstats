@@ -25,8 +25,7 @@ param(
     [string]$Version = '1.0.0',
     [string]$Arch = 'win-x64',
     [switch]$InstallSdk,
-    [switch]$SkipInstaller,
-    [switch]$StoreInstaller
+    [switch]$SkipInstaller
 )
 
 $ErrorActionPreference = 'Stop'
@@ -89,29 +88,20 @@ if ($SkipInstaller) {
 # LibreHardwareMonitor 0.9.5+ needs the PawnIO driver for CPU temperature /
 # clocks / power. The installer bundles PawnIO_setup.exe and installs it
 # silently, so the user never has to do anything. This step is REQUIRED.
-if (-not $StoreInstaller) {
 $PawnSetup = Join-Path $Root 'installer\PawnIO_setup.exe'
-if (-not (Test-Path $PawnSetup) -or (Get-Item $PawnSetup).Length -lt 100KB) {
-    $urls = @(
-        'https://github.com/namazso/PawnIO.Setup/releases/latest/download/PawnIO_setup.exe',
-        'https://github.com/namazso/PawnIO.Setup/releases/download/2.2.0/PawnIO_setup.exe'
-    )
+$PawnHash = '1F519A22E47187F70A1379A48CA604981C4FCF694F4E65B734AAA74A9FBA3032'
+if (-not (Test-Path $PawnSetup)) {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    foreach ($u in $urls) {
-        try {
-            Write-Host "Downloading PawnIO_setup.exe from $u" -ForegroundColor Cyan
-            Invoke-WebRequest -UseBasicParsing -Uri $u -OutFile $PawnSetup
-            if ((Get-Item $PawnSetup).Length -ge 100KB) { break }
-        } catch {
-            Write-Host "  failed: $($_.Exception.Message)" -ForegroundColor Yellow
-        }
-    }
-    if (-not (Test-Path $PawnSetup) -or (Get-Item $PawnSetup).Length -lt 100KB) {
-        throw "Could not download PawnIO_setup.exe. Download it manually from https://github.com/namazso/PawnIO.Setup/releases and save it as installer\PawnIO_setup.exe, then re-run."
-    }
+    Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/namazso/PawnIO.Setup/releases/download/2.2.0/PawnIO_setup.exe' -OutFile $PawnSetup
 }
-Write-Host "PawnIO setup ready: $PawnSetup" -ForegroundColor Green
+if ((Get-FileHash -LiteralPath $PawnSetup -Algorithm SHA256).Hash -ne $PawnHash) {
+    throw 'PawnIO setup does not match the pinned official 2.2.0 release. Build stopped.'
 }
+$PawnSignature = Get-AuthenticodeSignature -LiteralPath $PawnSetup
+if ($PawnSignature.Status -ne 'Valid' -or $PawnSignature.SignerCertificate.Subject -notmatch 'CN=namazso\.eu(?:,|$)') {
+    throw 'PawnIO setup publisher signature is invalid or unexpected. Build stopped.'
+}
+Write-Host "Verified PawnIO 2.2.0: $PawnSetup" -ForegroundColor Green
 
 # ---------------------------------------------------------------- Installer
 # Locate Inno Setup 6 (iscc.exe); install it with winget when missing.
@@ -143,7 +133,6 @@ Write-Host "Building installer with Inno Setup: $isccPath" -ForegroundColor Cyan
 $iss = Join-Path $Root 'installer\installer.iss'
 & $isccPath $iss `
     "/DMyAppVersion=$Version" `
-    "/DStoreInstaller=$([int][bool]$StoreInstaller)" `
     "/DSourceDir=$PublishDir" `
     "/DOutputDir=$Artifacts" 2>&1 | Tee-Object -Variable out
 if ($LASTEXITCODE -ne 0) {

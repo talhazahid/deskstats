@@ -16,20 +16,15 @@
 #ifndef OutputDir
   #define OutputDir "..\artifacts"
 #endif
-#ifndef StoreInstaller
-  #define StoreInstaller "0"
-#endif
 
 #define MyAppName "DeskStats"
 #define MyAppExeName "DeskStats.exe"
 #define MyAppPublisher "DeskStats Project (GPLv3)"
 
 ; The PawnIO setup must sit next to this script (build-release.ps1 downloads it).
-#if StoreInstaller == "0"
 #define PawnSetup AddBackslash(SourcePath) + "PawnIO_setup.exe"
 #if !FileExists(PawnSetup)
   #error PawnIO_setup.exe is missing next to installer.iss - run scripts\build-release.ps1 (it downloads it).
-#endif
 #endif
 
 [Setup]
@@ -79,9 +74,7 @@ Source: "..\NOTICE";                          DestDir: "{app}\docs"; Flags: igno
 Source: "..\README.md";                       DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "..\docs\COMPLIANCE.md";              DestDir: "{app}\docs"; Flags: ignoreversion
 ; Sensor driver — always bundled, extracted only when it is not installed yet.
-#if StoreInstaller == "0"
-Source: "PawnIO_setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; Check: not PawnIOInstalled
-#endif
+Source: "PawnIO_setup.exe"; Flags: dontcopy
 Source: "..\docs\THIRD_PARTY\*";              DestDir: "{app}\docs\third_party"; Flags: ignoreversion recursesubdirs
 
 [Icons]
@@ -89,10 +82,7 @@ Name: "{group}\DeskStats"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\DeskStats"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-; Setup is already elevated, so PawnIO installs silently with no second UAC prompt.
-#if StoreInstaller == "0"
-Filename: "{tmp}\PawnIO_setup.exe"; Parameters: "-install -silent"; StatusMsg: "Installing the sensor driver (CPU temperature)..."; Flags: runhidden waituntilterminated; Check: not PawnIOInstalled
-#endif
+; The required driver is installed and verified in PrepareToInstall before app files change.
 ; DeskStats runs as administrator; setup is elevated, so the app starts without another prompt.
 Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName} now"; Flags: nowait postinstall skipifsilent shellexec
 
@@ -103,7 +93,8 @@ Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName} now"; Flags
 [Code]
 function PawnIOInstalled(): Boolean;
 begin
-  Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\PawnIO');
+  Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\PawnIO') and
+    FileExists(ExpandConstant('{pf64}\PawnIO\PawnIOLib.dll'));
 end;
 
 procedure KillApp();
@@ -116,7 +107,7 @@ end;
 
 // Check access before copying files. Keep the installed EXE intact if an app or
 // security product prevents replacement; deleting it here would break rollback.
-function PrepareToInstall(var NeedsRestart: Boolean): String;
+function CheckExistingApp(): String;
 var
   Exe: String;
   I: Integer;
@@ -141,6 +132,46 @@ begin
   begin
     Log('Cannot access the existing DeskStats executable for replacement: ' + Exe);
     Result := 'Setup cannot replace the existing DeskStats.exe. Close DeskStats and check Windows permissions and security software detection details, then retry. The existing application has been preserved.';
+  end;
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  ExitCode: Integer;
+begin
+  Result := CheckExistingApp();
+  if Result <> '' then Exit;
+  if PawnIOInstalled() then
+  begin
+    Log('Required PawnIO dependency already present; leaving it unchanged.');
+    Exit;
+  end;
+  Log('Installing required PawnIO 2.2.0 dependency.');
+  try
+    ExtractTemporaryFile('PawnIO_setup.exe');
+    if not Exec(ExpandConstant('{tmp}\PawnIO_setup.exe'), '-install -silent', '',
+      SW_HIDE, ewWaitUntilTerminated, ExitCode) then
+    begin
+      Result := 'Could not start the required PawnIO driver installer. See the setup log.';
+      Exit;
+    end;
+    Log(Format('PawnIO installer exit code: %d', [ExitCode]));
+    if ExitCode = 3010 then
+    begin
+      NeedsRestart := True;
+      Result := 'PawnIO requires a Windows restart. Restart Windows and run DeskStats setup again.';
+      Exit;
+    end;
+    if ExitCode <> 0 then
+    begin
+      Result := Format('Required PawnIO driver installation failed (code %d). DeskStats has not been installed or upgraded.', [ExitCode]);
+      Exit;
+    end;
+    if not PawnIOInstalled() then
+      Result := 'PawnIO setup finished, but the required driver service or library is missing. See the setup log.';
+  except
+    Log(GetExceptionMessage);
+    Result := 'Could not prepare the required PawnIO driver. See the setup log.';
   end;
 end;
 
