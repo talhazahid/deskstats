@@ -1,0 +1,49 @@
+name: Build and verify Windows installer
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/installer-validation.yml'
+      - 'installer/installer.iss'
+      - 'scripts/build-release.ps1'
+      - 'scripts/verify-store-installer.ps1'
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    runs-on: windows-2022
+    timeout-minutes: 30
+    env:
+      RELEASE_VERSION: '1.0.1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install installer compiler
+        shell: pwsh
+        run: |
+          choco install innosetup --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed.' }
+      - name: Build installer
+        shell: pwsh
+        run: ./scripts/build-release.ps1 -Version $env:RELEASE_VERSION
+      - name: Verify silent installation and installed-app metadata
+        shell: pwsh
+        run: ./scripts/verify-store-installer.ps1 -Installer "artifacts/DeskStats-Setup-$env:RELEASE_VERSION.exe" -ExpectedVersion $env:RELEASE_VERSION
+      - name: Save verified installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: DeskStats-Setup-1.0.1
+          path: artifacts/DeskStats-Setup-1.0.1.exe
+          if-no-files-found: error
+      - name: Save verification logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-validation-logs
+          path: artifacts/store-validation/
+          if-no-files-found: ignore

@@ -33,6 +33,9 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
+AppPublisherURL=https://talhazahid.github.io/deskstats/
+AppSupportURL=https://github.com/talhazahid/deskstats/issues
+AppUpdatesURL=https://talhazahid.github.io/deskstats/
 DefaultDirName={autopf}\DeskStats
 UsePreviousAppDir=no
 DefaultGroupName=DeskStats
@@ -45,10 +48,16 @@ SolidCompression=yes
 WizardStyle=modern
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayName={#MyAppName} {#MyAppVersion}
+; Keep the name stable; Windows exposes the version separately as DisplayVersion.
+UninstallDisplayName={#MyAppName}
+Uninstallable=yes
+CreateUninstallRegKey=yes
+SetupLogging=yes
+DisableStartupPrompt=yes
 UninstallDisplayIcon={app}\{#MyAppExeName}
 AppMutex=DeskStats_SingleInstance_Mutex
 CloseApplications=no
+RestartIfNeededByRun=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -88,12 +97,53 @@ begin
   Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\PawnIO');
 end;
 
-// Best-effort: stop a running DeskStats (or old SysDash) before install/upgrade so file replaces don't fail.
-function InitializeSetup(): Boolean;
+procedure KillApp();
 var
   ResultCode: Integer;
 begin
+  Exec('taskkill.exe', '/IM DeskStats.exe /T /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('taskkill.exe', '/IM SysDash.exe /T /F', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+// Check access before copying files. Keep the installed EXE intact if an app or
+// security product prevents replacement; deleting it here would break rollback.
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Exe: String;
+  I: Integer;
+  Stream: TFileStream;
+begin
+  Result := '';
+  Exe := ExpandConstant('{app}\{#MyAppExeName}');
+  for I := 1 to 10 do
+  begin
+    KillApp();
+    Sleep(500);
+    if not FileExists(Exe) then Break;
+    try
+      Stream := TFileStream.Create(Exe, fmOpenReadWrite or fmShareExclusive);
+      Stream.Free;
+      Exit;
+    except
+      Log('Waiting for access to the existing DeskStats executable.');
+    end;
+  end;
+  if FileExists(Exe) then
+  begin
+    Log('Cannot access the existing DeskStats executable for replacement: ' + Exe);
+    Result := 'Setup cannot replace the existing DeskStats.exe. Close DeskStats and check Windows permissions and security software detection details, then retry. The existing application has been preserved.';
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+begin
   Result := True;
-  Exec('taskkill.exe', '/IM DeskStats.exe /T /F', '', 0, ewWaitUntilTerminated, ResultCode);
-  Exec('taskkill.exe', '/IM SysDash.exe /T /F', '', 0, ewWaitUntilTerminated, ResultCode);
+  KillApp();
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  Result := True;
+  KillApp();
+  Sleep(500);
 end;

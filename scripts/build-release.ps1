@@ -63,6 +63,7 @@ $out = $null; $err = $null
     -c Release `
     -r $Arch `
     --self-contained true `
+    -p:Version=$Version `
     -p:PublishSingleFile=true `
     -p:IncludeNativeLibrariesForSelfExtract=true `
     -p:DebugType=None -p:DebugSymbols=false `
