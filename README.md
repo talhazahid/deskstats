@@ -4,7 +4,7 @@
 
 # DeskStats
 
-**Your PC's vitals — CPU, GPU, memory, network and sensors — as beautiful widgets on your desktop, or docked in a sidebar.**
+**Your PC's vitals, including CPU, GPU, memory, network and sensors, as beautiful widgets on your desktop, or docked in a sidebar.**
 
 [![Download](https://img.shields.io/badge/Download-latest%20release-3d8bff?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/talhazahid/deskstats/releases/latest)
 &nbsp;
@@ -31,7 +31,7 @@ drives, network and every temperature and fan sensor your motherboard exposes, a
 shows them as clean, glass-style widgets that you can
 
 - **float anywhere** on any monitor, or
-- **dock into a sidebar** on the edge of the screen — switch between the two in one click.
+- **dock into a sidebar** on the edge of the screen. Switch between the two in one click.
 
 It is a **new version of [Sidebar Diagnostics](https://github.com/ArcadeRenegade/SidebarDiagnostics)**,
 rebuilt from the ground up for today's Windows: .NET 8, a widget platform instead of a single
@@ -45,16 +45,16 @@ sidebar, resizable responsive widgets, per-widget themes, and universal hardware
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/assets/shot-widgets-sm.jpg" alt="Floating widgets"><br><sub><b>Floating widgets</b> — CPU, GPU, memory and sensors, anywhere on the desktop.</sub></td>
-    <td width="50%"><img src="docs/assets/shot-sidebar-sm.jpg" alt="Sidebar mode"><br><sub><b>Sidebar mode</b> — dock everything to the edge of any screen.</sub></td>
+    <td width="50%"><img src="docs/assets/shot-widgets-sm.jpg" alt="Floating widgets"><br><sub><b>Floating widgets</b>: CPU, GPU, memory and sensors, anywhere on the desktop.</sub></td>
+    <td width="50%"><img src="docs/assets/shot-sidebar-sm.jpg" alt="Sidebar mode"><br><sub><b>Sidebar mode</b>: dock everything to the edge of any screen.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/assets/shot-cpu-sm.jpg" alt="CPU widget"><br><sub><b>Every core, every clock</b> — per-thread load, real temperature, power, voltage and fan.</sub></td>
-    <td width="50%"><img src="docs/assets/shot-sensors-sm.jpg" alt="Sensors widget"><br><sub><b>Real sensors</b> — temperatures and fan speeds read straight from your hardware.</sub></td>
+    <td width="50%"><img src="docs/assets/shot-cpu-sm.jpg" alt="CPU widget"><br><sub><b>Every core, every clock</b>: per-thread load, real temperature, power, voltage and fan.</sub></td>
+    <td width="50%"><img src="docs/assets/shot-sensors-sm.jpg" alt="Sensors widget"><br><sub><b>Real sensors</b>: temperatures and fan speeds read straight from your hardware.</sub></td>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/assets/shot-columns-sm.jpg" alt="Responsive columns"><br><sub><b>Responsive</b> — drag a widget wider and its cards flow into 2 or 3 columns.</sub></td>
-    <td width="50%"><img src="docs/assets/shot-customize-sm.jpg" alt="Customisation menu"><br><sub><b>Make it yours</b> — theme, opacity and layer per widget.</sub></td>
+    <td width="50%"><img src="docs/assets/shot-columns-sm.jpg" alt="Responsive columns"><br><sub><b>Responsive</b>: drag a widget wider and its cards flow into 2 or 3 columns.</sub></td>
+    <td width="50%"><img src="docs/assets/shot-customize-sm.jpg" alt="Customisation menu"><br><sub><b>Make it yours</b>: theme, opacity and layer per widget.</sub></td>
   </tr>
 </table>
 
@@ -64,31 +64,31 @@ sidebar, resizable responsive widgets, per-widget themes, and universal hardware
 
 **Monitoring**
 
-- **CPU** — total load, per-thread load (up to 256 threads), effective clock, temperature, package power, core voltage, fan.
-- **GPU** — load, VRAM, core and *hot-spot* temperature, core / memory clock, fan, voltage. Picks the right GPU automatically on hybrid laptops, and lets you choose when there are several.
-- **Memory** — in use, available, committed, installed, and the **top apps by memory (up to 30)**.
-- **Sensors** — every motherboard temperature and fan in one place.
-- **Network** — live download / upload with history, adapter choice, today's totals, optional public IP.
-- **Storage** — capacity and read / write activity per drive.
-- **Date & time, World clock** — clock with calendar, several time zones.
-- **Weather** — current conditions, humidity, rain chance, wind, **air quality (US AQI)**, feels-like, UV, dew point, visibility, hourly and daily forecast. City search with autocomplete (type "kar" → *Karachi, Sindh, Pakistan*).
-- **Extras** — Now Playing, Recycle Bin.
+- **CPU**: total load, per-thread load (up to 256 threads), effective clock, temperature, package power, core voltage, fan.
+- **GPU**: load, VRAM, core and *hot-spot* temperature, core / memory clock, fan, voltage. Picks the right GPU automatically on hybrid laptops, and lets you choose when there are several.
+- **Memory**: in use, available, committed, installed, and the **top apps by memory (up to 30)**.
+- **Sensors**: every motherboard temperature and fan in one place.
+- **Network**: live download / upload with history, adapter choice, today's totals, optional public IP.
+- **Storage**: capacity and read / write activity per drive.
+- **Date & time, World clock**: clock with calendar, several time zones.
+- **Weather**: current conditions, humidity, rain chance, wind, **air quality (US AQI)**, feels-like, UV, dew point, visibility, hourly and daily forecast. City search with autocomplete (type "kar" → *Karachi, Sindh, Pakistan*).
+- **Extras**: Now Playing, Recycle Bin.
 
 **Look & feel**
 
-- **Responsive widgets** — drag the edges: 1 → 2 → 3 columns, balanced heights, titles pinned, content centred.
-- **Dark & light themes — per widget**, with automatic text contrast so text stays readable on any wallpaper.
-- **Background-only opacity** (0–100 %), optional card frame, transparent sidebar, optional sidebar title.
-- **Floating or sidebar** — always on top, normal, or pinned to the desktop; click-through with a safe rescue; snap to grid; unlimited duplicates.
-- **Multi-monitor aware** — screens are named by position and model, not by confusing numbers.
-- **Layouts** — Minimal, Gaming, Work, Streaming presets, plus your own.
+- **Responsive widgets**: drag the edges: 1 → 2 → 3 columns, balanced heights, titles pinned, content centred.
+- **Dark & light themes for each widget**, with automatic text contrast so text stays readable on any wallpaper.
+- **Background-only opacity** (0 to 100 %), optional card frame, transparent sidebar, optional sidebar title.
+- **Floating or sidebar**: always on top, normal, or pinned to the desktop; click-through with a safe rescue; snap to grid; unlimited duplicates.
+- **Multi-monitor aware**: screens are named by position and model, not by confusing numbers.
+- **Layouts**: Minimal, Gaming, Work, Streaming presets, plus your own.
 
 **Reliable**
 
 - **Your setup is remembered.** Widgets, positions and settings are stored in `%LocalAppData%\DeskStats` and come back after every update or reinstall. A backup is taken automatically before a new version first runs.
-- **Universal hardware support** — graceful fallbacks when a sensor is not available; a hardware report (tray → *Hardware report…*) helps debug unusual PCs.
-- **Quiet** — low idle CPU, lives in the system tray, starts with Windows.
-- **Privacy first** — no account, no telemetry, no ads. Hardware data never leaves your PC. See the [privacy policy](https://talhazahid.github.io/deskstats/privacy.html).
+- **Universal hardware support**: graceful fallbacks when a sensor is not available; a hardware report (tray → *Hardware report…*) helps debug unusual PCs.
+- **Quiet**: low idle CPU, lives in the system tray, starts with Windows.
+- **Privacy first**: no account, no telemetry, no ads. Hardware data never leaves your PC. See the [privacy policy](https://talhazahid.github.io/deskstats/privacy.html).
 
 ## Install
 
@@ -103,7 +103,7 @@ with elevated rights. The installer also installs the free, signed
 [PawnIO](https://pawnio.eu/) driver (if it is not already installed), which DeskStats uses to read
 CPU sensors. Both are used only for reading sensors.
 
-**Requirements:** Windows 10 (2004) or Windows 11, 64-bit. No .NET install needed — the app is self-contained.
+**Requirements:** Windows 10 (2004) or Windows 11, 64-bit. No .NET install needed. The app is self-contained.
 
 ## Using it
 
@@ -168,25 +168,25 @@ false positive to the vendor.
 DeskStats stands on the shoulders of other open-source work, and says so:
 
 - **[Sidebar Diagnostics](https://github.com/ArcadeRenegade/SidebarDiagnostics)** by **ArcadeRenegade**
-  (GPLv3) — the original sidebar hardware monitor. DeskStats is a modernisation of that idea and adapts
+  (GPLv3): the original sidebar hardware monitor. DeskStats is a modernisation of that idea and adapts
   parts of its logic (sensor selection, unit conversion, multi-monitor / DPI handling, drive and network
   sampling). The exact files are listed in [`NOTICE`](NOTICE) and [`docs/COMPLIANCE.md`](docs/COMPLIANCE.md).
-- **[LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)** (MPL-2.0) — hardware sensor access.
-- **[PawnIO](https://pawnio.eu/)** — the signed kernel driver used to read CPU sensors.
-- **[Open-Meteo](https://open-meteo.com/)** — weather and air-quality data (CC BY 4.0), free for non-commercial use.
-- **[ipify](https://www.ipify.org/)** — public IP lookup (optional).
-- **Hardcodet.NotifyIcon.Wpf**, **Microsoft.Extensions.DependencyInjection** — tray icon and dependency injection.
+- **[LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)** (MPL-2.0): hardware sensor access.
+- **[PawnIO](https://pawnio.eu/)**: the signed kernel driver used to read CPU sensors.
+- **[Open-Meteo](https://open-meteo.com/)**: weather and air-quality data (CC BY 4.0), free for non-commercial use.
+- **[ipify](https://www.ipify.org/)**: public IP lookup (optional).
+- **Hardcodet.NotifyIcon.Wpf**, **Microsoft.Extensions.DependencyInjection**: tray icon and dependency injection.
 
 ## License
 
-DeskStats is licensed under the **[GNU General Public License v3.0](LICENSE)** — **it is not MIT-licensed.**
+DeskStats is licensed under the **[GNU General Public License v3.0](LICENSE)**: **it is not MIT-licensed.**
 
 Because DeskStats adapts code from Sidebar Diagnostics, which is itself GPLv3, the whole project must
 stay GPLv3. In plain words:
 
-- ✅ **Use it** — free, for personal or work use.
+- ✅ **Use it**: free, for personal or work use.
 - ✅ **Read, study and modify the source.**
-- ✅ **Share it** — but if you distribute DeskStats or a modified version, you must keep it under GPLv3, give the
+- ✅ **Share it**: but if you distribute DeskStats or a modified version, you must keep it under GPLv3, give the
   recipients the source code, keep the copyright and credit notices (including the credit to Sidebar Diagnostics),
   and clearly mark your changes.
 - ❌ **You can't make it closed-source**, re-license it under a permissive licence (such as MIT), or strip the credits.
