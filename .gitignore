@@ -31,3 +31,6 @@ Thumbs.db
 # Local source snapshots and generated handoff files
 _backup_round*/
 Claude outputs/
+
+# Installer hosted on GitHub Pages
+!docs/downloads/DeskStats-Setup-*.exe
