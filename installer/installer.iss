@@ -16,15 +16,20 @@
 #ifndef OutputDir
   #define OutputDir "..\artifacts"
 #endif
+#ifndef StoreInstaller
+  #define StoreInstaller "0"
+#endif
 
 #define MyAppName "DeskStats"
 #define MyAppExeName "DeskStats.exe"
 #define MyAppPublisher "DeskStats Project (GPLv3)"
 
 ; The PawnIO setup must sit next to this script (build-release.ps1 downloads it).
+#if StoreInstaller == "0"
 #define PawnSetup AddBackslash(SourcePath) + "PawnIO_setup.exe"
 #if !FileExists(PawnSetup)
   #error PawnIO_setup.exe is missing next to installer.iss - run scripts\build-release.ps1 (it downloads it).
+#endif
 #endif
 
 [Setup]
@@ -74,7 +79,9 @@ Source: "..\NOTICE";                          DestDir: "{app}\docs"; Flags: igno
 Source: "..\README.md";                       DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "..\docs\COMPLIANCE.md";              DestDir: "{app}\docs"; Flags: ignoreversion
 ; Sensor driver — always bundled, extracted only when it is not installed yet.
+#if StoreInstaller == "0"
 Source: "PawnIO_setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; Check: not PawnIOInstalled
+#endif
 Source: "..\docs\THIRD_PARTY\*";              DestDir: "{app}\docs\third_party"; Flags: ignoreversion recursesubdirs
 
 [Icons]
@@ -83,7 +90,9 @@ Name: "{autodesktop}\DeskStats"; Filename: "{app}\{#MyAppExeName}"; Tasks: deskt
 
 [Run]
 ; Setup is already elevated, so PawnIO installs silently with no second UAC prompt.
+#if StoreInstaller == "0"
 Filename: "{tmp}\PawnIO_setup.exe"; Parameters: "-install -silent"; StatusMsg: "Installing the sensor driver (CPU temperature)..."; Flags: runhidden waituntilterminated; Check: not PawnIOInstalled
+#endif
 ; DeskStats runs as administrator; setup is elevated, so the app starts without another prompt.
 Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName} now"; Flags: nowait postinstall skipifsilent shellexec
 

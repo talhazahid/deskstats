@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-2022
     timeout-minutes: 30
     env:
-      RELEASE_VERSION: '1.0.1'
+      RELEASE_VERSION: '1.0.2'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -30,15 +30,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed.' }
       - name: Build installer
         shell: pwsh
-        run: ./scripts/build-release.ps1 -Version $env:RELEASE_VERSION
+        run: ./scripts/build-release.ps1 -Version $env:RELEASE_VERSION -StoreInstaller
       - name: Verify silent installation and installed-app metadata
         shell: pwsh
         run: ./scripts/verify-store-installer.ps1 -Installer "artifacts/DeskStats-Setup-$env:RELEASE_VERSION.exe" -ExpectedVersion $env:RELEASE_VERSION
       - name: Save verified installer
         uses: actions/upload-artifact@v4
         with:
-          name: DeskStats-Setup-1.0.1
-          path: artifacts/DeskStats-Setup-1.0.1.exe
+          name: DeskStats-Setup-1.0.2
+          path: artifacts/DeskStats-Setup-1.0.2.exe
           if-no-files-found: error
       - name: Save verification logs
         if: always()

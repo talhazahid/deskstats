@@ -25,7 +25,8 @@ param(
     [string]$Version = '1.0.0',
     [string]$Arch = 'win-x64',
     [switch]$InstallSdk,
-    [switch]$SkipInstaller
+    [switch]$SkipInstaller,
+    [switch]$StoreInstaller
 )
 
 $ErrorActionPreference = 'Stop'
@@ -88,6 +89,7 @@ if ($SkipInstaller) {
 # LibreHardwareMonitor 0.9.5+ needs the PawnIO driver for CPU temperature /
 # clocks / power. The installer bundles PawnIO_setup.exe and installs it
 # silently, so the user never has to do anything. This step is REQUIRED.
+if (-not $StoreInstaller) {
 $PawnSetup = Join-Path $Root 'installer\PawnIO_setup.exe'
 if (-not (Test-Path $PawnSetup) -or (Get-Item $PawnSetup).Length -lt 100KB) {
     $urls = @(
@@ -109,6 +111,7 @@ if (-not (Test-Path $PawnSetup) -or (Get-Item $PawnSetup).Length -lt 100KB) {
     }
 }
 Write-Host "PawnIO setup ready: $PawnSetup" -ForegroundColor Green
+}
 
 # ---------------------------------------------------------------- Installer
 # Locate Inno Setup 6 (iscc.exe); install it with winget when missing.
@@ -140,6 +143,7 @@ Write-Host "Building installer with Inno Setup: $isccPath" -ForegroundColor Cyan
 $iss = Join-Path $Root 'installer\installer.iss'
 & $isccPath $iss `
     "/DMyAppVersion=$Version" `
+    "/DStoreInstaller=$([int][bool]$StoreInstaller)" `
     "/DSourceDir=$PublishDir" `
     "/DOutputDir=$Artifacts" 2>&1 | Tee-Object -Variable out
 if ($LASTEXITCODE -ne 0) {

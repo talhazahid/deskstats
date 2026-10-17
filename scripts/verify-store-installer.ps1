@@ -24,6 +24,19 @@ New-Item -ItemType Directory -Path $output -Force | Out-Null
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $log = Join-Path $output "$stamp-install.log"
 $report = Join-Path $output "$stamp-result.json"
+function Get-VisibleInstalledApps {
+    $roots = @(
+        'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+        'HKCU:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+    )
+    @(Get-ItemProperty -Path $roots -ErrorAction SilentlyContinue |
+        Where-Object { $_.DisplayName -and $_.SystemComponent -ne 1 } |
+        Select-Object PSPath, DisplayName, Publisher, DisplayVersion)
+}
+$before = @(Get-VisibleInstalledApps)
+$beforeKeys = @($before | ForEach-Object { $_.PSPath })
 $process = Start-Process -FilePath $installerPath -WindowStyle Hidden -PassThru -ArgumentList @(
     '/SP-', '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', ('/LOG="' + $log + '"')
 )
@@ -31,6 +44,11 @@ if (-not $process.WaitForExit(600000)) {
     throw "Setup is still running after ten minutes. Inspect it and $log before retrying."
 }
 $process.Refresh()
+$after = @(Get-VisibleInstalledApps)
+$newEntries = @($after | Where-Object { $_.PSPath -notin $beforeKeys })
+$appKeySuffix = '\{3F0A2E9C-7B1D-4C5A-8F6E-2D9B0A1C4E5F}_is1'
+$extraEntries = @($newEntries | Where-Object { -not $_.PSPath.EndsWith($appKeySuffix) })
+$deskStatsEntries = @($after | Where-Object { $_.DisplayName -eq 'DeskStats' })
 $entry = Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{3F0A2E9C-7B1D-4C5A-8F6E-2D9B0A1C4E5F}_is1' -ErrorAction SilentlyContinue
 $appPath = Join-Path $env:ProgramFiles 'DeskStats\DeskStats.exe'
 $result = [ordered]@{
@@ -48,10 +66,13 @@ $result = [ordered]@{
     UninstallCommandPresent = (-not [string]::IsNullOrWhiteSpace($entry.UninstallString))
     SilentUninstallCommandPresent = (-not [string]::IsNullOrWhiteSpace($entry.QuietUninstallString))
     Log = $log
+    NewInstalledApps = @($newEntries)
+    NoExtraInstalledApps = ($extraEntries.Count -eq 0)
+    ExactlyOneDeskStatsEntry = ($deskStatsEntries.Count -eq 1)
 }
-$passed = $result.InstallSucceeded -and $result.AppNameMatches -and $result.PublisherMatches -and $result.VersionMatches -and $result.AppPresent -and $result.UninstallCommandPresent -and $result.SilentUninstallCommandPresent
+$passed = $result.InstallSucceeded -and $result.AppNameMatches -and $result.PublisherMatches -and $result.VersionMatches -and $result.AppPresent -and $result.UninstallCommandPresent -and $result.SilentUninstallCommandPresent -and $result.NoExtraInstalledApps -and $result.ExactlyOneDeskStatsEntry
 $result['Passed'] = $passed
-$result | ConvertTo-Json | Set-Content -LiteralPath $report -Encoding UTF8
+$result | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $report -Encoding UTF8
 Write-Host "Verification report: $report"
 if (-not $passed) { throw "Installer verification failed. See $report and $log. Do not submit this build yet." }
 Write-Host 'Installation and installed-app metadata checks passed. Also verify no installer or bundled-driver UI appeared on a clean test PC.'
