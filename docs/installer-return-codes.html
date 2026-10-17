@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Installer return codes — DeskStats</title>
+  <meta name="description" content="DeskStats EXE installer return codes and silent installation parameters.">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="top"><div class="wrap"><a class="brand" href="index.html"><img src="assets/logo-256.png" alt="">DeskStats</a></div></nav>
+  <main class="wrap policy">
+    <h1>Installer return codes</h1>
+    <p>Applies to the DeskStats 1.0.1 EXE installer, built with Inno Setup.</p>
+    <h2>Silent installation</h2>
+    <p><code>/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART</code></p>
+    <p>Run setup with administrator privileges. Add <code>/LOG="C:\path\install.log"</code> to collect diagnostic details in an existing directory.</p>
+    <h2>Exit codes</h2>
+    <table>
+      <thead><tr><th scope="col">Code</th><th scope="col">Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>0</td><td>Setup completed successfully.</td></tr>
+        <tr><td>1</td><td>Setup could not initialize.</td></tr>
+        <tr><td>2</td><td>The user canceled before installation began.</td></tr>
+        <tr><td>3</td><td>A fatal error interrupted preparation for the next setup phase.</td></tr>
+        <tr><td>4</td><td>A fatal installation error occurred.</td></tr>
+        <tr><td>5</td><td>Installation was canceled or aborted, including a suppressed file-operation error.</td></tr>
+        <tr><td>6</td><td>The installer debugger terminated setup.</td></tr>
+        <tr><td>7</td><td>A preparation check blocked installation, such as an inaccessible existing executable.</td></tr>
+        <tr><td>8</td><td>A preparation check blocked installation and requires a restart before retrying.</td></tr>
+      </tbody>
+    </table>
+    <p>Codes 1–8 indicate incomplete installation. Code 8 does not mean a successful installation awaiting restart. This build defines no custom success-with-restart code or dedicated codes for network failure, disk capacity, an existing installation, concurrent installation, or security-policy rejection.</p>
+    <p><a href="https://jrsoftware.org/ishelp/topic_setupexitcodes.htm">Inno Setup exit-code reference</a></p>
+  </main>
+</body>
+</html>
