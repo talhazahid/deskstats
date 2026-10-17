@@ -32,9 +32,9 @@
 
   <header class="hero" id="top">
     <div class="wrap">
-      <span class="pill"><i></i> A new version of Sidebar Diagnostics · for Windows 10 &amp; 11</span>
-      <h1>Your PC's vitals, <span class="grad">right on your desktop.</span></h1>
-      <p class="lead">Live CPU, GPU, memory, network and sensor readings in clean, glass-style widgets — float them anywhere on any screen, or dock them in a sidebar.</p>
+      <span class="pill"><i></i> Desktop monitoring, thoughtfully simple · Windows 10 &amp; 11</span>
+      <h1>Know your PC.<br><span class="grad">Without the clutter.</span></h1>
+      <p class="lead">CPU, GPU, memory and sensors. The readings you need, quietly on your desktop. Float your widgets anywhere or bring them together in a sidebar.</p>
       <div class="cta">
         <a class="btn primary" href="https://github.com/talhazahid/deskstats/releases/latest">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
@@ -106,8 +106,8 @@
           <div class="eyebrow">Screenshots</div>
           <h2>See it in action.</h2>
         </div>
-        <div class="tabs" role="tablist" id="tabs"></div>
-        <div class="gallery rv">
+        <div class="tabs" role="tablist" aria-label="Widget previews" id="tabs"></div>
+        <div class="gallery rv" id="gallery-panel" role="tabpanel" aria-labelledby="preview-tab-0">
           <div class="frame"><img id="shot" src="assets/shot-widgets.jpg" alt="" width="1600" height="900"></div>
           <div class="caption" id="cap"></div>
           <div class="note">Design renders of the real widgets — values on your PC will differ.</div>
@@ -209,6 +209,25 @@
 
   <script>
     (function () {
+      // One consistent, lightweight line-icon vocabulary. No icon library or CDN.
+      var iconPaths = [
+        'M7 7h10v10H7z M9 3v4m6-4v4M9 17v4m6-4v4M3 9h4m-4 6h4m10-6h4m-4 6h4',
+        'M3 6h18v12H3z M7 10h4v4H7z M15 10h3m-3 4h3M7 18v3m4-3v3',
+        'M4 7h16v10H4z M7 10v4m4-4v4m4-4v4M7 17v3m4-3v3m4-3v3',
+        'M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z M12 9v8',
+        'M3 7h18v10H3z M7 11h.01M11 11h.01M16 14h3 M12 3v4m0 10v4',
+        'M4 5h16v14H4z M8 9l-3 3 3 3m8-6 3 3-3 3 M10 12h4',
+        'M7 17h10a4 4 0 1 0-1-8 5 5 0 0 0-9-1 4.5 4.5 0 0 0 0 9z',
+        'M12 3a9 9 0 1 0 0 18z M12 3v18',
+        'M3 4h18v13H3z M8 21h8m-4-4v4',
+        'M4 7h13m-4-4 4 4-4 4 M20 17H7m4-4-4 4 4 4',
+        'M6 10h12v11H6z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3',
+        'M3 12h4l3-7 4 14 3-7h4'
+      ];
+      document.querySelectorAll('.ico').forEach(function (el, i) {
+        el.setAttribute('aria-hidden', 'true');
+        el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="' + iconPaths[i % iconPaths.length] + '"/></svg>';
+      });
       var shots = [
         ["widgets", "Floating widgets", "Your PC's vitals — CPU, GPU, memory and sensors — right on your desktop."],
         ["sidebar", "Sidebar", "Prefer a sidebar? Dock every widget to the edge of any screen in one click."],
@@ -221,20 +240,26 @@
       shots.forEach(function (s, i) {
         var b = document.createElement("button");
         b.className = "tab"; b.type = "button"; b.setAttribute("role", "tab");
+        b.id = "preview-tab-" + i; b.setAttribute("aria-controls", "gallery-panel"); b.tabIndex = i === 0 ? 0 : -1;
         b.textContent = s[1]; b.setAttribute("aria-selected", i === 0 ? "true" : "false");
         b.addEventListener("click", function () { show(i); });
+        b.addEventListener("keydown", function (event) {
+          var next = event.key === 'ArrowRight' ? (i + 1) % shots.length : event.key === 'ArrowLeft' ? (i + shots.length - 1) % shots.length : event.key === 'Home' ? 0 : event.key === 'End' ? shots.length - 1 : -1;
+          if (next < 0) return;
+          event.preventDefault(); show(next); tabs.children[next].focus();
+        });
         tabs.appendChild(b);
       });
       function show(i) {
         var all = tabs.children;
-        for (var k = 0; k < all.length; k++) all[k].setAttribute("aria-selected", k === i ? "true" : "false");
+        for (var k = 0; k < all.length; k++) { all[k].setAttribute("aria-selected", k === i ? "true" : "false"); all[k].tabIndex = k === i ? 0 : -1; }
+        document.getElementById("gallery-panel").setAttribute("aria-labelledby", "preview-tab-" + i);
         img.style.opacity = 0;
         setTimeout(function () { img.src = "assets/shot-" + shots[i][0] + ".jpg"; img.alt = shots[i][1]; img.style.opacity = 1; }, 160);
         cap.textContent = shots[i][2];
       }
       cap.textContent = shots[0][2]; img.alt = shots[0][1];
-      var n = 0; var timer = setInterval(function () { n = (n + 1) % shots.length; show(n); }, 6000);
-      tabs.addEventListener("click", function () { clearInterval(timer); });
+      // Deliberate browsing: don't change the preview while someone is reading.
 
       var els = document.querySelectorAll(".rv");
       if ("IntersectionObserver" in window) {
