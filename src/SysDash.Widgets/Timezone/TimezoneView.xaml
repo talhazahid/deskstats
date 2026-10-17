@@ -1,0 +1,36 @@
+<UserControl x:Class="SysDash.Widgets.Timezone.TimezoneView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinWidth="240" MinHeight="150">
+
+    <Border Style="{StaticResource WidgetCard}" Padding="16,14">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <Path Style="{StaticResource IconGlyph}" Data="{StaticResource Icon.Timezone}" />
+                <TextBlock Style="{StaticResource WidgetTitle}" Text="WORLD CLOCK" Margin="8,0,0,0" />
+            </StackPanel>
+
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Zones}" Margin="0,8,0,0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Style="{StaticResource WidgetRowLabel}" Text="{Binding Label}" />
+                            <TextBlock Grid.Column="1" Style="{StaticResource WidgetValue}" FontSize="20"
+                                       Text="{Binding Time}"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </Grid>
+    </Border>
+</UserControl>

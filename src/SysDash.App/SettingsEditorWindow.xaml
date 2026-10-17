@@ -1,0 +1,43 @@
+<Window x:Class="SysDash.App.SettingsEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Widget settings"
+        Width="440"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="False"
+        Background="{DynamicResource PanelBackgroundBrush}"
+        TextElement.FontFamily="{StaticResource UiFont}">
+
+    <Grid Margin="20,18,20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel>
+            <TextBlock x:Name="TitleText" FontSize="20" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock x:Name="DescriptionText" FontSize="12" Margin="0,2,0,0" TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextTertiaryBrush}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1"
+                      MaxHeight="560"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      Margin="0,14,0,0">
+            <StackPanel x:Name="EditorPanel" />
+        </ScrollViewer>
+
+        <Grid Grid.Row="2" Margin="0,14,0,0">
+            <Button Content="Reset to defaults" HorizontalAlignment="Left" Click="OnResetDefaults" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Close" IsCancel="True" Width="88" Margin="0,0,10,0" Click="OnCancel" />
+                <Button x:Name="SaveButton" Content="Save" IsDefault="True" Width="88" Click="OnSave" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SysDash.Widgets</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <Description>Built-in widgets (CPU, RAM, GPU, Network, Drive, Clock, Weather, Timezone, Recycle bin, Now playing).</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SysDash.Core\SysDash.Core.csproj" />
+    <ProjectReference Include="..\SysDash.SDK\SysDash.SDK.csproj" />
+    <ProjectReference Include="..\SysDash.Theming\SysDash.Theming.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,57 @@
+<Window x:Class="SysDash.App.NameDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Name"
+        Width="360"
+        SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{DynamicResource WindowBackdropBrush}">
+
+    <Grid Margin="20,16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="PromptText"
+                   FontFamily="{StaticResource UiFont}"
+                   FontSize="12"
+                   Foreground="{DynamicResource TextSecondaryBrush}" />
+
+        <TextBox x:Name="NameBox"
+                 Grid.Row="1"
+                 Margin="0,12,0,0"
+                 Padding="6,4"
+                 FontFamily="{StaticResource UiFont}"
+                 FontSize="13"
+                 Foreground="{DynamicResource TextPrimaryBrush}"
+                 KeyDown="OnNameKeyDown" />
+
+        <TextBlock x:Name="ErrorText"
+                   Grid.Row="2"
+                   Margin="0,8,0,0"
+                   FontFamily="{StaticResource UiFont}"
+                   FontSize="11"
+                   Foreground="{DynamicResource DangerBrush}"
+                   Visibility="Collapsed" />
+
+        <StackPanel Grid.Row="3"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <Button Content="Cancel"
+                    IsCancel="True"
+                    Width="88"
+                    Margin="0,0,10,0"
+                    Click="OnCancel" />
+            <Button Content="Save"
+                    IsDefault="True"
+                    Width="88"
+                    Click="OnSave" />
+        </StackPanel>
+    </Grid>
+</Window>

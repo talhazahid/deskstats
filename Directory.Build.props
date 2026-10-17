@@ -1,0 +1,22 @@
+<Project>
+
+  <PropertyGroup>
+    <!--
+      net8.0-windows10.0.19041.0 gives every project access to the Windows 10 SDK
+      projections (e.g. Windows.Media.Control for the Now Playing widget) while still
+      being a normal .NET 8 WPF-compatible target on Windows.
+    -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Deterministic>true</Deterministic>
+    <Version>0.1.0</Version>
+    <Authors>SysDash contributors</Authors>
+    <Product>DeskStats</Product>
+    <RepositoryUrl>https://github.com/ArcadeRenegade/SidebarDiagnostics</RepositoryUrl>
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SysDash.Theming</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <Description>Theme system (dark/light), Win11 glass/backdrop effects, Sparkline control.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SysDash.Core\SysDash.Core.csproj" />
+  </ItemGroup>
+
+</Project>

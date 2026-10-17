@@ -1,0 +1,96 @@
+<UserControl x:Class="SysDash.Widgets.Clock.ClockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:SysDash.Theming.Controls;assembly=SysDash.Theming"
+             MinWidth="240">
+
+    <Border Style="{StaticResource WidgetCard}">
+        <!-- Fluid: 1 column at the default width, 2–3 columns when the widget is widened. -->
+        <s:ResponsiveColumns MinColumnWidth="264" MaxColumns="3" ColumnGap="8">
+            <!-- Time -->
+            <Border Style="{StaticResource WidgetSection}">
+                <s:SectionLayout>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding TimeText}" FontSize="40" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="{Binding SecondsText}" FontSize="18" FontWeight="SemiBold"
+                                   Foreground="{DynamicResource AccentBrush}" Margin="8,0,0,7" VerticalAlignment="Bottom"
+                                   Visibility="{Binding ShowSeconds, Converter={StaticResource BoolToVisibility}}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding DateText}" FontSize="13" HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               Visibility="{Binding ShowDate, Converter={StaticResource BoolToVisibility}}" />
+                </s:SectionLayout>
+            </Border>
+
+            <!-- Month calendar -->
+            <Border Style="{StaticResource WidgetSection}" Margin="0"
+                    Visibility="{Binding ShowCalendar, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Button Style="{StaticResource IconButton}" Width="Auto" HorizontalAlignment="Left"
+                                Command="{Binding TodayCommand}" ToolTip="Back to today">
+                            <TextBlock Text="{Binding MonthTitle}" FontSize="13.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextPrimaryBrush}" Margin="4,0" />
+                        </Button>
+                        <Button Grid.Column="1" Style="{StaticResource IconButton}" Content="‹"
+                                Command="{Binding PreviousMonthCommand}" ToolTip="Previous month" />
+                        <Button Grid.Column="2" Style="{StaticResource IconButton}" Content="›"
+                                Command="{Binding NextMonthCommand}" ToolTip="Next month" />
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding WeekdayNames}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="7" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource TextTertiaryBrush}" Margin="0,0,0,4" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <ItemsControl ItemsSource="{Binding Days}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="7" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border x:Name="Cell" Height="28" Margin="1.5" CornerRadius="8"
+                                        Background="{DynamicResource SectionBackgroundBrush}">
+                                    <TextBlock x:Name="DayText" Text="{Binding Day}" FontSize="12.5"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextPrimaryBrush}" />
+                                </Border>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsWeekend}" Value="True">
+                                        <Setter TargetName="DayText" Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsCurrentMonth}" Value="False">
+                                        <Setter TargetName="DayText" Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+                                        <Setter TargetName="Cell" Property="Background" Value="Transparent" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding IsToday}" Value="True">
+                                        <Setter TargetName="Cell" Property="Background" Value="{DynamicResource AccentBrush}" />
+                                        <Setter TargetName="DayText" Property="Foreground" Value="White" />
+                                        <Setter TargetName="DayText" Property="FontWeight" Value="Bold" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </s:ResponsiveColumns>
+    </Border>
+</UserControl>

@@ -1,0 +1,1037 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:conv="clr-namespace:SysDash.Theming.Converters">
+
+    <!-- ============ Converters ============ -->
+    <conv:BoolToVisibilityConverter x:Key="BoolToVisibility" />
+    <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
+    <conv:NullToVisibilityConverter x:Key="NullToVisibility" />
+    <conv:InvertBoolConverter x:Key="InvertBool" />
+    <conv:BoolToOpacityConverter x:Key="BoolToOpacity" />
+    <conv:StringFormatConverter x:Key="StringFormat" />
+
+    <!-- Brushes live in Dark.xaml / Light.xaml so theme switches repaint live. -->
+
+    <!-- ============ Typography ============ -->
+    <FontFamily x:Key="UiFont">Segoe UI Variable Text, Segoe UI</FontFamily>
+
+    <!-- ============ Widget visual styles ============ -->
+    <!-- Card brushes are Card*Brush (not Panel*Brush) so each window can override
+         them: background opacity and "no card frame" (see CardAppearance). -->
+    <Style x:Key="WidgetCard" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="TextElement.FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="TextElement.Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <!-- Inner rounded panel (iStat-style section inside a widget card). -->
+    <Style x:Key="WidgetSection" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardSectionBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardSectionBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="12,10" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+    </Style>
+
+    <!-- Uppercase grey caption at the top of a section: "TEMPERATURE", "PROCESSES". -->
+    <Style x:Key="SectionHeader" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="11.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+        <Setter Property="Margin" Value="0,0,0,4" />
+    </Style>
+
+    <!-- Row label / value pair used by detail lists. -->
+    <Style x:Key="RowLabel" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,1.5" />
+    </Style>
+
+    <Style x:Key="RowValue" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="8,1.5,0,1.5" />
+    </Style>
+
+    <!-- Big headline numbers: "41.4 MB/s", "72%". -->
+    <Style x:Key="BigNumber" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Text centred inside a ring gauge. -->
+    <Style x:Key="RingValue" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="RingCaption" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="9.5" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="TextAlignment" Value="Center" />
+    </Style>
+
+    <!-- Borderless glyph button (calendar ‹ ›). -->
+    <Style x:Key="IconButton" TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Width" Value="24" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd" Background="{TemplateBinding Background}" CornerRadius="6">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- iOS / Windows 11 style on-off switch (a CheckBox). -->
+    <Style x:Key="ToggleSwitch" TargetType="CheckBox">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Border x:Name="Track" Width="40" Height="22" CornerRadius="11"
+                            Background="{DynamicResource TrackBrush}">
+                        <Ellipse x:Name="Knob" Width="16" Height="16" Fill="White"
+                                 HorizontalAlignment="Left" Margin="3,0,0,0" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Track" Property="Background" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+                            <Setter TargetName="Knob" Property="Margin" Value="0,0,3,0" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Slider parts: filled (left of thumb) and empty (right of thumb) track halves. -->
+    <Style x:Key="SliderFill" TargetType="RepeatButton">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Border Background="Transparent">
+                        <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
+                                Background="{DynamicResource AccentBrush}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="SliderEmpty" TargetType="RepeatButton">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Border Background="Transparent">
+                        <Border Height="4" CornerRadius="2" VerticalAlignment="Center"
+                                Background="{DynamicResource TrackBrush}" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ModernSlider" TargetType="Slider">
+        <Setter Property="Height" Value="24" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid Background="Transparent">
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource SliderFill}" Command="Slider.DecreaseLarge" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource SliderEmpty}" Command="Slider.IncreaseLarge" />
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Ellipse Width="18" Height="18" Fill="White"
+                                                     Stroke="{DynamicResource AccentBrush}" StrokeThickness="4" />
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Red "HOT 92°" / "92%" warning pill next to a section header. -->
+    <Style x:Key="AlertBadge" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource DangerBrush}" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="6,1" />
+        <Setter Property="Margin" Value="8,0,0,4" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="TextElement.Foreground" Value="White" />
+        <Setter Property="TextElement.FontSize" Value="10" />
+        <Setter Property="TextElement.FontWeight" Value="Bold" />
+    </Style>
+
+    <!-- ============ Minimal scrollbar (thin pill, no arrows) ============ -->
+    <Style x:Key="ScrollPageButton" TargetType="RepeatButton">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ScrollThumb" TargetType="Thumb">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border x:Name="Pill" CornerRadius="3" Background="{DynamicResource ScrollThumbBrush}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Pill" Property="Background" Value="{DynamicResource ScrollThumbHoverBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsDragging" Value="True">
+                            <Setter TargetName="Pill" Property="Background" Value="{DynamicResource TextSecondaryBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <ControlTemplate x:Key="VerticalScrollBarTemplate" TargetType="ScrollBar">
+        <Grid Background="Transparent">
+            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                <Track.DecreaseRepeatButton>
+                    <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageUpCommand" />
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                    <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageDownCommand" />
+                </Track.IncreaseRepeatButton>
+                <Track.Thumb>
+                    <Thumb Style="{StaticResource ScrollThumb}" Margin="1,2" />
+                </Track.Thumb>
+            </Track>
+        </Grid>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="HorizontalScrollBarTemplate" TargetType="ScrollBar">
+        <Grid Background="Transparent">
+            <Track x:Name="PART_Track" IsDirectionReversed="False">
+                <Track.DecreaseRepeatButton>
+                    <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageLeftCommand" />
+                </Track.DecreaseRepeatButton>
+                <Track.IncreaseRepeatButton>
+                    <RepeatButton Style="{StaticResource ScrollPageButton}" Command="ScrollBar.PageRightCommand" />
+                </Track.IncreaseRepeatButton>
+                <Track.Thumb>
+                    <Thumb Style="{StaticResource ScrollThumb}" Margin="2,1" />
+                </Track.Thumb>
+            </Track>
+        </Grid>
+    </ControlTemplate>
+
+    <Style TargetType="ScrollBar">
+        <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Width" Value="7" />
+        <Setter Property="MinWidth" Value="7" />
+        <Setter Property="Height" Value="Auto" />
+        <Setter Property="Template" Value="{StaticResource VerticalScrollBarTemplate}" />
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Width" Value="Auto" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="Height" Value="7" />
+                <Setter Property="MinHeight" Value="7" />
+                <Setter Property="Template" Value="{StaticResource HorizontalScrollBarTemplate}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Small coloured legend dot. -->
+    <Style x:Key="LegendDot" TargetType="Ellipse">
+        <Setter Property="Width" Value="9" />
+        <Setter Property="Height" Value="9" />
+        <Setter Property="Margin" Value="0,0,6,0" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+        <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+    </Style>
+
+    <Style x:Key="WidgetTitle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="WidgetValue" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="28" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+
+    <Style x:Key="WidgetValueLarge" TargetType="TextBlock"
+           BasedOn="{StaticResource WidgetValue}">
+        <Setter Property="FontSize" Value="40" />
+    </Style>
+
+    <Style x:Key="WidgetLabel" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{DynamicResource TextTertiaryBrush}" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <Style x:Key="WidgetRowLabel" TargetType="TextBlock" BasedOn="{StaticResource WidgetLabel}">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    </Style>
+
+    <Style x:Key="IconGlyph" TargetType="Path">
+        <Setter Property="Width" Value="15" />
+        <Setter Property="Height" Value="15" />
+        <Setter Property="Stretch" Value="Uniform" />
+        <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+    </Style>
+
+    <Style x:Key="WidgetSeparator" TargetType="Border">
+        <Setter Property="Height" Value="1" />
+        <Setter Property="Background" Value="{DynamicResource PanelBorderSoftBrush}" />
+        <Setter Property="Margin" Value="0,10" />
+    </Style>
+
+    <!-- Slim steady progress bar used inside widgets. -->
+    <Style x:Key="WidgetBar" TargetType="ProgressBar">
+        <Setter Property="Height" Value="4" />
+        <Setter Property="Background" Value="{DynamicResource TrackBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- ============ Inline icon geometries (24×24, EvenOdd) ============ -->
+
+    <!-- CPU: socket board with a die -->
+    <PathGeometry x:Key="Icon.Cpu" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="2,8">
+                    <LineSegment Point="6,8" />
+                    <LineSegment Point="6,10" />
+                    <LineSegment Point="3,10" />
+                    <LineSegment Point="3,12" />
+                    <LineSegment Point="6,12" />
+                    <LineSegment Point="6,15" />
+                    <LineSegment Point="3,15" />
+                    <LineSegment Point="3,17" />
+                    <LineSegment Point="6,17" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="18,8">
+                    <LineSegment Point="22,8" />
+                    <LineSegment Point="22,10" />
+                    <LineSegment Point="19,10" />
+                    <LineSegment Point="19,12" />
+                    <LineSegment Point="22,12" />
+                    <LineSegment Point="22,15" />
+                    <LineSegment Point="19,15" />
+                    <LineSegment Point="19,17" />
+                    <LineSegment Point="22,17" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="9,2">
+                    <LineSegment Point="9,5" />
+                    <LineSegment Point="11,5" />
+                    <LineSegment Point="11,2" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="13,2">
+                    <LineSegment Point="13,5" />
+                    <LineSegment Point="15,5" />
+                    <LineSegment Point="15,2" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="9,19">
+                    <LineSegment Point="9,22" />
+                    <LineSegment Point="11,22" />
+                    <LineSegment Point="11,19" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="13,19">
+                    <LineSegment Point="13,22" />
+                    <LineSegment Point="15,22" />
+                    <LineSegment Point="15,19" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="5,5">
+                    <LineSegment Point="19,5" />
+                    <LineSegment Point="19,19" />
+                    <LineSegment Point="5,19" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="9,9">
+                    <LineSegment Point="15,9" />
+                    <LineSegment Point="15,15" />
+                    <LineSegment Point="9,15" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Memory: stick with gold-finger slits -->
+    <PathGeometry x:Key="Icon.Memory" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="3,5">
+                    <LineSegment Point="21,5" />
+                    <LineSegment Point="21,15" />
+                    <LineSegment Point="3,15" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="5,17">
+                    <LineSegment Point="19,17" />
+                    <LineSegment Point="19,19" />
+                    <LineSegment Point="5,19" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="7,8">
+                    <LineSegment Point="9,8" />
+                    <LineSegment Point="9,12" />
+                    <LineSegment Point="7,12" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="11,8">
+                    <LineSegment Point="13,8" />
+                    <LineSegment Point="13,12" />
+                    <LineSegment Point="11,12" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="15,8">
+                    <LineSegment Point="17,8" />
+                    <LineSegment Point="17,12" />
+                    <LineSegment Point="15,12" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- GPU: card with a fan -->
+    <PathGeometry x:Key="Icon.Gpu" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="2,4">
+                    <LineSegment Point="22,4" />
+                    <LineSegment Point="22,20" />
+                    <LineSegment Point="2,20" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="4,8">
+                    <LineSegment Point="10,8" />
+                    <LineSegment Point="10,16" />
+                    <LineSegment Point="4,16" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="13,8">
+                    <LineSegment Point="20,8" />
+                    <LineSegment Point="20,16" />
+                    <LineSegment Point="13,16" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="16,10">
+                    <PathFigure.Segments>
+                        <BezierSegment Point1="19,10" Point2="20,11" Point3="20,13" />
+                        <BezierSegment Point1="20,15" Point2="18,16" Point3="16,16" />
+                        <BezierSegment Point1="17.4,15" Point2="18,14" Point3="18,13" />
+                        <BezierSegment Point1="18,11.5" Point2="17.2,11" Point3="16,11" />
+                    </PathFigure.Segments>
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Network: ascending bars -->
+    <PathGeometry x:Key="Icon.Network" FillRule="Nonzero">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="3,14">
+                    <LineSegment Point="6,14" />
+                    <LineSegment Point="6,21" />
+                    <LineSegment Point="3,21" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="9,9">
+                    <LineSegment Point="12,9" />
+                    <LineSegment Point="12,21" />
+                    <LineSegment Point="9,21" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="15,5">
+                    <LineSegment Point="18,5" />
+                    <LineSegment Point="18,21" />
+                    <LineSegment Point="15,21" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="21,2">
+                    <LineSegment Point="22,2" />
+                    <LineSegment Point="22,21" />
+                    <LineSegment Point="21,21" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Drive: bay with indicator dots -->
+    <PathGeometry x:Key="Icon.Drive" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="1,5">
+                    <PathFigure.Segments>
+                        <LineSegment Point="23,5" />
+                        <ArcSegment Point="24,8" Size="2,2" SweepDirection="Clockwise" />
+                        <LineSegment Point="24,14" />
+                        <ArcSegment Point="22,17" Size="2,2" SweepDirection="Clockwise" />
+                        <LineSegment Point="2,17" />
+                        <ArcSegment Point="0,14" Size="2,2" SweepDirection="Clockwise" />
+                        <LineSegment Point="0,8" />
+                        <ArcSegment Point="1,5" Size="2,2" SweepDirection="Clockwise" />
+                    </PathFigure.Segments>
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="5,10">
+                    <LineSegment Point="8,10" />
+                    <LineSegment Point="8,12" />
+                    <LineSegment Point="5,12" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="11,10">
+                    <LineSegment Point="14,10" />
+                    <LineSegment Point="14,12" />
+                    <LineSegment Point="11,12" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="15,10">
+                    <LineSegment Point="19,10" />
+                    <LineSegment Point="19,12" />
+                    <LineSegment Point="15,12" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Clock -->
+    <PathGeometry x:Key="Icon.Clock" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="12,2">
+                    <PathFigure.Segments>
+                        <ArcSegment Point="12,22" Size="10,10" SweepDirection="Clockwise" />
+                        <ArcSegment Point="12,2" Size="10,10" SweepDirection="Clockwise" />
+                    </PathFigure.Segments>
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="11,5">
+                    <LineSegment Point="13,5" />
+                    <LineSegment Point="13,11" />
+                    <LineSegment Point="18,11" />
+                    <LineSegment Point="18,13" />
+                    <LineSegment Point="11,13" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="10.6,10.6">
+                    <LineSegment Point="13.4,10.6" />
+                    <LineSegment Point="13.4,13.4" />
+                    <LineSegment Point="10.6,13.4" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Weather: sun over cloud -->
+    <PathGeometry x:Key="Icon.Weather" FillRule="Nonzero">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="5,16">
+                    <LineSegment Point="19,16" />
+                    <LineSegment Point="20,16" />
+                    <ArcSegment Point="21,13" Size="5,5" SweepDirection="Clockwise" />
+                    <LineSegment Point="21,11" />
+                    <ArcSegment Point="18,8" Size="3.4,3.4" SweepDirection="Clockwise" />
+                    <LineSegment Point="14,8" />
+                    <ArcSegment Point="11,6" Size="3.4,3.4" SweepDirection="Clockwise" />
+                    <LineSegment Point="9,6" />
+                    <ArcSegment Point="6,9" Size="3.4,3.4" SweepDirection="Clockwise" />
+                    <LineSegment Point="5,11" />
+                    <ArcSegment Point="4,14" Size="3.4,3.4" SweepDirection="Clockwise" />
+                    <LineSegment Point="4,16" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="13,4">
+                    <LineSegment Point="13,2" />
+                    <LineSegment Point="15,2" />
+                    <LineSegment Point="15,4" />
+                    <LineSegment Point="13,4" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="19,7">
+                    <LineSegment Point="21,5" />
+                    <LineSegment Point="22,6" />
+                    <LineSegment Point="20,8" />
+                    <LineSegment Point="19,7" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Timezone: location pin with a clock slot -->
+    <PathGeometry x:Key="Icon.Timezone" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="12,2">
+                    <PathFigure.Segments>
+                        <ArcSegment Point="5,9" Size="7,7" SweepDirection="Clockwise" IsLargeArc="True" />
+                        <ArcSegment Point="12,22" Size="19,19" SweepDirection="Clockwise" IsLargeArc="False" />
+                        <ArcSegment Point="19,9" Size="7,7" SweepDirection="Clockwise" IsLargeArc="True" />
+                        <ArcSegment Point="12,2" Size="7,7" SweepDirection="Clockwise" IsLargeArc="True" />
+                    </PathFigure.Segments>
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="11,5">
+                    <LineSegment Point="12.6,5" />
+                    <LineSegment Point="12.6,8.2" />
+                    <LineSegment Point="15,8.2" />
+                    <LineSegment Point="15,9.6" />
+                    <LineSegment Point="11,9.6" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Recycle bin -->
+    <PathGeometry x:Key="Icon.Recycle" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="9,2">
+                    <LineSegment Point="15,2" />
+                    <LineSegment Point="16.2,4" />
+                    <LineSegment Point="22,4" />
+                    <LineSegment Point="22,6" />
+                    <LineSegment Point="2,6" />
+                    <LineSegment Point="2,4" />
+                    <LineSegment Point="7.8,4" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="5,10">
+                    <LineSegment Point="19,10" />
+                    <LineSegment Point="18,20.4" />
+                    <ArcSegment Point="16.6,22" Size="2,2" SweepDirection="Clockwise" />
+                    <LineSegment Point="7.4,22" />
+                    <ArcSegment Point="6,20.4" Size="2,2" SweepDirection="Clockwise" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="9,12">
+                    <LineSegment Point="11,12" />
+                    <LineSegment Point="11,19" />
+                    <LineSegment Point="9,19" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="13,12">
+                    <LineSegment Point="15,12" />
+                    <LineSegment Point="15,19" />
+                    <LineSegment Point="13,19" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Music note -->
+    <PathGeometry x:Key="Icon.Music" FillRule="Nonzero">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="12,3">
+                    <LineSegment Point="12,13.4" />
+                    <ArcSegment Point="8,17" Size="4,4" SweepDirection="Clockwise" />
+                    <ArcSegment Point="12,20.6" Size="4,4" SweepDirection="Clockwise" />
+                    <LineSegment Point="12,20.5" />
+                    <LineSegment Point="17,19.3" />
+                    <LineSegment Point="17,6.6" />
+                    <LineSegment Point="14,7.6" />
+                    <LineSegment Point="14,2" />
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- Globe -->
+    <PathGeometry x:Key="Icon.Globe" FillRule="EvenOdd">
+        <PathGeometry.Figures>
+            <PathFigureCollection>
+                <PathFigure IsClosed="True" StartPoint="12,2">
+                    <PathFigure.Segments>
+                        <ArcSegment Point="12,22" Size="10,10" SweepDirection="Clockwise" />
+                        <ArcSegment Point="12,2" Size="10,10" SweepDirection="Clockwise" />
+                    </PathFigure.Segments>
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="3,12">
+                    <LineSegment Point="21,12" />
+                    <LineSegment Point="21,13.6" />
+                    <LineSegment Point="3,13.6" />
+                </PathFigure>
+                <PathFigure IsClosed="True" StartPoint="12,3">
+                    <PathFigure.Segments>
+                        <ArcSegment Point="8,12" Size="5.5,6" SweepDirection="Clockwise" IsLargeArc="True" />
+                        <ArcSegment Point="16,12" Size="5.5,6" SweepDirection="Clockwise" IsLargeArc="True" />
+                        <ArcSegment Point="12,3" Size="5.5,6" SweepDirection="Clockwise" IsLargeArc="True" />
+                    </PathFigure.Segments>
+                </PathFigure>
+            </PathFigureCollection>
+        </PathGeometry.Figures>
+    </PathGeometry>
+
+    <!-- ============ Implicit control styles (consistent dark/light look) ============ -->
+    <Style TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PanelBorderSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsDefault" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource AccentBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PanelBorderSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="8">
+                        <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="CheckBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+        <Setter Property="Margin" Value="0,8,0,0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Orientation="Horizontal" Background="Transparent">
+                        <Border x:Name="Box"
+                                Width="16" Height="16"
+                                CornerRadius="4"
+                                BorderThickness="1"
+                                BorderBrush="{DynamicResource PanelBorderBrush}"
+                                Background="{DynamicResource PanelBorderSoftBrush}"
+                                VerticalAlignment="Center">
+                            <Path x:Name="Mark"
+                                  Data="M3.5,8.2 L6.6,11.2 L12.4,4.8"
+                                  Stroke="{DynamicResource OnAccentBrush}"
+                                  StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round"
+                                  StrokeEndLineCap="Round"
+                                  StrokeLineJoin="Round"
+                                  Visibility="Collapsed" />
+                        </Border>
+                        <ContentPresenter Margin="9,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+                    </StackPanel>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Mark" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ============ Premium dropdown (ComboBox) ============ -->
+    <Style x:Key="ComboToggle" TargetType="ToggleButton">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="ClickMode" Value="Press" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="9">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="30" />
+                            </Grid.ColumnDefinitions>
+                            <Path x:Name="Chevron" Grid.Column="1"
+                                  Data="M0,0 L4.5,4.5 L9,0"
+                                  Stroke="{DynamicResource TextSecondaryBrush}"
+                                  StrokeThickness="1.6"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  HorizontalAlignment="Center" VerticalAlignment="Center"
+                                  RenderTransformOrigin="0.5,0.5">
+                                <Path.RenderTransform>
+                                    <RotateTransform x:Name="ChevronRotate" Angle="0" />
+                                </Path.RenderTransform>
+                            </Path>
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Chevron" Property="Stroke" Value="{DynamicResource AccentBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentFillBrush}" />
+                            <Setter TargetName="Chevron" Property="Stroke" Value="{DynamicResource AccentBrush}" />
+                            <Setter TargetName="Chevron" Property="RenderTransform">
+                                <Setter.Value>
+                                    <RotateTransform Angle="180" />
+                                </Setter.Value>
+                            </Setter>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Background" Value="{DynamicResource PanelBorderSoftBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PanelBorderBrush}" />
+        <Setter Property="MinHeight" Value="32" />
+        <Setter Property="Padding" Value="11,0,34,0" />
+        <Setter Property="SnapsToDevicePixels" Value="True" />
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+        <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+        <Setter Property="MaxDropDownHeight" Value="300" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <ToggleButton x:Name="Toggle"
+                                      Style="{StaticResource ComboToggle}"
+                                      Background="{TemplateBinding Background}"
+                                      BorderBrush="{TemplateBinding BorderBrush}"
+                                      IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" />
+                        <ContentPresenter x:Name="ContentSite"
+                                          IsHitTestVisible="False"
+                                          Margin="{TemplateBinding Padding}"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"
+                                          Content="{TemplateBinding SelectionBoxItem}"
+                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                          TextElement.Foreground="{TemplateBinding Foreground}">
+                            <ContentPresenter.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                </Style>
+                            </ContentPresenter.Resources>
+                        </ContentPresenter>
+                        <Popup x:Name="PART_Popup"
+                               Placement="Bottom"
+                               VerticalOffset="4"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               PopupAnimation="Fade"
+                               IsOpen="{TemplateBinding IsDropDownOpen}">
+                            <Border Margin="0,0,10,12"
+                                    MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                    MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                    Background="{DynamicResource PanelBackgroundBrush}"
+                                    BorderBrush="{DynamicResource PanelBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="4"
+                                    Effect="{DynamicResource CardShadow}">
+                                <ScrollViewer SnapsToDevicePixels="True">
+                                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="HasItems" Value="False">
+                            <Setter TargetName="PART_Popup" Property="MinHeight" Value="40" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBoxItem">
+                    <Border x:Name="Bd" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ContentPresenter VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            <Path x:Name="Check" Grid.Column="1" Margin="12,0,2,0"
+                                  Data="M0,4 L3.5,7.5 L10,0.5"
+                                  Stroke="{DynamicResource AccentBrush}" StrokeThickness="1.8"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                  VerticalAlignment="Center" Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentFillBrush}" />
+                            <Setter TargetName="Check" Property="Visibility" Value="Visible" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Autocomplete suggestion row (city lookup) -->
+    <Style x:Key="SuggestionItem" TargetType="ListBoxItem">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Padding" Value="10,7" />
+        <Setter Property="Margin" Value="0,1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="Bd" Background="Transparent" CornerRadius="7" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource AccentFillBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

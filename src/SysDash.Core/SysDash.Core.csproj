@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SysDash.Core</RootNamespace>
+    <Description>Domain models, MVVM primitives, units, history buffers, logging.</Description>
+  </PropertyGroup>
+
+</Project>

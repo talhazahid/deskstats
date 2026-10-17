@@ -1,0 +1,108 @@
+<UserControl x:Class="SysDash.Widgets.Cpu.CpuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:SysDash.Theming.Controls;assembly=SysDash.Theming"
+             MinWidth="240">
+
+    <Border Style="{StaticResource WidgetCard}">
+        <!-- Fluid: 1 column at the default width, 2–3 columns when the widget is widened. -->
+        <s:ResponsiveColumns MinColumnWidth="264" MaxColumns="3" ColumnGap="8">
+            <!-- Shown when CPU sensors are unavailable (PawnIO driver missing / not admin). -->
+            <Border Style="{StaticResource WidgetSection}" s:ResponsiveColumns.FullRow="True" Visibility="{Binding HasDriverHint, Converter={StaticResource BoolToVisibility}}">
+                <s:SectionLayout>
+                    <TextBlock Style="{StaticResource RowLabel}" TextWrapping="Wrap" TextTrimming="None" Text="{Binding DriverHint}" />
+                    <Button HorizontalAlignment="Left" Margin="0,8,0,0" Command="{Binding InstallDriverCommand}" Content="{Binding InstallButtonText}" />
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}">
+                <s:SectionLayout>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="CPU" />
+                            <Border Style="{StaticResource AlertBadge}" Visibility="{Binding IsTempAlert, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{Binding AlertText}" />
+                            </Border>
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowValue}" Margin="0" Text="{Binding HeaderText}" TextTrimming="CharacterEllipsis" MaxWidth="180" />
+                    </Grid>
+                    <s:BarGraph Height="64" Margin="0,4,0,8" Values="{Binding Sparkline}" Maximum="100"
+                                Capacity="{Binding GraphCapacity}"
+                                Visibility="{Binding ShowGraph, Converter={StaticResource BoolToVisibility}}"
+                                BarBrush="{DynamicResource AccentBrush}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource AccentBrush}" />
+                            <TextBlock Style="{StaticResource RowLabel}" Text="Load" />
+                        </StackPanel>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding LoadText}" />
+                    </Grid>
+                    <TextBlock Style="{StaticResource RowLabel}" FontSize="11" Foreground="{DynamicResource TextTertiaryBrush}"
+                               Text="{Binding NameText}" ToolTip="{Binding NameText}" />
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}" Visibility="{Binding HasPerCore, Converter={StaticResource BoolToVisibility}}">
+                <s:SectionLayout>
+                    <Grid>
+                        <TextBlock Style="{StaticResource SectionHeader}" Text="CORES" />
+                        <TextBlock Style="{StaticResource RowValue}" Margin="0" Text="{Binding CoresSummary}" TextTrimming="CharacterEllipsis" MaxWidth="180" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding Cores}" Margin="0,2,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="8" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Width="28" Height="28" Margin="0,3" HorizontalAlignment="Center" ToolTip="{Binding Name}">
+                                    <s:RingGauge Value="{Binding Load}" Thickness="3.5"
+                                                 RingBrush="{DynamicResource AccentBrush}"
+                                                 TrackBrush="{DynamicResource TrackBrush}" />
+                                    <TextBlock Text="{Binding Load, StringFormat={}{0:0}}" FontSize="8.5"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource TextSecondaryBrush}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}" Margin="0"
+                    Visibility="{Binding ShowDetails, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="DETAILS" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Style="{StaticResource RowLabel}" Text="Temperature" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding TempText}" />
+                        <TextBlock Grid.Row="1" Style="{StaticResource RowLabel}" Text="Clock speed" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding ClockText}" />
+                        <TextBlock Grid.Row="2" Style="{StaticResource RowLabel}" Text="Package power" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding PowerText}" />
+                        <TextBlock Grid.Row="3" Style="{StaticResource RowLabel}" Text="Core voltage" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding VoltageText}" />
+                        <TextBlock Grid.Row="4" Style="{StaticResource RowLabel}" Text="CPU fan" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding FanText}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </s:ResponsiveColumns>
+    </Border>
+</UserControl>

@@ -1,0 +1,94 @@
+<UserControl x:Class="SysDash.Widgets.Network.NetworkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:SysDash.Theming.Controls;assembly=SysDash.Theming"
+             MinWidth="240">
+
+    <Border Style="{StaticResource WidgetCard}">
+        <!-- Fluid: 1 column at the default width, 2–3 columns when the widget is widened. -->
+        <s:ResponsiveColumns MinColumnWidth="264" MaxColumns="3" ColumnGap="8">
+            <Border Style="{StaticResource WidgetSection}">
+                <s:SectionLayout>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Style="{StaticResource BigNumber}" Text="{Binding UpText}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource AccentBrush}" />
+                                <TextBlock Style="{StaticResource RowLabel}" Text="Upload" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <TextBlock Style="{StaticResource BigNumber}" Text="{Binding DownText}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource SecondarySeriesBrush}" />
+                                <TextBlock Style="{StaticResource RowLabel}" Text="Download" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <s:BarGraph Height="72" Margin="0,8,0,6" Values="{Binding UpHistory}" SecondaryValues="{Binding DownHistory}" Capacity="{Binding GraphCapacity}" Visibility="{Binding ShowGraph, Converter={StaticResource BoolToVisibility}}"
+                                BarBrush="{DynamicResource AccentBrush}" SecondaryBrush="{DynamicResource SecondarySeriesBrush}" />
+                    <Grid>
+                        <TextBlock Style="{StaticResource RowLabel}">
+                            <Run Text="Peak ↑ " /><Run Text="{Binding PeakUpText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource RowLabel}" HorizontalAlignment="Right">
+                            <Run Text="Peak ↓ " /><Run Text="{Binding PeakDownText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </TextBlock>
+                    </Grid>
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}">
+                <s:SectionLayout>
+                    <Grid>
+                        <StackPanel Orientation="Horizontal">
+                            <Path Style="{StaticResource IconGlyph}" Data="{StaticResource Icon.Network}" Width="13" Height="13" Margin="0,0,8,0" />
+                            <TextBlock Style="{StaticResource RowLabel}" Text="{Binding AdapterText}" MaxWidth="170" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource RowValue}" Text="{Binding StatusText}" />
+                    </Grid>
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}" Visibility="{Binding ShowPublicIp, Converter={StaticResource BoolToVisibility}}">
+                <s:SectionLayout>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="PUBLIC IP ADDRESS" />
+                    <TextBlock Style="{StaticResource RowValue}" HorizontalAlignment="Left" Margin="0" FontSize="13.5" Text="{Binding PublicIpText}" />
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}" Visibility="{Binding ShowIp, Converter={StaticResource BoolToVisibility}}">
+                <s:SectionLayout>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="IP ADDRESS" />
+                    <TextBlock Style="{StaticResource RowValue}" HorizontalAlignment="Left" Margin="0" FontSize="13.5" Text="{Binding IpText}" />
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}" Visibility="{Binding ShowTotals, Converter={StaticResource BoolToVisibility}}" Margin="0">
+                <s:SectionLayout>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="DATA USED THIS SESSION" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal">
+                            <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource AccentBrush}" />
+                            <TextBlock Style="{StaticResource RowLabel}" Text="Sent" />
+                        </StackPanel>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding TotalSentText}" />
+                        <StackPanel Grid.Row="1" Orientation="Horizontal">
+                            <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource SecondarySeriesBrush}" />
+                            <TextBlock Style="{StaticResource RowLabel}" Text="Received" />
+                        </StackPanel>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding TotalReceivedText}" />
+                    </Grid>
+                </s:SectionLayout>
+            </Border>
+        </s:ResponsiveColumns>
+    </Border>
+</UserControl>

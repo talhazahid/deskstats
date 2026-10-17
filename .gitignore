@@ -1,0 +1,33 @@
+# Build output
+bin/
+obj/
+artifacts/
+publish/
+*.exe
+*.msi
+*.pdb
+
+# Installer inputs downloaded at build time
+installer/PawnIO_setup.exe
+installer/Output/
+
+# IDE / OS
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.rsuser
+*.DotSettings.user
+Thumbs.db
+.DS_Store
+
+# Local data
+*.log
+*.tmp
+*.bak
+*.corrupt
+
+# Local source snapshots and generated handoff files
+_backup_round*/
+Claude outputs/

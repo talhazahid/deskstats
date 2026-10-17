@@ -1,0 +1,84 @@
+<UserControl x:Class="SysDash.Widgets.Drive.DriveView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:s="clr-namespace:SysDash.Theming.Controls;assembly=SysDash.Theming"
+             MinWidth="240">
+
+    <Border Style="{StaticResource WidgetCard}">
+        <!-- Fluid: 1 column at the default width, 2–3 columns when the widget is widened. -->
+        <s:ResponsiveColumns MinColumnWidth="264" MaxColumns="3" ColumnGap="8">
+            <Border Style="{StaticResource WidgetSection}" Visibility="{Binding ShowDrives, Converter={StaticResource BoolToVisibility}}">
+                <s:SectionLayout>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="DRIVES" />
+                    <ItemsControl ItemsSource="{Binding Drives}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid Width="40" Height="40">
+                                        <s:RingGauge x:Name="Ring" Value="{Binding UsedPercent}" Thickness="4"
+                                                     RingBrush="{DynamicResource AccentBrush}"
+                                                     TrackBrush="{DynamicResource TrackBrush}" />
+                                        <TextBlock Text="{Binding UsedText}" FontSize="10.5" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </Grid>
+                                    <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Style="{StaticResource RowLabel}" Margin="0" Text="{Binding FreeText}" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Style="{StaticResource RowValue}" Text="{Binding TotalText}"
+                                               Foreground="{DynamicResource TextTertiaryBrush}" FontWeight="Normal" />
+                                </Grid>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding IsLow}" Value="True">
+                                        <Setter TargetName="Ring" Property="RingBrush" Value="{DynamicResource DangerBrush}" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}" Margin="0" Visibility="{Binding ShowActivity, Converter={StaticResource BoolToVisibility}}">
+                <s:SectionLayout>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel HorizontalAlignment="Center">
+                            <TextBlock Style="{StaticResource BigNumber}" Text="{Binding ReadText}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource AccentBrush}" />
+                                <TextBlock Style="{StaticResource RowLabel}" Text="Read" />
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center">
+                            <TextBlock Style="{StaticResource BigNumber}" Text="{Binding WriteText}" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource SecondarySeriesBrush}" />
+                                <TextBlock Style="{StaticResource RowLabel}" Text="Write" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <s:BarGraph Height="64" Margin="0,8,0,6" Values="{Binding ReadHistory}" SecondaryValues="{Binding WriteHistory}" Capacity="{Binding GraphCapacity}"
+                                BarBrush="{DynamicResource AccentBrush}" SecondaryBrush="{DynamicResource SecondarySeriesBrush}" />
+                    <Grid>
+                        <TextBlock Style="{StaticResource RowLabel}">
+                            <Run Text="Peak read " /><Run Text="{Binding PeakReadText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource RowLabel}" HorizontalAlignment="Right">
+                            <Run Text="Peak write " /><Run Text="{Binding PeakWriteText, Mode=OneWay}" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </TextBlock>
+                    </Grid>
+                </s:SectionLayout>
+            </Border>
+        </s:ResponsiveColumns>
+    </Border>
+</UserControl>

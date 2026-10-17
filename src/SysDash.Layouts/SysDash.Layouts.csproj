@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SysDash.Layouts</RootNamespace>
+    <Description>Persisted layouts: placements, layout items, presets, JSON storage.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SysDash.Core\SysDash.Core.csproj" />
+  </ItemGroup>
+
+</Project>

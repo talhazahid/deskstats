@@ -1,0 +1,59 @@
+DeskStats (internal codename: SysDash)
+Copyright (C) 2026 DeskStats contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+------------------------------------------------------------------------
+
+Third-party notices
+------------------------------------------------------------------------
+
+1. SidebarDiagnostics (https://github.com/ArcadeRenegade/SidebarDiagnostics)
+   Copyright (C) ArcadeRenegade — GPLv3.
+   DeskStats is a new version / modernization of the SidebarDiagnostics concept. Selected
+   portions of its logic are adapted and re-licensed under GPLv3, including:
+     * sensor-selection heuristics for CPU/RAM/GPU (Monitoring.cs)
+     * unit conversion helpers and metric formatting
+     * app-bar / multi-monitor / DPI enumeration techniques (Windows.cs)
+     * performance-counter based drive and network sampling
+   The original project's license text is included at docs/THIRD_PARTY/
+   SidebarDiagnostics-LICENSE.md. Because this product derives from a GPLv3
+   project, the whole SysDash codebase is licensed under the GPLv3 so that
+   all derivative works remain free software.
+
+2. LibreHardwareMonitor (https://github.com/LibreHardwareMonitor/LibreHardwareMonitor)
+   Distributed under the Mozilla Public License 2.0 (https://mozilla.org/MPL/2.0/).
+   Used as a dynamically linked library for hardware sensor data. The MPL 2.0
+   file-level copyleft is compatible with combining the library with GPL
+   software (when the GPL project modifies and distributes MPL-covered files,
+   those files are provided under the MPL).
+   Data provided by LibreHardwareMonitor. Please thank the library's
+   contributors for their support.
+
+3. Other NuGet dependencies:
+   - Microsoft.Extensions.DependencyInjection (MIT)
+   - Hardcodet.NotifyIcon.Wpf (The Code Project Open License / CPOL)
+   - System.Diagnostics.PerformanceCounter (MIT)
+
+------------------------------------------------------------------------
+
+Compliance notes for contributors
+------------------------------------------------------------------------
+
+* Do NOT add proprietary, closed-source files to this repository.
+* If you copy code from another GPLv3 project, preserve its copyright
+  header and add an attribution entry to this NOTICE file.
+* If you copy code from an MPL-2.0 library (e.g. LibreHardwareMonitor),
+  keep the original file header and note the dual licensing.
+* The "DeskStats" name, logo and app icon are not licensed for use in forks or
+  other products under the GPL; forks should use their own name and artwork.
+* Any user-generated data (layouts, settings) is NOT covered by this
+  license; it belongs to the user who created it.

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SysDash.SDK</RootNamespace>
+    <UseWPF>true</UseWPF>
+    <Description>Stable widget contracts: IWidget, widget instances, hosts, window services.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SysDash.Core\SysDash.Core.csproj" />
+  </ItemGroup>
+
+</Project>

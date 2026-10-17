@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Privacy Policy — DeskStats</title>
+  <meta name="description" content="DeskStats privacy policy: no account, no tracking, no ads. What stays on your PC and the few optional online lookups.">
+  <meta name="theme-color" content="#07090f">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="aurora"></div><div class="grid-bg"></div>
+  <nav class="top">
+    <div class="wrap">
+      <a class="brand" href="index.html"><img src="assets/logo-256.png" alt="">DeskStats</a>
+      <div class="links">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/talhazahid/deskstats">GitHub</a>
+        <a class="btn primary sm" href="https://github.com/talhazahid/deskstats/releases/latest">Download</a>
+      </div>
+    </div>
+  </nav>
+  <div class="wrap policy">
+<h1>Privacy Policy</h1>
+    <p class="meta">Effective date: October 17, 2026 · Applies to the DeskStats app for Windows</p>
+
+    <p>DeskStats is a desktop app that shows your PC's hardware readings (CPU, GPU, memory, storage, network and sensors) in widgets. This policy explains what information the app uses and where it goes. In short: <b>DeskStats has no account, no analytics, no tracking and no ads. Your hardware readings never leave your PC.</b></p>
+
+    <h2>1. Information that stays on your PC</h2>
+    <p>To work, DeskStats reads information locally from Windows and your hardware. This information is shown on your screen and is <b>not sent to us or anyone else</b>:</p>
+    <ul>
+      <li>Hardware readings: CPU, GPU and memory load, clock speeds, temperatures, fan speeds, power, drive usage and network throughput.</li>
+      <li>Names of your hardware (for example your processor and graphics card), drive letters and network adapter names.</li>
+      <li>The names and memory use of running apps, if you turn on the "Top apps" list in the Memory widget.</li>
+    </ul>
+    <p>DeskStats saves these files on your PC only, in <code>%LocalAppData%\DeskStats</code>:</p>
+    <ul>
+      <li>Your settings and widget layouts.</li>
+      <li>A diagnostic log of the app's own events (for example "sensor driver installed").</li>
+      <li><code>hardware-report.txt</code> — a list of the hardware and sensors detected on your PC. It is only shared if <b>you</b> choose to send it to us for support.</li>
+    </ul>
+    <p>You can delete this folder at any time. Uninstalling DeskStats keeps it so your settings survive a reinstall; delete it manually to remove everything.</p>
+
+    <h2>2. Optional online features</h2>
+    <p>DeskStats only connects to the internet for the features below, and only while you use them. No personal identifiers, hardware data or usage data are included in these requests.</p>
+    <table>
+      <tr><th>Feature</th><th>Service contacted</th><th>What is sent</th></tr>
+      <tr>
+        <td>Weather widget</td>
+        <td>Open-Meteo (open-meteo.com) — geocoding, forecast and air-quality APIs</td>
+        <td>The letters you type in the City box (to suggest matching places), and the chosen place's coordinates, to get the forecast and air quality. Not used if you don't add the Weather widget.</td>
+      </tr>
+      <tr>
+        <td>Public IP address (Network widget)</td>
+        <td>ipify (api.ipify.org)</td>
+        <td>A simple request that returns your public IP address so it can be shown in the widget. Not used if this option is turned off.</td>
+      </tr>
+      <tr>
+        <td>Sensor driver install (only when you click "Install sensor driver")</td>
+        <td>Windows Package Manager (winget) and the PawnIO download (github.com / pawnio.eu)</td>
+        <td>A standard download of the free PawnIO driver, which lets DeskStats read CPU temperature on some PCs.</td>
+      </tr>
+    </table>
+    <p>Like any internet request, these services can see your IP address while they answer. Their own privacy policies apply to those requests. DeskStats does not send them anything else.</p>
+
+    <h2>3. What we do not do</h2>
+    <ul>
+      <li>We do not collect, store or sell personal information.</li>
+      <li>We do not use analytics, telemetry, crash reporting services, advertising or tracking.</li>
+      <li>We do not create user accounts or ask for your name or e-mail.</li>
+    </ul>
+
+    <h2>4. Administrator rights and the sensor driver</h2>
+    <p>DeskStats asks for administrator rights because Windows only allows hardware sensors (such as CPU temperature) to be read with them. The optional PawnIO driver is used for the same purpose. These rights are used only to read hardware sensors and to install that driver when you ask for it.</p>
+
+    <h2>5. Children</h2>
+    <p>DeskStats does not knowingly collect any information from anyone, including children.</p>
+
+    <h2>6. Changes to this policy</h2>
+    <p>If this policy changes, the updated version will be published on this page with a new effective date.</p>
+
+    <h2>7. Contact</h2>
+    <p>Questions about privacy? Open an issue at <a href="https://github.com/talhazahid/deskstats/issues">github.com/talhazahid/deskstats/issues</a>.</p>
+
+      </div>
+  <footer>
+    <div class="wrap">
+      <span>© 2026 DeskStats · GPLv3 · Not affiliated with Sidebar Diagnostics</span>
+      <span class="r">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/talhazahid/deskstats">GitHub</a>
+        <a href="https://github.com/talhazahid/deskstats/issues">Support</a>
+      </span>
+    </div>
+  </footer>
+</body>
+</html>
