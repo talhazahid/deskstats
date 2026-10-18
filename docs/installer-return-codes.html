@@ -12,8 +12,9 @@
   <nav class="top"><div class="wrap"><a class="brand" href="index.html"><img src="assets/logo-256.png" alt="">DeskStats</a></div></nav>
   <main class="wrap policy">
     <h1>Installer return codes</h1>
-    <p>Applies to the DeskStats 1.0.1, 1.0.2 and 1.0.3 EXE installers, built with Inno Setup.</p>
+    <p>Applies to DeskStats EXE installers through version 1.0.4, built with Inno Setup.</p>
     <p>Version 1.0.3 installs the required PawnIO 2.2.0 sensor driver automatically when missing. Its prerequisite checks stop setup if driver installation fails. An existing shared driver is preserved. Version 1.0.2 omitted this dependency and is superseded.</p>
+    <p>Version 1.0.4 has two variants. The website installer keeps automatic driver setup. The deferred installer offers driver installation after launch, with a choice to continue with limited readings. Its setup return code covers app installation only; driver errors are reported within DeskStats.</p>
     <h2>Silent installation</h2>
     <p><code>/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART</code></p>
     <p>Run setup with administrator privileges. Add <code>/LOG="C:\path\install.log"</code> to collect diagnostic details in an existing directory.</p>
