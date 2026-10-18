@@ -1,0 +1,29 @@
+<Window x:Class="SysDash.App.SensorSetupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DeskStats — Sensor readings" Width="480" SizeToContent="Height"
+        ResizeMode="NoResize" WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource PanelBackgroundBrush}"
+        FontFamily="{StaticResource UiFont}" FontWeight="Normal">
+    <Border Padding="24" Background="{DynamicResource PanelBackgroundBrush}">
+    <StackPanel>
+        <TextBlock Text="Enable full sensor readings" FontSize="22" FontWeight="Medium"
+                   Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
+        <TextBlock Margin="0,12,0,0" FontSize="13" TextWrapping="Wrap" LineHeight="20"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   Text="CPU temperature, hardware clock and power readings need the PawnIO sensor driver. Install the included driver with administrator approval, or keep using DeskStats with limited readings." />
+        <TextBlock Margin="0,10,0,0" FontSize="12" TextWrapping="Wrap"
+                   Foreground="{DynamicResource TextTertiaryBrush}"
+                   Text="You can install it later from the tray menu. The shared driver is kept when DeskStats is uninstalled." />
+        <TextBlock x:Name="StatusText" Margin="0,16,0,0" FontSize="13"
+                   TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"
+                   AutomationProperties.LiveSetting="Polite" Visibility="Collapsed" />
+        <Button x:Name="InstallButton" Margin="0,20,0,0" Padding="12,9"
+                Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"
+                FontSize="13" FontWeight="Normal" Content="Install sensor driver" Click="OnInstall" />
+        <Button x:Name="ContinueButton" Margin="0,8,0,0" Padding="12,9"
+                Background="{DynamicResource PanelBorderSoftBrush}" Foreground="{DynamicResource TextPrimaryBrush}"
+                FontSize="13" FontWeight="Normal" Content="Continue with limited readings" Click="OnContinue" />
+    </StackPanel>
+    </Border>
+</Window>

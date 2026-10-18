@@ -216,11 +216,19 @@ public partial class App : Application
         // CPU sensors need the PawnIO driver: offer it once, and restart DeskStats
         // automatically after it was installed so the sensors appear.
         SensorDriver.Installed += () => Dispatcher.BeginInvoke(new Action(RestartApp));
-        if (SensorDriver.MissingReason is { } reason && !_provider.GetRequiredService<AppSettings>().SensorDriverPromptShown)
+        if (!PawnIOInstaller.IsPackaged && !SensorDriver.IsPawnIOInstalled && !settings.SensorDriverChoiceMade)
         {
-            _tray.ShowHint(reason + " Right-click the tray icon → Install sensor driver.");
-            _provider.GetRequiredService<AppSettings>().SensorDriverPromptShown = true;
-            _provider.GetRequiredService<AppSettingsService>().Save();
+            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            {
+                var dialog = new SensorSetupWindow();
+                // Save only after the window opens; cancellation or closing means "continue".
+                dialog.Loaded += (_, _) =>
+                {
+                    settings.SensorDriverChoiceMade = true;
+                    settingsService.Save();
+                };
+                dialog.ShowDialog();
+            }));
         }
 
         Log.Info($"DeskStats started — layout '{_layout.CurrentLayoutName}'.");

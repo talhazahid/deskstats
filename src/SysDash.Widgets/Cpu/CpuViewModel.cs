@@ -52,7 +52,8 @@ public sealed class CpuViewModel : HardwareWidgetViewModel
     {
         InstallButtonText = "Installing…";
         bool ok = await SensorDriver.InstallPawnIOAsync();
-        InstallButtonText = ok ? "Installed — restarting…" : "Open download page";
+        InstallButtonText = ok ? "Installed — restarting…" : PawnIOInstaller.RestartRequired ? "Restart Windows" : "Retry driver installation";
+        if (!ok) ApplyDriverHint(PawnIOInstaller.LastMessage);
     }
 
     private void ApplyDriverHint(string? hint)

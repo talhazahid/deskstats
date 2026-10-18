@@ -11,7 +11,7 @@ namespace SysDash.Core.Diagnostics;
 /// Windows Defender and other antiviruses now block. PawnIO is NOT bundled in
 /// the library: if it is not installed, those sensors are simply empty on every
 /// PC, even when the app runs as administrator. This helper detects that and
-/// installs PawnIO on request (official package via winget).
+/// installs the bundled, verified PawnIO package on request.
 /// </summary>
 public static class SensorDriver
 {
@@ -44,13 +44,8 @@ public static class SensorDriver
             try
             {
                 using RegistryKey? service = Registry.LocalMachine.OpenSubKey(@"SYSTEM\CurrentControlSet\Services\PawnIO");
-                if (service is not null)
-                {
-                    return true;
-                }
-
                 string programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                return File.Exists(Path.Combine(programFiles, "PawnIO", "PawnIOLib.dll"));
+                return service is not null && File.Exists(Path.Combine(programFiles, "PawnIO", "PawnIOLib.dll"));
             }
             catch
             {
@@ -86,35 +81,15 @@ public static class SensorDriver
         => Log.Info($"Sensor access: elevated={IsElevated}, PawnIO installed={IsPawnIOInstalled}");
 
     /// <summary>
-    /// Installs PawnIO with winget (official package namazso.PawnIO). Falls back
-    /// to opening the download page when winget is unavailable. Returns true when
-    /// the driver is installed afterwards.
+    /// Installs the bundled verified PawnIO package after an explicit request.
+    /// Returns true only when installation completed and the driver is present.
     /// </summary>
     public static async Task<bool> InstallPawnIOAsync()
     {
-        if (IsPawnIOInstalled)
-        {
-            Installed?.Invoke();
-            return true;
-        }
-
-        int exitCode = await Task.Run(() => RunHidden(
-            "winget",
-            "install --id namazso.PawnIO --exact --silent --accept-package-agreements --accept-source-agreements --disable-interactivity",
-            TimeSpan.FromMinutes(5)));
-
-        Log.Info($"PawnIO install via winget finished (exit {exitCode}).");
-
-        if (IsPawnIOInstalled)
-        {
-            Installed?.Invoke();
-            return true;
-        }
-
-        OpenDownloadPage();
-        return false;
+        bool installed = await PawnIOInstaller.InstallAsync();
+        if (installed) Installed?.Invoke();
+        return installed;
     }
-
     public static void OpenDownloadPage()
     {
         try
@@ -127,40 +102,4 @@ public static class SensorDriver
         }
     }
 
-    private static int RunHidden(string fileName, string arguments, TimeSpan timeout)
-    {
-        try
-        {
-            using Process? process = Process.Start(new ProcessStartInfo
-            {
-                FileName = fileName,
-                Arguments = arguments,
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            });
-
-            if (process is null)
-            {
-                return -1;
-            }
-
-            // Drain output so the child never blocks on a full pipe.
-            _ = process.StandardOutput.ReadToEndAsync();
-            _ = process.StandardError.ReadToEndAsync();
-
-            if (!process.WaitForExit((int)timeout.TotalMilliseconds))
-            {
-                return -2;
-            }
-
-            return process.ExitCode;
-        }
-        catch (Exception ex)
-        {
-            Log.Warn($"{fileName} failed: {ex.Message}");
-            return -1;
-        }
-    }
 }

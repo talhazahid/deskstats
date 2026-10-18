@@ -271,7 +271,7 @@ public sealed class TrayService : IDisposable
                     ShowHint("Installing the PawnIO sensor driver… DeskStats restarts when it is done.");
                     if (!await SensorDriver.InstallPawnIOAsync())
                     {
-                        ShowHint("Automatic install failed — the PawnIO download page was opened instead.");
+                        ShowHint(PawnIOInstaller.LastMessage);
                     }
                 };
                 menu.Items.Add(installDriver);

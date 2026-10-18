@@ -11,7 +11,8 @@ param(
     [Parameter(Mandatory = $true)][string]$Installer,
     [Parameter(Mandatory = $true)][string]$ExpectedVersion,
     [string]$ExpectedPublisher = 'DeskStats Project (GPLv3)',
-    [switch]$RequireFreshInstall
+    [switch]$RequireFreshInstall,
+    [switch]$DeferredDriver
 )
 $ErrorActionPreference = 'Stop'
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -91,8 +92,15 @@ $result = [ordered]@{
     InstallerSignatureValid = ($installerSignature.Status -eq 'Valid')
     MicrosoftDriverDependencyReviewRequired = $true
     StoreCertificationReady = $false
+    DeferredDriver = [bool]$DeferredDriver
+    BundledInstallerVerified = ((Test-Path (Join-Path $env:ProgramFiles 'DeskStats\Dependencies\PawnIO_setup.exe')) -and
+        (Get-FileHash (Join-Path $env:ProgramFiles 'DeskStats\Dependencies\PawnIO_setup.exe')).Hash -eq '1F519A22E47187F70A1379A48CA604981C4FCF694F4E65B734AAA74A9FBA3032')
 }
-$passed = $result.InstallSucceeded -and $result.AppNameMatches -and $result.PublisherMatches -and $result.VersionMatches -and $result.AppPresent -and $result.UninstallCommandPresent -and $result.SilentUninstallCommandPresent -and $result.NoUnexpectedInstalledApps -and $result.ExactlyOneDeskStatsEntry -and $result.RequiredDriverRegistered -and $result.RequiredDriverLibraryPresent -and $result.DriverSignatureValid
+$dependencyPassed = $result.RequiredDriverRegistered -and $result.RequiredDriverLibraryPresent -and $result.DriverSignatureValid
+if ($DeferredDriver) {
+    $dependencyPassed = $result.NoExtraInstalledApps -and -not $result.RequiredDriverRegistered -and -not $result.RequiredDriverLibraryPresent
+}
+$passed = $result.InstallSucceeded -and $result.AppNameMatches -and $result.PublisherMatches -and $result.VersionMatches -and $result.AppPresent -and $result.UninstallCommandPresent -and $result.SilentUninstallCommandPresent -and $result.NoUnexpectedInstalledApps -and $result.ExactlyOneDeskStatsEntry -and $result.BundledInstallerVerified -and $dependencyPassed
 $result['Passed'] = $passed
 $result | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $report -Encoding UTF8
 Write-Host "Verification report: $report"
