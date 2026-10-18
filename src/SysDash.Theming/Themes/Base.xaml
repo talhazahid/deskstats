@@ -777,10 +777,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="ActionSurface" Property="Opacity" Value="0.92" />
+                            <Setter TargetName="ActionSurface" Property="Background" Value="{DynamicResource AccentHoverBrush}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="ActionSurface" Property="Opacity" Value="0.82" />
+                            <Setter TargetName="ActionSurface" Property="Background" Value="{DynamicResource AccentPressedBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="True">
                             <Setter TargetName="ActionSurface" Property="BorderBrush" Value="{DynamicResource TextPrimaryBrush}" />

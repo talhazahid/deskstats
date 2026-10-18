@@ -43,6 +43,8 @@
     <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569" />
     <SolidColorBrush x:Key="TextTertiaryBrush" Color="#8391A7" />
     <SolidColorBrush x:Key="AccentBrush" Color="#2563EB" />
+    <SolidColorBrush x:Key="AccentHoverBrush" Color="#1D4ED8" />
+    <SolidColorBrush x:Key="AccentPressedBrush" Color="#1E40AF" />
     <SolidColorBrush x:Key="AccentSoftBrush" Color="#2E2563EB" />
     <SolidColorBrush x:Key="AccentFillBrush" Color="#1A2563EB" />
     <SolidColorBrush x:Key="SecondarySeriesBrush" Color="#94A3B8" />
