@@ -12,7 +12,7 @@
 - Other standard mappings: leave blank unless the precise scenario matches the documented meaning.
 - Return-code documentation: https://talhazahid.github.io/deskstats/installer-return-codes.html
 
-Version 1.0.4 provides two distinct installers. `DeskStats-Setup-1.0.4.exe` is the website edition and installs PawnIO during setup. `DeskStats-Store-Setup-1.0.4.exe` is an EXE submission candidate that keeps the verified driver installer locally but waits for an explicit first-launch choice before installing it. The app also offers "Continue with limited readings" and remembers that choice. This candidate is not an MSIX package and is not claimed to be approved for Store distribution.
+Version 1.0.5 provides two distinct installers. `DeskStats-Setup-1.0.5.exe` is the website edition and installs PawnIO during setup. `DeskStats-Store-Setup-1.0.5.exe` is an EXE submission candidate that keeps the verified driver installer locally but waits for an explicit first-launch choice before installing it. The app also offers "Continue with limited readings" and remembers that choice. This candidate is not an MSIX package and is not claimed to be approved for Store distribution.
 
 Version 1.0.2 omitted the dependency entirely and is superseded. Never replace bytes behind an already-submitted versioned URL.
 
@@ -26,7 +26,7 @@ Dependency installer SHA-256: `1F519A22E47187F70A1379A48CA604981C4FCF694F4E65B73
 
 The dependency installer is signed by namazso.eu. The installed driver signature is recorded in the verification report; a Microsoft Windows Hardware Compatibility Publisher signature is evidence for review, rather than a guarantee of policy approval or proof of every WHCP requirement.
 
-For the deferred 1.0.4 candidate, initial setup creates only DeskStats in Programs and Features. On first launch, the user can choose "Install sensor driver" or "Continue with limited readings." Choosing installation verifies the bundled installer against its pinned SHA-256 hash, requests administrator approval, and installs PawnIO silently. A successful installation restarts DeskStats to refresh sensors; a driver restart request instead asks the user to restart Windows. Cancellation and installation errors allow retrying or continuing with limited readings. PawnIO then has its own visible entry in Programs and Features.
+For the deferred 1.0.5 candidate, initial setup creates only DeskStats in Programs and Features. On first launch, the user can choose "Install sensor driver" or "Continue with limited readings." Choosing installation verifies the bundled installer against its pinned SHA-256 hash, requests administrator approval, and installs PawnIO silently. A successful installation restarts DeskStats to refresh sensors; a driver restart request instead asks the user to restart Windows. Cancellation and installation errors allow retrying or continuing with limited readings. PawnIO then has its own visible entry in Programs and Features.
 
 PawnIO is an explicitly disclosed functional dependency, not an unrelated optional application. We request case-by-case review of this driver dependency and its post-launch installation under policies 10.1.5 and 10.2.4. Moving installation to first launch does not establish compliance with those policies. No registry entries are concealed or renamed to alter validation results. Uninstalling DeskStats preserves the shared PawnIO installation and existing user settings.
 
