@@ -463,8 +463,10 @@ public sealed class WidgetWindow : Window, IWidgetHost
     /// </summary>
     public void MoveTo(double x, double y)
     {
+        _missingSavedMonitor = false;
         Left = x;
         Top = y;
+        CapturePlacement();
     }
 
     // ---- chrome ------------------------------------------------------------
@@ -856,6 +858,21 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private void PlaceAt(WidgetPlacementSpec spec)
     {
+        if (string.IsNullOrEmpty(spec.MonitorDeviceId))
+        {
+            Rect oldBounds = new(spec.X, spec.Y, Width, Height);
+            bool reachable = MonitorGeometry.EnumerateMonitors().Any(m =>
+            {
+                Rect visible = Rect.Intersect(oldBounds, m.BoundsDip);
+                return !visible.IsEmpty && visible.Width >= 48 && visible.Height >= 48;
+            });
+            if (reachable)
+            {
+                Left = spec.X;
+                Top = spec.Y;
+                return; // Migrate a reachable legacy position without snapping it elsewhere.
+            }
+        }
         // Use the screen the widget was saved on (any monitor, not just the
         // primary); if that screen is gone, bring it back to the main one.
         Rect work = MonitorGeometry.FindById(spec.MonitorDeviceId)?.WorkAreaDip ??
