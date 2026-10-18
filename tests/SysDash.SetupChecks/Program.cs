@@ -20,6 +20,13 @@ internal static class Program
         {
             var app = new App();
             app.InitializeComponent(); // Load the actual theme without bootstrapping monitoring.
+            SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
+            app.DispatcherUnhandledException += (_, e) =>
+            {
+                File.WriteAllText(Path.Combine(output, "dispatcher-error.txt"), e.Exception.ToString());
+                e.Handled = true;
+                Environment.Exit(1);
+            };
             foreach (string theme in new[] { "Dark", "Light" })
             {
                 app.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/SysDash.Theming;component/Themes/{theme}.xaml");
