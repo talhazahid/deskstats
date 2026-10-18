@@ -1258,6 +1258,14 @@ public sealed class LayoutController : IDisposable
         try
         {
         var items = _current.Items.Where(i => _initialArrangement.Contains(i.InstanceId) && !i.Placement.Docked && !i.Placement.Hidden).ToArray();
+        // Native moves can finish a pending WPF measure. Read live heights again
+        // after that pass instead of arranging from a stale model snapshot.
+        for (int pass = 0; pass < 3; pass++)
+        {
+        foreach (var item in items)
+            if (_detachedWindows.TryGetValue(item.InstanceId, out var id) &&
+                _widgetWindows.TryGetHost(id, out var host) && host is WidgetWindow live && live.ActualHeight > 0)
+                item.Placement.Height = live.ActualHeight;
         var plan = FloatingPlacement.ArrangeInitial(MonitorGeometry.PrimaryWorkAreaDip(), items.Select(i => new Size(i.Placement.Width, i.Placement.Height)).ToArray());
         for (int i = 0; i < items.Length; i++)
         {
@@ -1266,6 +1274,7 @@ public sealed class LayoutController : IDisposable
             p.Width = plan[i].Bounds.Width; p.Height = plan[i].Bounds.Height;
             p.HeightLimit = plan[i].HeightLimit;
             if (_detachedWindows.TryGetValue(items[i].InstanceId, out var windowId)) _widgetWindows.MoveTo(windowId, p.X, p.Y);
+        }
         }
         if (items.Length > 0) ScheduleSave();
         }
