@@ -33,6 +33,7 @@ internal static class WindowPersistenceChecks
             foreach (var instance in controller.Instances) instance.View.MinHeight = 900;
             Pump();
             var windows = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
+            File.WriteAllText(Path.Combine(output, "initial-window-bounds.json"), JsonSerializer.Serialize(windows.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight, w.MaxHeight }), new JsonSerializerOptions { WriteIndented = true }));
             checks["CreatesAllSixWidgets"] = windows.Length == 6;
             checks["LiveContentGrowthDoesNotOverlap"] = !windows.SelectMany((a, i) => windows.Skip(i + 1).Select(b =>
                 new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight).IntersectsWith(new Rect(b.Left, b.Top, b.ActualWidth, b.ActualHeight)))).Any(x => x);

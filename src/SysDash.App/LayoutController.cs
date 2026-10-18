@@ -40,7 +40,7 @@ public sealed class LayoutController : IDisposable
     private bool _layingOutAll;
     private CancellationTokenSource? _saveCts;
     private readonly HashSet<Guid> _initialArrangement = new();
-    private bool _arrangementQueued;
+    private bool _arrangingInitial;
     private bool _tearingDown;
 
     public LayoutController(
@@ -852,15 +852,7 @@ public sealed class LayoutController : IDisposable
             item.Placement.Width = width;
             item.Placement.Height = height;
             ScheduleSave();
-            if (_initialArrangement.Contains(instanceId) && !_arrangementQueued)
-            {
-                _arrangementQueued = true;
-                Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
-                {
-                    _arrangementQueued = false;
-                    if (!_tearingDown) ArrangeInitialWindows();
-                }));
-            }
+            if (!_tearingDown && _initialArrangement.Contains(instanceId) && !_arrangingInitial) ArrangeInitialWindows();
         }
     }
 
@@ -1261,6 +1253,10 @@ public sealed class LayoutController : IDisposable
 
     private void ArrangeInitialWindows()
     {
+        if (_arrangingInitial) return;
+        _arrangingInitial = true;
+        try
+        {
         var items = _current.Items.Where(i => _initialArrangement.Contains(i.InstanceId) && !i.Placement.Docked && !i.Placement.Hidden).ToArray();
         var plan = FloatingPlacement.ArrangeInitial(MonitorGeometry.PrimaryWorkAreaDip(), items.Select(i => new Size(i.Placement.Width, i.Placement.Height)).ToArray());
         for (int i = 0; i < items.Length; i++)
@@ -1272,6 +1268,8 @@ public sealed class LayoutController : IDisposable
             if (_detachedWindows.TryGetValue(items[i].InstanceId, out var windowId)) _widgetWindows.MoveTo(windowId, p.X, p.Y);
         }
         if (items.Length > 0) ScheduleSave();
+        }
+        finally { _arrangingInitial = false; }
     }
 
     private void ClearRuntime()
