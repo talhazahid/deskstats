@@ -55,10 +55,15 @@ internal static class Program
                 var frame = new DispatcherFrame();
                 var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
                 DateTime deadline = DateTime.UtcNow.AddMinutes(5);
-                timer.Tick += (_, _) => { if (!window.IsVisible || DateTime.UtcNow > deadline) frame.Continue = false; };
+                timer.Tick += (_, _) =>
+                {
+                    if (!window.IsVisible || ((Button)window.FindName("ContinueButton")).IsEnabled || DateTime.UtcNow > deadline)
+                        frame.Continue = false;
+                };
                 timer.Start();
                 Dispatcher.PushFrame(frame);
                 timer.Stop();
+                File.WriteAllText(Path.Combine(output, "driver-install-message.txt"), PawnIOInstaller.LastMessage);
                 checks["ExplicitInstallRegisteredDriver"] = SensorDriver.IsPawnIOInstalled;
                 checks["SuccessfulInstallNotifiedApp"] = installedEvent;
                 checks["SuccessfulInstallClosedDialog"] = !window.IsVisible;

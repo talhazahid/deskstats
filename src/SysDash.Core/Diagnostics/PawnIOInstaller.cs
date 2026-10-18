@@ -53,10 +53,12 @@ public static class PawnIOInstaller
                 return false;
             }
             LastMessage = "Installing the sensor driver…";
+            bool needsElevation = !SensorDriver.IsElevated;
             using Process? process = Process.Start(new ProcessStartInfo(path, "-install -silent")
             {
-                UseShellExecute = true,
-                Verb = "runas",
+                UseShellExecute = needsElevation,
+                Verb = needsElevation ? "runas" : string.Empty,
+                CreateNoWindow = !needsElevation,
                 WindowStyle = ProcessWindowStyle.Hidden,
             });
             if (process is null)
