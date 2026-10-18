@@ -18,8 +18,10 @@ internal static class Program
         var checks = new Dictionary<string, bool>();
         try
         {
-            var app = new App();
-            app.InitializeComponent(); // Load the actual theme without bootstrapping monitoring.
+            // A neutral WPF host must not run DeskStats startup or touch the user's layout.
+            var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+            app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/SysDash.Theming;component/Themes/Base.xaml") });
+            app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/SysDash.Theming;component/Themes/Dark.xaml") });
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             app.DispatcherUnhandledException += (_, e) =>
             {
@@ -27,6 +29,8 @@ internal static class Program
                 e.Handled = true;
                 Environment.Exit(1);
             };
+            checks["PlacementScenariosPass"] = PlacementChecks.Run(output);
+            checks["WindowPersistenceScenariosPass"] = WindowPersistenceChecks.Run(output);
             foreach (string theme in new[] { "Dark", "Light" })
             {
                 app.Resources.MergedDictionaries[1].Source = new Uri($"pack://application:,,,/SysDash.Theming;component/Themes/{theme}.xaml");

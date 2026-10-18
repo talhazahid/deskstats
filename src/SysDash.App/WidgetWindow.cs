@@ -4,6 +4,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 using SysDash.Core.Diagnostics;
 using SysDash.SDK.Hosting;
 using SysDash.SDK.Session;
@@ -46,6 +48,17 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private Border? _rightHandle;
     private Border? _resizeBadge;
     private TextBlock? _resizeHint;
+    private bool _restoringPlacement = true;
+    private bool _missingSavedMonitor;
+    private string? _savedMonitorDeviceId;
+    private double _savedOffsetX, _savedOffsetY;
+    private readonly DispatcherTimer _placementTimer;
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PixelRect { public int Left, Top, Right, Bottom; }
+    [DllImport("user32.dll")]
+    private static extern bool GetWindowRect(IntPtr hwnd, out PixelRect rect);
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
 
     private event EventHandler? _hostClosed;
 
@@ -62,6 +75,11 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _theme = theme ?? throw new ArgumentNullException(nameof(theme));
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _savedMonitorDeviceId = spec.MonitorDeviceId;
+        _savedOffsetX = spec.MonitorOffsetX;
+        _savedOffsetY = spec.MonitorOffsetY;
+        _placementTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _placementTimer.Tick += (_, _) => { _placementTimer.Stop(); CapturePlacement(); };
 
         Title = instance.EffectiveTitle;
         WindowStyle = WindowStyle.None;
@@ -80,6 +98,9 @@ public sealed class WidgetWindow : Window, IWidgetHost
         Width = Math.Clamp(spec.Width, 220, 1200);
         Height = Math.Clamp(spec.Height, 120, 1600);
         PlaceAt(spec);
+        MaxHeight = spec.HeightLimit > 0 ? spec.HeightLimit :
+            (MonitorGeometry.FindById(spec.MonitorDeviceId)?.WorkAreaDip ??
+             MonitorGeometry.WorkAreaFor(new Point(spec.X + 20, spec.Y + 20), spec.MonitorIndex)).Height;
 
         // Height always follows the widget's content, so detailed widgets are
         // never clipped; the user only chooses the width (right-click → Resize width).
@@ -119,19 +140,30 @@ public sealed class WidgetWindow : Window, IWidgetHost
         WindowLayerHelper.Attach(this, () => _layer);
         Loaded += (_, _) =>
         {
+            RestoreMonitorAnchor(spec);
+            _restoringPlacement = false;
             _instance.ViewModel.Activate(_session);
 
             // Height follows the content; remember the real size so auto-layout
             // of other widgets does not overlap this one.
             _layout.SetDetachedSize(_instance.Id, Width, ActualHeight);
+            CapturePlacement();
+        };
+        LocationChanged += (_, _) => { if (!_restoringPlacement) { _placementTimer.Stop(); _placementTimer.Start(); } };
+        SizeChanged += (_, _) =>
+        {
+            if (!_restoringPlacement && ActualWidth > 0 && ActualHeight > 0)
+                _layout.SetDetachedSize(_instance.Id, ActualWidth, ActualHeight);
         };
         base.Closed += (_, _) =>
         {
+            _placementTimer.Stop();
             // Release the widget View before the window is gone so it can be
             // re-homed (e.g. "Dock to sidebar") without WPF complaining that it
             // is still a logical child of this window's card.
             if (_card is not null)
             {
+                if (_card.Child is ScrollViewer scroll) scroll.Content = null;
                 _card.Child = null;
                 _card = null;
             }
@@ -461,7 +493,13 @@ public sealed class WidgetWindow : Window, IWidgetHost
             Background = Brushes.Transparent,
         };
         ViewParenting.Release(_instance.View);
-        card.Child = _instance.View;
+        card.Child = new ScrollViewer
+        {
+            Content = _instance.View,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            CanContentScroll = false,
+        };
         _card = card;
         root.Children.Add(card);
 
@@ -513,6 +551,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
         try
         {
+            _layout.BeginManualPlacement();
+            _missingSavedMonitor = false;
             DragMove();
             double snappedX = SnapAxis(Left);
             double snappedY = SnapAxis(Top);
@@ -523,6 +563,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             Point center = new(snappedX + ActualWidth / 2, snappedY + Math.Min(ActualHeight, 80) / 2);
             int monitor = MonitorGeometry.MonitorAt(center)?.Number ?? 0;
             _layout.SetDetachedPosition(_instance.Id, snappedX, snappedY, monitor);
+            CapturePlacement();
         }
         catch (InvalidOperationException)
         {
@@ -623,6 +664,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private void OnHandleDown(object sender, MouseButtonEventArgs e)
     {
+        _layout.BeginManualPlacement();
+        _missingSavedMonitor = false;
         _dragResizing = true;
         _resizeStart = WindowEffects.GetCursorPositionDip();
         _startWidth = ActualWidth;
@@ -664,6 +707,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         (sender as UIElement)?.ReleaseMouseCapture();
         _layout.SetDetachedSize(_instance.Id, Width, ActualHeight);
         _layout.SetDetachedPosition(_instance.Id, Left, Top);
+        CapturePlacement();
         Dispatcher.BeginInvoke(new Action(UpdateResizeHint), System.Windows.Threading.DispatcherPriority.Loaded);
         e.Handled = true;
     }
@@ -703,6 +747,19 @@ public sealed class WidgetWindow : Window, IWidgetHost
     {
         Dispatcher.BeginInvoke(new Action(() =>
         {
+            if (!string.IsNullOrEmpty(_savedMonitorDeviceId))
+            {
+                var saved = MonitorGeometry.FindById(_savedMonitorDeviceId);
+                if (saved is null) _missingSavedMonitor = true;
+                else if (_missingSavedMonitor)
+                {
+                    Point pixels = FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
+                    SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
+                    _missingSavedMonitor = false;
+                    CapturePlacement();
+                    return;
+                }
+            }
             Point center = new(Left + ActualWidth / 2, Top + 20);
             if (MonitorGeometry.MonitorAt(center) is not null)
             {
@@ -801,12 +858,43 @@ public sealed class WidgetWindow : Window, IWidgetHost
     {
         // Use the screen the widget was saved on (any monitor, not just the
         // primary); if that screen is gone, bring it back to the main one.
-        Rect work = MonitorGeometry.WorkAreaFor(new Point(spec.X + 20, spec.Y + 20), spec.MonitorIndex);
+        Rect work = MonitorGeometry.FindById(spec.MonitorDeviceId)?.WorkAreaDip ??
+            MonitorGeometry.WorkAreaFor(new Point(spec.X + 20, spec.Y + 20), spec.MonitorIndex);
 
         Rect rect = MonitorGeometry.ClampToWorkArea(
             new Rect(spec.X, spec.Y, Width, Height), work);
         Left = rect.X;
         Top = rect.Y;
+    }
+
+    private void RestoreMonitorAnchor(WidgetPlacementSpec spec)
+    {
+        if (string.IsNullOrEmpty(spec.MonitorDeviceId)) return; // Legacy coordinates migrate on capture.
+        var monitors = MonitorGeometry.EnumerateMonitors();
+        var saved = monitors.FirstOrDefault(m => string.Equals(m.DeviceId, spec.MonitorDeviceId, StringComparison.OrdinalIgnoreCase));
+        _missingSavedMonitor = saved is null;
+        var monitor = saved ?? monitors.FirstOrDefault(m => m.IsPrimary) ?? monitors.FirstOrDefault();
+        if (monitor is null) return;
+        Point pixels = FloatingPlacement.RestorePixels(monitor, spec.MonitorOffsetX, spec.MonitorOffsetY, Width, ActualHeight);
+        SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
+    }
+
+    public void CapturePlacement()
+    {
+        if (_restoringPlacement || _missingSavedMonitor || !IsLoaded) return;
+        if (!GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect pixels)) return;
+        var monitors = MonitorGeometry.EnumerateMonitors();
+        Point center = new((pixels.Left + pixels.Right) / 2.0, pixels.Top + Math.Min(40, pixels.Bottom - pixels.Top) / 2.0);
+        var monitor = monitors.FirstOrDefault(m =>
+            new Rect(m.BoundsDip.X * m.DpiX / 96.0, m.BoundsDip.Y * m.DpiY / 96.0, m.PixelWidth, m.PixelHeight).Contains(center));
+        if (monitor is null) return;
+        Rect work = FloatingPlacement.PixelWorkArea(monitor);
+        _savedMonitorDeviceId = monitor.DeviceId;
+        _savedOffsetX = (pixels.Left - work.Left) * 96.0 / monitor.DpiX;
+        _savedOffsetY = (pixels.Top - work.Top) * 96.0 / monitor.DpiY;
+        _layout.SetDetachedPosition(_instance.Id, Left, Top, monitor.Number);
+        _layout.SetDetachedAnchor(_instance.Id, monitor.DeviceId, _savedOffsetX, _savedOffsetY);
+        _layout.SetDetachedSize(_instance.Id, ActualWidth, ActualHeight);
     }
 
     private void ApplyChrome()

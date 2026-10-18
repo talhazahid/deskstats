@@ -10,9 +10,9 @@ public sealed class AppSettingsService
 {
     private readonly AppSettings _settings;
 
-    public AppSettingsService()
+    public AppSettingsService(string? dataDirectory = null)
     {
-        string dir = AppPaths.DataDirectory;
+        string dir = dataDirectory ?? AppPaths.DataDirectory;
         Directory.CreateDirectory(dir);
         FilePath = Path.Combine(dir, "settings.json");
         _settings = LoadFromDisk(FilePath);

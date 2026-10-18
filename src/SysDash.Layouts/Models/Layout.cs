@@ -24,7 +24,7 @@ public sealed class Layout
             Theme = Theme,
             Items = Items.Select(i => new LayoutItem
             {
-                InstanceId = Guid.NewGuid(),
+                InstanceId = i.InstanceId,
                 WidgetId = i.WidgetId,
                 TitleOverride = i.TitleOverride,
                 SettingsJson = i.SettingsJson,
@@ -43,6 +43,10 @@ public sealed class Layout
                     ClickThrough = i.Placement.ClickThrough,
                     SnapToGrid = i.Placement.SnapToGrid,
                     MonitorIndex = i.Placement.MonitorIndex,
+                    MonitorDeviceId = i.Placement.MonitorDeviceId,
+                    MonitorOffsetX = i.Placement.MonitorOffsetX,
+                    MonitorOffsetY = i.Placement.MonitorOffsetY,
+                    HeightLimit = i.Placement.HeightLimit,
                     Theme = i.Placement.Theme,
                 },
             }).ToList(),

@@ -56,6 +56,10 @@ public sealed class WidgetPlacementSpec
     public bool SnapToGrid { get; set; } = true;
 
     public int MonitorIndex { get; set; }
+    public string? MonitorDeviceId { get; set; }
+    public double MonitorOffsetX { get; set; }
+    public double MonitorOffsetY { get; set; }
+    public double HeightLimit { get; set; }
 
     /// <summary>"dark", "light", or null = follow the app theme.</summary>
     public string? Theme { get; set; }

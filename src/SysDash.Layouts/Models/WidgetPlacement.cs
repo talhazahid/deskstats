@@ -46,6 +46,11 @@ public sealed class WidgetPlacement
 
     /// <summary>Windows display number of the screen the detached window lives on (0 = unknown / main).</summary>
     public int MonitorIndex { get; set; }
+    public string? MonitorDeviceId { get; set; }
+    public double MonitorOffsetX { get; set; }
+    public double MonitorOffsetY { get; set; }
+    /// <summary>Content-height cap for a tidy initial layout; zero uses the screen height.</summary>
+    public double HeightLimit { get; set; }
 
     /// <summary>Per-widget theme: "dark", "light", or null/empty = follow the app theme.</summary>
     public string? Theme { get; set; }

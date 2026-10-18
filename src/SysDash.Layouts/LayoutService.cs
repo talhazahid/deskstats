@@ -17,10 +17,9 @@ public sealed class LayoutService : ILayoutService
     private Layout _active;
     private string _activeName = LayoutPresets.Default;
 
-    public LayoutService()
+    public LayoutService(string? storageDirectory = null)
     {
-        string baseDir = SysDash.Core.Diagnostics.AppPaths.DataDirectory;
-        _directory = Path.Combine(baseDir, "layouts");
+        _directory = storageDirectory ?? Path.Combine(SysDash.Core.Diagnostics.AppPaths.DataDirectory, "layouts");
         _active = LayoutPresets.Build(LayoutPresets.Default);
     }
 

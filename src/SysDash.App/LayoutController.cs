@@ -39,6 +39,9 @@ public sealed class LayoutController : IDisposable
     private Layout _current;
     private bool _layingOutAll;
     private CancellationTokenSource? _saveCts;
+    private readonly HashSet<Guid> _initialArrangement = new();
+    private bool _arrangementQueued;
+    private bool _tearingDown;
 
     public LayoutController(
         IServiceProvider services,
@@ -268,7 +271,14 @@ public sealed class LayoutController : IDisposable
     public void Materialize()
     {
         StartupTrace.Mark($"materialize: {_current.Items.Count} item(s)");
-        ClearAll();
+        ClearRuntime();
+        _initialArrangement.Clear();
+        var floating = _current.Items.Where(i => !i.Placement.Docked && !i.Placement.Hidden).ToArray();
+        if (floating.Length > 0 && floating.All(i => i.Placement.AutoPlace))
+        {
+            foreach (var item in floating) _initialArrangement.Add(item.InstanceId);
+            ArrangeInitialWindows();
+        }
 
         bool droppedUnknown = false;
         foreach (LayoutItem item in _current.Items.ToArray())
@@ -345,7 +355,8 @@ public sealed class LayoutController : IDisposable
         {
             if (item.Placement.AutoPlace)
             {
-                ResolveAutoPlace(item, instance.View, measure: true);
+                if (_initialArrangement.Contains(item.InstanceId)) item.Placement.AutoPlace = false;
+                else ResolveAutoPlace(item, instance.View, measure: true);
                 ScheduleSave();
             }
 
@@ -474,6 +485,10 @@ public sealed class LayoutController : IDisposable
                 Docked = false,
                 X = p.X + 28,
                 Y = p.Y + 28,
+                MonitorDeviceId = p.MonitorDeviceId,
+                MonitorOffsetX = p.MonitorOffsetX + 28,
+                MonitorOffsetY = p.MonitorOffsetY + 28,
+                HeightLimit = p.HeightLimit,
                 Width = p.Width,
                 Height = p.Height,
                 Opacity = p.Opacity,
@@ -819,6 +834,7 @@ public sealed class LayoutController : IDisposable
         {
             item.Placement.X = x;
             item.Placement.Y = y;
+            item.Placement.AutoPlace = false;
             if (screenNumber.HasValue)
             {
                 item.Placement.MonitorIndex = screenNumber.Value;
@@ -832,9 +848,19 @@ public sealed class LayoutController : IDisposable
     {
         if (FindItem(instanceId) is { } item)
         {
+            if (Math.Abs(item.Placement.Width - width) < 0.1 && Math.Abs(item.Placement.Height - height) < 0.1) return;
             item.Placement.Width = width;
             item.Placement.Height = height;
             ScheduleSave();
+            if (_initialArrangement.Contains(instanceId) && !_arrangementQueued)
+            {
+                _arrangementQueued = true;
+                Application.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
+                {
+                    _arrangementQueued = false;
+                    if (!_tearingDown) ArrangeInitialWindows();
+                }));
+            }
         }
     }
 
@@ -976,6 +1002,7 @@ public sealed class LayoutController : IDisposable
     /// </summary>
     private void ScheduleSave()
     {
+        if (_tearingDown) return;
         _saveCts?.Cancel();
         var cts = new CancellationTokenSource();
         _saveCts = cts;
@@ -1007,6 +1034,10 @@ public sealed class LayoutController : IDisposable
 
     public void Dispose()
     {
+        if (_tearingDown) return;
+        _tearingDown = true;
+        foreach (Guid windowId in _detachedWindows.Values.ToArray())
+            if (_widgetWindows.TryGetHost(windowId, out var host) && host is WidgetWindow window) window.CapturePlacement();
         _saveCts?.Cancel();
         _saveCts = null;
 
@@ -1020,10 +1051,7 @@ public sealed class LayoutController : IDisposable
             Log.Error("Failed to persist layout at shutdown", ex);
         }
 
-        foreach (Guid id in _instances.Keys.ToArray())
-        {
-            RemoveInstance(id);
-        }
+        ClearRuntime();
 
         _saveCts?.Cancel(); // drop debounced saves scheduled by teardown
     }
@@ -1189,6 +1217,10 @@ public sealed class LayoutController : IDisposable
             ClickThrough = placement.ClickThrough,
             SnapToGrid = placement.SnapToGrid,
             MonitorIndex = placement.MonitorIndex,
+            MonitorDeviceId = placement.MonitorDeviceId,
+            MonitorOffsetX = placement.MonitorOffsetX,
+            MonitorOffsetY = placement.MonitorOffsetY,
+            HeightLimit = placement.HeightLimit,
         };
 
         Guid windowId = _widgetWindows.CreateWindow(instance, spec);
@@ -1215,4 +1247,42 @@ public sealed class LayoutController : IDisposable
 
     private LayoutItem? FindItem(Guid instanceId)
         => _current.Items.FirstOrDefault(i => i.InstanceId == instanceId);
+
+    public void BeginManualPlacement() => _initialArrangement.Clear();
+
+    public void SetDetachedAnchor(Guid id, string monitorId, double offsetX, double offsetY)
+    {
+        if (FindItem(id) is not { } item) return;
+        item.Placement.MonitorDeviceId = monitorId;
+        item.Placement.MonitorOffsetX = offsetX;
+        item.Placement.MonitorOffsetY = offsetY;
+        ScheduleSave();
+    }
+
+    private void ArrangeInitialWindows()
+    {
+        var items = _current.Items.Where(i => _initialArrangement.Contains(i.InstanceId) && !i.Placement.Docked && !i.Placement.Hidden).ToArray();
+        var plan = FloatingPlacement.ArrangeInitial(MonitorGeometry.PrimaryWorkAreaDip(), items.Select(i => new Size(i.Placement.Width, i.Placement.Height)).ToArray());
+        for (int i = 0; i < items.Length; i++)
+        {
+            var p = items[i].Placement;
+            p.X = plan[i].Bounds.X; p.Y = plan[i].Bounds.Y;
+            p.Width = plan[i].Bounds.Width; p.Height = plan[i].Bounds.Height;
+            p.HeightLimit = plan[i].HeightLimit;
+            if (_detachedWindows.TryGetValue(items[i].InstanceId, out var windowId)) _widgetWindows.MoveTo(windowId, p.X, p.Y);
+        }
+        if (items.Length > 0) ScheduleSave();
+    }
+
+    private void ClearRuntime()
+    {
+        // Rehosting and shutdown must never remove the persisted layout items.
+        foreach (Guid id in _detachedWindows.Values.ToArray())
+            if (_widgetWindows.TryGetHost(id, out var host)) host.Closed -= OnHostClosed;
+        foreach (Guid id in _detachedWindows.Values.ToArray()) _widgetWindows.Close(id);
+        _detachedWindows.Clear();
+        _sidebar.ClearAll();
+        foreach (var instance in _instances.Values) instance.ViewModel.Dispose();
+        _instances.Clear();
+    }
 }
