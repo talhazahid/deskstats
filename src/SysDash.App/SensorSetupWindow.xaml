@@ -19,7 +19,7 @@
                    TextWrapping="Wrap" Foreground="{DynamicResource TextSecondaryBrush}"
                    AutomationProperties.LiveSetting="Polite" Visibility="Collapsed" />
         <Button x:Name="InstallButton" Margin="0,20,0,0" Padding="12,9"
-                Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"
+                Style="{StaticResource PrimaryActionButton}"
                 FontSize="13" FontWeight="Normal" Content="Install sensor driver" Click="OnInstall" />
         <Button x:Name="ContinueButton" Margin="0,8,0,0" Padding="12,9"
                 Background="{DynamicResource PanelBorderSoftBrush}" Foreground="{DynamicResource TextPrimaryBrush}"

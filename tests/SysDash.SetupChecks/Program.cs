@@ -39,6 +39,20 @@ internal static class Program
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(bitmap));
                 using (var image = File.Create(Path.Combine(output, $"sensor-setup-{theme.ToLowerInvariant()}.png"))) encoder.Save(image);
+                // Render the actual WPF hover trigger without moving the user's pointer.
+                var hoverKey = typeof(UIElement).GetField("IsMouseOverPropertyKey", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)?.GetValue(null) as DependencyPropertyKey;
+                if (hoverKey is not null)
+                {
+                    var installButton = (Button)window.FindName("InstallButton");
+                    installButton.SetValue(hoverKey, true);
+                    window.UpdateLayout();
+                    var hoverBitmap = new RenderTargetBitmap(bitmap.PixelWidth, bitmap.PixelHeight, 96, 96, PixelFormats.Pbgra32);
+                    hoverBitmap.Render(content);
+                    var hoverEncoder = new PngBitmapEncoder();
+                    hoverEncoder.Frames.Add(BitmapFrame.Create(hoverBitmap));
+                    using (var image = File.Create(Path.Combine(output, $"sensor-setup-{theme.ToLowerInvariant()}-hover.png"))) hoverEncoder.Save(image);
+                    installButton.SetValue(hoverKey, false);
+                }
                 ((Button)window.FindName("ContinueButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 checks[$"ContinueCloses{theme}Dialog"] = !window.IsVisible;
             }
