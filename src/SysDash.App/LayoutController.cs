@@ -106,6 +106,19 @@ public sealed class LayoutController : IDisposable
     /// <summary>The hardware widgets every fresh / empty layout starts with.</summary>
     public static readonly string[] DefaultWidgetIds = { "cpu", "gpu", "ram", "network", "drive", "sensors" };
 
+    /// <summary>Restore the complete hardware set without moving existing widgets.</summary>
+    public void ShowAllHardwareWidgets()
+    {
+        foreach (string id in DefaultWidgetIds)
+        {
+            if (IsWidgetShown(id)) continue;
+            var hidden = _current.Items.FirstOrDefault(i => i.WidgetId.Equals(id, StringComparison.OrdinalIgnoreCase));
+            if (hidden is not null) ShowInstance(hidden.InstanceId);
+            else AddWidget(id, docked: IsSidebarMode);
+        }
+        ScheduleSave();
+    }
+
     /// <summary>
     /// An empty layout would launch to a blank desktop. Seed it with the
     /// hardware widgets (floating, or docked in sidebar mode) instead.

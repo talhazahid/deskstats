@@ -84,6 +84,14 @@ internal static class WindowPersistenceChecks
             Pump();
             Rect reserved = new(sidebar.Left, sidebar.Top, sidebar.ActualWidth, sidebar.ActualHeight);
             checks["FloatingWidgetsClearSidebar"] = windows.All(w => !reserved.IntersectsWith(new Rect(w.Left, w.Top, w.ActualWidth, w.ActualHeight)));
+            var retained = controller.Instances.First(i => i.WidgetId == "cpu").Id;
+            controller.HideInstance(controller.Instances.First(i => i.WidgetId == "gpu").Id);
+            controller.RemoveInstance(controller.Instances.First(i => i.WidgetId == "ram").Id);
+            controller.ShowAllHardwareWidgets();
+            controller.ShowAllHardwareWidgets();
+            Pump();
+            checks["RestoreHardwareShowsAllSixWithoutDuplicates"] = controller.Instances.Count() == 6 &&
+                LayoutController.DefaultWidgetIds.All(controller.IsWidgetShown) && controller.Instances.Any(i => i.Id == retained);
             controller.Dispose();
             CloseSidebar(services);
         }

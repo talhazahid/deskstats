@@ -137,6 +137,10 @@ public sealed class TrayService : IDisposable
             addWidget.Items.Add(categoryItem);
         }
 
+        addWidget.Items.Add(new Separator());
+        var showHardware = new MenuItem { Header = "Show all hardware widgets" };
+        showHardware.Click += (_, _) => _layout.ShowAllHardwareWidgets();
+        addWidget.Items.Add(showHardware);
         menu.Items.Add(addWidget);
 
         // ---- Layouts ------------------------------------------------------

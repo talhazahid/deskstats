@@ -1,0 +1,15 @@
+{
+  "Checks": {
+    "CreatesAllSixWidgets": true,
+    "LiveContentGrowthDoesNotOverlap": true,
+    "ExitKeepsAllWidgetEntries": true,
+    "ExitStoresStableMonitorIdentities": true,
+    "UsesConnectedScreens": true,
+    "RestartRestoresExactMonitorAndPosition": true,
+    "DockOperationSucceeds": true,
+    "FloatingWidgetsClearSidebar": true,
+    "RestoreHardwareShowsAllSixWithoutDuplicates": true
+  },
+  "Version": "1.0.10",
+  "SHA256": "AECD2D9AEA70C348B2F600CB69AA9F1FDBA4EC265A5907BCFB1B61666A0FAB01"
+}
