@@ -383,6 +383,8 @@ public sealed class LayoutController : IDisposable
                 _sidebar.Show();
                 Log.Info("Sidebar shown (has visible docked widgets).");
             }
+            _sidebar.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Loaded,
+                new Action(MoveFloatingWidgetsClearOfSidebar));
         }
         else if (_sidebar.IsVisible)
         {
@@ -392,6 +394,41 @@ public sealed class LayoutController : IDisposable
     }
 
     // ---- instance mutation -------------------------------------------------
+    private void MoveFloatingWidgetsClearOfSidebar()
+    {
+        if (_tearingDown || !_sidebar.IsVisible) return;
+        _sidebar.UpdateLayout();
+        Rect sidebar = new(_sidebar.Left, _sidebar.Top, _sidebar.ActualWidth, _sidebar.ActualHeight);
+        if (sidebar.IsEmpty || sidebar.Width <= 0 || sidebar.Height <= 0) return;
+        BeginManualPlacement();
+        var windows = _detachedWindows.Values.Select(id =>
+            _widgetWindows.TryGetHost(id, out var host) ? host as WidgetWindow : null)
+            .Where(w => w is not null && w.IsVisible).Cast<WidgetWindow>().ToArray();
+        foreach (var window in windows)
+        {
+            Rect bounds = new(window.Left, window.Top, window.ActualWidth, window.ActualHeight);
+            if (!bounds.IntersectsWith(sidebar)) continue;
+            var monitor = MonitorGeometry.MonitorAt(new Point(sidebar.Left + sidebar.Width / 2, sidebar.Top + 20));
+            Rect work = monitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip();
+            var obstacles = windows.Where(w => w != window)
+                .Select(w => new Rect(w.Left, w.Top, w.ActualWidth, w.ActualHeight)).Append(sidebar).ToArray();
+            Point? destination = null;
+            // Search available space with a consistent gap, keeping unaffected widgets still.
+            for (double y = work.Top + 12; y + bounds.Height <= work.Bottom - 12 && destination is null; y += 12)
+                for (double x = work.Left + 12; x + bounds.Width <= work.Right - 12; x += 12)
+                {
+                    Rect candidate = new(x, y, bounds.Width, bounds.Height);
+                    candidate.Inflate(6, 6);
+                    if (obstacles.All(o => !candidate.IntersectsWith(o))) { destination = new Point(x, y); break; }
+                }
+            // If the desktop is full, prioritize clearing the sidebar without clamping back onto it.
+            destination ??= new Point(sidebar.Left - bounds.Width - 12 >= work.Left
+                ? sidebar.Left - bounds.Width - 12 : sidebar.Right + 12, bounds.Top);
+            window.MoveTo(destination.Value.X, destination.Value.Y);
+            window.CapturePlacement();
+        }
+        ScheduleSave();
+    }
 
     public WidgetInstance? AddWidget(
         string widgetId,

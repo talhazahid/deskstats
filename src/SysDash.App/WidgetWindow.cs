@@ -507,7 +507,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
         // Drag from anywhere on the widget (buttons inside the widget mark the
         // event handled, so they keep working); right-click anywhere for the menu.
-        root.MouseLeftButtonDown += OnStripDrag;
+        root.PreviewMouseLeftButtonDown += OnStripDrag;
         root.MouseRightButtonUp += (_, args) =>
         {
             OpenMenu();
@@ -546,6 +546,16 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private void OnStripDrag(object sender, MouseButtonEventArgs e)
     {
+        // ScrollViewer handles bubbling mouse events; listen during preview,
+        // while preserving real controls such as buttons and scrollbars.
+        for (DependencyObject? node = e.OriginalSource as DependencyObject;
+             node is not null && !ReferenceEquals(node, sender);
+             node = node is Visual ? VisualTreeHelper.GetParent(node) : null)
+        {
+            if (node is System.Windows.Controls.Primitives.ButtonBase or
+                System.Windows.Controls.Primitives.ScrollBar or TextBox or Slider)
+                return;
+        }
         if (ClickThroughEnabled)
         {
             return;
@@ -555,6 +565,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         {
             _layout.BeginManualPlacement();
             _missingSavedMonitor = false;
+            e.Handled = true;
             DragMove();
             double snappedX = SnapAxis(Left);
             double snappedY = SnapAxis(Top);

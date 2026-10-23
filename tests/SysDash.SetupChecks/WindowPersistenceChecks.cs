@@ -68,6 +68,25 @@ internal static class WindowPersistenceChecks
                 p.Screen == i.Placement.MonitorDeviceId && Math.Abs(p.X - i.Placement.MonitorOffsetX) <= 1 && Math.Abs(p.Y - i.Placement.MonitorOffsetY) <= 1);
             CloseSidebar(services);
         }
+        using (var services = Build(Path.Combine(root, "docking")))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout();
+            Pump();
+            checks["DockOperationSucceeds"] = controller.DockInstance(controller.Instances.First().Id);
+            Pump();
+            var sidebar = services.GetRequiredService<SidebarWindow>();
+            var windows = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
+            // Deliberately reproduce a floating widget occupying the sidebar.
+            windows[0].MoveTo(sidebar.Left, sidebar.Top + 24);
+            var relocate = typeof(LayoutController).GetMethod("MoveFloatingWidgetsClearOfSidebar", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+            relocate.Invoke(controller, null);
+            Pump();
+            Rect reserved = new(sidebar.Left, sidebar.Top, sidebar.ActualWidth, sidebar.ActualHeight);
+            checks["FloatingWidgetsClearSidebar"] = windows.All(w => !reserved.IntersectsWith(new Rect(w.Left, w.Top, w.ActualWidth, w.ActualHeight)));
+            controller.Dispose();
+            CloseSidebar(services);
+        }
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
     }

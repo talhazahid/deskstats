@@ -1,0 +1,23 @@
+{
+  "Version": "1.0.9",
+  "SHA256": "58E571499D832DD2B626F1B28137513FCA6AECF51BE6368D6AF7574FC6EF76A4",
+  "WindowTests": {
+    "CreatesAllSixWidgets": true,
+    "LiveContentGrowthDoesNotOverlap": true,
+    "ExitKeepsAllWidgetEntries": true,
+    "ExitStoresStableMonitorIdentities": true,
+    "UsesConnectedScreens": true,
+    "RestartRestoresExactMonitorAndPosition": true,
+    "DockOperationSucceeds": true,
+    "FloatingWidgetsClearSidebar": true
+  },
+  "SetupTests": {
+    "PlacementScenariosPass": true,
+    "WindowPersistenceScenariosPass": true,
+    "ContinueClosesDarkDialog": true,
+    "ContinueClosesLightDialog": true,
+    "RejectsTamperedInstaller": true,
+    "RejectsMissingInstaller": true
+  },
+  "Scope": "Build, routed input correction, real WPF docking relocation and position persistence tests. Physical pointer dragging and virtual-desktop membership not automatically tested."
+}
