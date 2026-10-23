@@ -95,6 +95,7 @@ internal static class WindowPersistenceChecks
             foreach (var instance in controller.Instances) controller.SetWidgetLarge(instance.Id, true);
             Pump();
             checks["EveryHardwareWidgetSupportsLargeSize"] = controller.Instances.All(i => controller.IsLargeWidget(i.Id) && Math.Abs(i.View.LayoutTransform.Value.M11 - 1.35) < 0.001);
+            checks["LargeWidgetsHaveNoHeightCap"] = Application.Current.Windows.OfType<WidgetWindow>().All(w => double.IsPositiveInfinity(w.MaxHeight) && w.SizeToContent == SizeToContent.Height);
             foreach (var window in Application.Current.Windows.OfType<WidgetWindow>())
             {
                 var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth), (int)Math.Ceiling(window.ActualHeight), 96, 96, System.Windows.Media.PixelFormats.Pbgra32);

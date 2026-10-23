@@ -1318,6 +1318,7 @@ public sealed class LayoutController : IDisposable
         if (_detachedWindows.TryGetValue(id, out var windowId) && _widgetWindows.TryGetHost(windowId, out var host) && host is WidgetWindow window)
         {
             window.Width *= large ? 1.35 : 1 / 1.35;
+            window.ApplyContentSizing(large);
             window.CapturePlacement();
         }
         _sidebar.RefreshWidgetSizes();

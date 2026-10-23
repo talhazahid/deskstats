@@ -109,6 +109,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         Background = Brushes.Transparent;
 
         Content = BuildChrome();
+        if (_layout.IsLargeWidget(_instance.Id)) ApplyContentSizing(true);
 
         // Leave resize mode with Esc or by clicking somewhere else.
         KeyDown += (_, e) =>
@@ -467,6 +468,15 @@ public sealed class WidgetWindow : Window, IWidgetHost
         Left = x;
         Top = y;
         CapturePlacement();
+    }
+
+    public void ApplyContentSizing(bool large)
+    {
+        if (_card?.Child is not ScrollViewer scroll) return;
+        scroll.VerticalScrollBarVisibility = large ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
+        MaxHeight = large ? double.PositiveInfinity : MonitorGeometry.PrimaryWorkAreaDip().Height;
+        SizeToContent = SizeToContent.Height;
+        InvalidateMeasure();
     }
 
     // ---- chrome ------------------------------------------------------------

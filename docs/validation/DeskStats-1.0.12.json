@@ -1,0 +1,18 @@
+{
+  "Version": "1.0.12",
+  "Checks": {
+    "CreatesAllSixWidgets": true,
+    "LiveContentGrowthDoesNotOverlap": true,
+    "ExitKeepsAllWidgetEntries": true,
+    "ExitStoresStableMonitorIdentities": true,
+    "UsesConnectedScreens": true,
+    "RestartRestoresExactMonitorAndPosition": true,
+    "DockOperationSucceeds": true,
+    "FloatingWidgetsClearSidebar": true,
+    "RestoreHardwareShowsAllSixWithoutDuplicates": true,
+    "EveryHardwareWidgetSupportsLargeSize": true,
+    "LargeWidgetsHaveNoHeightCap": true,
+    "LargeSizePersistsForEveryWidget": true
+  },
+  "SHA256": "8C5ADB84F75523D4F7AFAF0ADE0674129138C5B9117BE3B7D43A703B1CF3CFE9"
+}
