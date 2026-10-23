@@ -1,0 +1,17 @@
+{
+  "SHA256": "3C05485936E302371CEA42B29A494DE1D88B6244B420073A42F9FFF5018593A3",
+  "Checks": {
+    "CreatesAllSixWidgets": true,
+    "LiveContentGrowthDoesNotOverlap": true,
+    "ExitKeepsAllWidgetEntries": true,
+    "ExitStoresStableMonitorIdentities": true,
+    "UsesConnectedScreens": true,
+    "RestartRestoresExactMonitorAndPosition": true,
+    "DockOperationSucceeds": true,
+    "FloatingWidgetsClearSidebar": true,
+    "RestoreHardwareShowsAllSixWithoutDuplicates": true,
+    "EveryHardwareWidgetSupportsLargeSize": true,
+    "LargeSizePersistsForEveryWidget": true
+  },
+  "Version": "1.0.11"
+}

@@ -158,12 +158,24 @@ public sealed partial class SidebarWindow : Window
         slot.Child = instance.View;
         HostPanel.Children.Add(slot);
         _slots[instance.Id] = (slot, instance);
+        RefreshWidgetSizes();
         instance.ViewModel.Activate(_session);
+    }
+
+    // The sidebar shares a width, so reserve space for the largest selected size.
+    // Regular cards retain their normal scale within that width.
+    public void RefreshWidgetSizes()
+    {
+        bool large = _slots.Keys.Any(id => _controller?.IsLargeWidget(id) == true);
+        _expandedWidth = Math.Clamp(_settings.SidebarWidth, 240, 560) * (large ? 1.35 : 1);
+        if (_expanded) Width = _expandedWidth;
+        if (IsLoaded) Dispatcher.BeginInvoke(new Action(SnapToEdge), DispatcherPriority.Loaded);
     }
 
     private ContextMenu BuildCardMenu(WidgetInstance instance)
     {
         var menu = new ContextMenu();
+        if (_controller is not null) menu.Items.Add(_controller.BuildSizeMenu(instance.Id));
 
         var detach = new MenuItem { Header = "Detach window" };
         detach.Click += (_, _) =>
@@ -209,6 +221,7 @@ public sealed partial class SidebarWindow : Window
             // child of a discarded slot, or WPF rejects the new parent.
             entry.Slot.Child = null;
             HostPanel.Children.Remove(entry.Slot);
+            RefreshWidgetSizes();
         }
     }
 
@@ -243,7 +256,8 @@ public sealed partial class SidebarWindow : Window
     /// </summary>
     public void ApplySettings()
     {
-        _expandedWidth = Math.Clamp(_settings.SidebarWidth, 240, 560);
+        _expandedWidth = Math.Clamp(_settings.SidebarWidth, 240, 560) *
+            (_slots.Keys.Any(id => _controller?.IsLargeWidget(id) == true) ? 1.35 : 1);
         _layer = WindowLayerHelper.Parse(_settings.SidebarLayer);
         _pinned = _settings.SidebarPinned;
 

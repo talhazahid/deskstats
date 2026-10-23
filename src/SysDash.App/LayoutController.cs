@@ -357,6 +357,7 @@ public sealed class LayoutController : IDisposable
             TitleOverride = item.TitleOverride,
         };
         widget.CreateView(instance);
+        instance.View.LayoutTransform = new System.Windows.Media.ScaleTransform(item.Placement.LargeSize ? 1.35 : 1, item.Placement.LargeSize ? 1.35 : 1);
         instance.ViewModel.SettingsChanged += (_, _) => PersistSettings(instance);
         _instances[instance.Id] = instance;
 
@@ -545,6 +546,7 @@ public sealed class LayoutController : IDisposable
                 AlwaysOnTop = p.AlwaysOnTop,
                 Layer = p.Layer,
                 Theme = p.Theme,
+                LargeSize = p.LargeSize,
                 ClickThrough = p.ClickThrough,
                 SnapToGrid = p.SnapToGrid,
                 MonitorIndex = p.MonitorIndex,
@@ -1291,6 +1293,36 @@ public sealed class LayoutController : IDisposable
         => _current.Items.FirstOrDefault(i => i.InstanceId == instanceId);
 
     public void BeginManualPlacement() => _initialArrangement.Clear();
+
+    public bool IsLargeWidget(Guid id) => FindItem(id)?.Placement.LargeSize ?? false;
+
+    public System.Windows.Controls.MenuItem BuildSizeMenu(Guid id)
+    {
+        var menu = new System.Windows.Controls.MenuItem { Header = "Size" };
+        foreach (bool large in new[] { false, true })
+        {
+            var option = new System.Windows.Controls.MenuItem { Header = large ? "Large" : "Regular", IsCheckable = true };
+            option.Click += (_, _) => SetWidgetLarge(id, large);
+            menu.SubmenuOpened += (_, _) => option.IsChecked = IsLargeWidget(id) == large;
+            menu.Items.Add(option);
+        }
+        return menu;
+    }
+
+    public void SetWidgetLarge(Guid id, bool large)
+    {
+        if (FindItem(id) is not { } item || FindInstance(id) is not { } instance || item.Placement.LargeSize == large) return;
+        BeginManualPlacement();
+        item.Placement.LargeSize = large;
+        instance.View.LayoutTransform = new System.Windows.Media.ScaleTransform(large ? 1.35 : 1, large ? 1.35 : 1);
+        if (_detachedWindows.TryGetValue(id, out var windowId) && _widgetWindows.TryGetHost(windowId, out var host) && host is WidgetWindow window)
+        {
+            window.Width *= large ? 1.35 : 1 / 1.35;
+            window.CapturePlacement();
+        }
+        _sidebar.RefreshWidgetSizes();
+        ScheduleSave();
+    }
 
     public void SetDetachedAnchor(Guid id, string monitorId, double offsetX, double offsetY)
     {

@@ -846,6 +846,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         frame.Click += (_, _) => _layout.SetCardFrame(frame.IsChecked);
         themeMenu.Items.Add(frame);
         menu.Items.Add(themeMenu);
+        menu.Items.Add(_layout.BuildSizeMenu(_instance.Id));
         menu.Items.Add(new Separator());
 
         var resize = new MenuItem { Header = _resizeMode ? "Done resizing" : "Resize width" };

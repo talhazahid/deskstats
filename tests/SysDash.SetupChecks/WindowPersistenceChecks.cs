@@ -92,7 +92,22 @@ internal static class WindowPersistenceChecks
             Pump();
             checks["RestoreHardwareShowsAllSixWithoutDuplicates"] = controller.Instances.Count() == 6 &&
                 LayoutController.DefaultWidgetIds.All(controller.IsWidgetShown) && controller.Instances.Any(i => i.Id == retained);
+            foreach (var instance in controller.Instances) controller.SetWidgetLarge(instance.Id, true);
+            Pump();
+            checks["EveryHardwareWidgetSupportsLargeSize"] = controller.Instances.All(i => controller.IsLargeWidget(i.Id) && Math.Abs(i.View.LayoutTransform.Value.M11 - 1.35) < 0.001);
+            foreach (var window in Application.Current.Windows.OfType<WidgetWindow>())
+            {
+                var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth), (int)Math.Ceiling(window.ActualHeight), 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+                bitmap.Render(window);
+                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmap));
+                using var file = File.Create(Path.Combine(output, "large-" + window.Title + ".png"));
+                encoder.Save(file);
+            }
             controller.Dispose();
+            var savedSizes = new LayoutService(Path.Combine(root, "docking", "layouts"));
+            savedSizes.EnsureDefaults();
+            checks["LargeSizePersistsForEveryWidget"] = savedSizes.ActiveLayout.Items.All(i => i.Placement.LargeSize);
             CloseSidebar(services);
         }
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));

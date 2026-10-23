@@ -54,4 +54,5 @@ public sealed class WidgetPlacement
 
     /// <summary>Per-widget theme: "dark", "light", or null/empty = follow the app theme.</summary>
     public string? Theme { get; set; }
+    public bool LargeSize { get; set; }
 }

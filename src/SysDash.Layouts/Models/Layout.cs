@@ -48,6 +48,7 @@ public sealed class Layout
                     MonitorOffsetY = i.Placement.MonitorOffsetY,
                     HeightLimit = i.Placement.HeightLimit,
                     Theme = i.Placement.Theme,
+                    LargeSize = i.Placement.LargeSize,
                 },
             }).ToList(),
         };
