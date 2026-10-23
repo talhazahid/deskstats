@@ -293,6 +293,7 @@ public sealed class TrayService : IDisposable
                             UseShellExecute = true,
                             Verb = "runas",
                         });
+                        _layout.Dispose();
                         _sidebar.AllowClose();
                         Application.Current.Shutdown();
                     }
@@ -339,6 +340,7 @@ public sealed class TrayService : IDisposable
         var exit = new MenuItem { Header = "Exit" };
         exit.Click += (_, _) =>
         {
+            _layout.Dispose(); // Save before WPF closes windows and raises host.Closed.
             _sidebar.AllowClose();
             Application.Current.Shutdown();
         };

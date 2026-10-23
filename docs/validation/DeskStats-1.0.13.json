@@ -1,0 +1,22 @@
+{
+  "SHA256": "24FBB9F525ECAF9A72AAC295314B366C8F2F2CE0AA75022D2B5EC3E49E41842F",
+  "Checks": {
+    "CreatesAllSixWidgets": true,
+    "LiveContentGrowthDoesNotOverlap": true,
+    "ExitKeepsAllWidgetEntries": true,
+    "ExitStoresStableMonitorIdentities": true,
+    "UsesConnectedScreens": true,
+    "RestartRestoresExactMonitorAndPosition": true,
+    "DockOperationSucceeds": true,
+    "FloatingWidgetsClearSidebar": true,
+    "RestoreHardwareShowsAllSixWithoutDuplicates": true,
+    "EveryHardwareWidgetSupportsLargeSize": true,
+    "LargeWidgetsHaveNoHeightCap": true,
+    "LargeSizePersistsForEveryWidget": true,
+    "AutomaticRelocationRestoresUserAnchor": true,
+    "RestartKeepsHiddenRemovedAndLargeState": true,
+    "SavedEmptyLayoutDoesNotRepopulateDefaults": true
+  },
+  "Limitation": "Display relocation simulated; physical monitor power-off and Windows sign-out not automated.",
+  "Version": "1.0.13"
+}

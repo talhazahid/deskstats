@@ -13,6 +13,7 @@ public sealed class Layout
 
     /// <summary>Themes: "dark" / "light". Null keeps the current theme when applied.</summary>
     public string? Theme { get; set; }
+    public bool HasSavedState { get; set; }
 
     public List<LayoutItem> Items { get; set; } = new();
 
@@ -22,6 +23,7 @@ public sealed class Layout
             Id = Id,
             Name = Name,
             Theme = Theme,
+            HasSavedState = HasSavedState,
             Items = Items.Select(i => new LayoutItem
             {
                 InstanceId = i.InstanceId,

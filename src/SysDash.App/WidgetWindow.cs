@@ -467,7 +467,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _missingSavedMonitor = false;
         Left = x;
         Top = y;
-        CapturePlacement();
+        CapturePlacement(userMove: true);
     }
 
     public void ApplyContentSizing(bool large)
@@ -586,7 +586,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             Point center = new(snappedX + ActualWidth / 2, snappedY + Math.Min(ActualHeight, 80) / 2);
             int monitor = MonitorGeometry.MonitorAt(center)?.Number ?? 0;
             _layout.SetDetachedPosition(_instance.Id, snappedX, snappedY, monitor);
-            CapturePlacement();
+            CapturePlacement(userMove: true);
         }
         catch (InvalidOperationException)
         {
@@ -768,33 +768,27 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private void OnDisplaySettingsChanged(object? sender, EventArgs e)
     {
-        Dispatcher.BeginInvoke(new Action(() =>
-        {
-            if (!string.IsNullOrEmpty(_savedMonitorDeviceId))
-            {
-                var saved = MonitorGeometry.FindById(_savedMonitorDeviceId);
-                if (saved is null) _missingSavedMonitor = true;
-                else if (_missingSavedMonitor)
-                {
-                    Point pixels = FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
-                    SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
-                    _missingSavedMonitor = false;
-                    CapturePlacement();
-                    return;
-                }
-            }
-            Point center = new(Left + ActualWidth / 2, Top + 20);
-            if (MonitorGeometry.MonitorAt(center) is not null)
-            {
-                return; // still on a connected screen
-            }
+        Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(RestoreSavedDisplayPosition));
+    }
 
-            Rect work = MonitorGeometry.PrimaryWorkAreaDip();
-            Rect rect = MonitorGeometry.ClampToWorkArea(new Rect(Left, Top, ActualWidth, ActualHeight), work);
-            Left = rect.X;
-            Top = rect.Y;
-            _layout.SetDetachedPosition(_instance.Id, rect.X, rect.Y, 0);
-        }));
+    public void RestoreSavedDisplayPosition()
+    {
+        if (!IsLoaded || string.IsNullOrEmpty(_savedMonitorDeviceId)) return;
+        if (Mouse.LeftButton == MouseButtonState.Pressed) return;
+        var saved = MonitorGeometry.FindById(_savedMonitorDeviceId);
+        _missingSavedMonitor = saved is null;
+        // A monitor may disappear temporarily during screen timeout. Keep its
+        // anchor intact until it returns; never save Windows' temporary relocation.
+        if (saved is null) return;
+        _restoringPlacement = true;
+        try
+        {
+            Point pixels = FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
+            if (GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect current) &&
+                Math.Abs(current.Left - pixels.X) <= 1 && Math.Abs(current.Top - pixels.Y) <= 1) return;
+            SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
+        }
+        finally { _restoringPlacement = false; }
     }
 
     private bool ClickThroughEnabled => WindowEffects.IsClickThrough(this);
@@ -918,9 +912,16 @@ public sealed class WidgetWindow : Window, IWidgetHost
         SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
     }
 
-    public void CapturePlacement()
+    public void CapturePlacement(bool userMove = false)
     {
-        if (_restoringPlacement || _missingSavedMonitor || !IsLoaded) return;
+        if (_restoringPlacement || !IsLoaded) return;
+        if (!userMove && !string.IsNullOrEmpty(_savedMonitorDeviceId))
+        {
+            RestoreSavedDisplayPosition();
+            _layout.SetDetachedSize(_instance.Id, ActualWidth, ActualHeight);
+            return;
+        }
+        if (_missingSavedMonitor && !userMove) return;
         if (!GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect pixels)) return;
         var monitors = MonitorGeometry.EnumerateMonitors();
         Point center = new((pixels.Left + pixels.Right) / 2.0, pixels.Top + Math.Min(40, pixels.Bottom - pixels.Top) / 2.0);
@@ -928,6 +929,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             new Rect(m.BoundsDip.X * m.DpiX / 96.0, m.BoundsDip.Y * m.DpiY / 96.0, m.PixelWidth, m.PixelHeight).Contains(center));
         if (monitor is null) return;
         Rect work = FloatingPlacement.PixelWorkArea(monitor);
+        _missingSavedMonitor = false;
         _savedMonitorDeviceId = monitor.DeviceId;
         _savedOffsetX = (pixels.Left - work.Left) * 96.0 / monitor.DpiX;
         _savedOffsetY = (pixels.Top - work.Top) * 96.0 / monitor.DpiY;

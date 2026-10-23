@@ -125,7 +125,7 @@ public sealed class LayoutController : IDisposable
     /// </summary>
     private void EnsureDefaultWidgets()
     {
-        if (_current.Items.Count > 0)
+        if (_current.Items.Count > 0 || _current.HasSavedState)
         {
             return;
         }
@@ -1280,6 +1280,7 @@ public sealed class LayoutController : IDisposable
 
     private void OnHostClosed(object? sender, EventArgs e)
     {
+        if (_tearingDown) return;
         if (sender is IWidgetHost h)
         {
             RemoveInstance(h.InstanceId);

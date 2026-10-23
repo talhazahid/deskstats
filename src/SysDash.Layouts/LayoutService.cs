@@ -135,6 +135,7 @@ public sealed class LayoutService : ILayoutService
                 layout.Name = _activeName;
             }
 
+            layout.HasSavedState = true;
             _active = layout.Clone();
             _activeName = layout.Name;
             WriteFile(layout);
@@ -215,6 +216,7 @@ public sealed class LayoutService : ILayoutService
             }
 
             Layout? layout = JsonSerializer.Deserialize<Layout>(text, JsonDefaults.Options);
+            if (layout is not null) layout.HasSavedState = true;
             return layout?.Clone();
         }
         catch (Exception ex)

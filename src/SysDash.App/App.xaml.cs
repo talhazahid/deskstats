@@ -254,7 +254,14 @@ public partial class App : Application
             return;
         }
 
+        _layout?.Dispose();
         Shutdown();
+    }
+
+    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+    {
+        _layout?.Dispose();
+        base.OnSessionEnding(e);
     }
 
     protected override void OnExit(ExitEventArgs e)

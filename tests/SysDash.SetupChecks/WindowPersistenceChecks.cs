@@ -44,6 +44,7 @@ internal static class WindowPersistenceChecks
                 var monitor = monitors[i % monitors.Count];
                 Point pixels = FloatingPlacement.RestorePixels(monitor, 45 + i * 17, 85 + i * 13, windows[i].ActualWidth, windows[i].ActualHeight);
                 SetWindowPos(new WindowInteropHelper(windows[i]).Handle, IntPtr.Zero, (int)pixels.X, (int)pixels.Y, 0, 0, 0x0015);
+                windows[i].CapturePlacement(userMove: true);
             }
             // Exit immediately, before the normal save debounce can finish.
             controller.Dispose();
@@ -110,6 +111,43 @@ internal static class WindowPersistenceChecks
             savedSizes.EnsureDefaults();
             checks["LargeSizePersistsForEveryWidget"] = savedSizes.ActiveLayout.Items.All(i => i.Placement.LargeSize);
             CloseSidebar(services);
+        }
+        string stateRoot = Path.Combine(root, "state-roundtrip");
+        using (var services = Build(stateRoot))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump();
+            controller.SetWidgetLarge(controller.Instances.First(i => i.WidgetId == "cpu").Id, true);
+            controller.HideInstance(controller.Instances.First(i => i.WidgetId == "gpu").Id);
+            controller.RemoveInstance(controller.Instances.First(i => i.WidgetId == "ram").Id);
+            var window = Application.Current.Windows.OfType<WidgetWindow>().First();
+            var location = new Point(window.Left, window.Top);
+            // Windows can move a window without a user drag when displays change.
+            SetWindowPos(new WindowInteropHelper(window).Handle, IntPtr.Zero, 0, 0, 0, 0, 0x0015);
+            window.CapturePlacement(); Pump();
+            checks["AutomaticRelocationRestoresUserAnchor"] = Math.Abs(window.Left - location.X) <= 1 && Math.Abs(window.Top - location.Y) <= 1;
+            controller.Dispose(); CloseSidebar(services);
+        }
+        using (var services = Build(stateRoot))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump();
+            checks["RestartKeepsHiddenRemovedAndLargeState"] = controller.Instances.Count() == 4 &&
+                !controller.IsWidgetShown("gpu") && !controller.IsWidgetShown("ram") &&
+                controller.IsLargeWidget(controller.Instances.First(i => i.WidgetId == "cpu").Id);
+            controller.ClearAll();
+            // Remove hidden items too to test an intentionally empty saved layout.
+            var layouts = services.GetRequiredService<ILayoutService>();
+            controller.Dispose();
+            var empty = layouts.ActiveLayout; empty.Items.Clear(); layouts.SaveActive(empty);
+            CloseSidebar(services);
+        }
+        using (var services = Build(stateRoot))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump();
+            checks["SavedEmptyLayoutDoesNotRepopulateDefaults"] = !controller.Instances.Any();
+            controller.Dispose(); CloseSidebar(services);
         }
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
