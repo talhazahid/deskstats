@@ -26,7 +26,7 @@ param(
     [string]$Arch = 'win-x64',
     [switch]$InstallSdk,
     [switch]$SkipInstaller,
-    [switch]$DeferredDriver
+    [switch]$StoreEdition
 )
 
 $ErrorActionPreference = 'Stop'
@@ -35,7 +35,7 @@ $AppProj = Join-Path $Root 'src\SysDash.App\SysDash.App.csproj'
 $Artifacts = Join-Path $Root 'artifacts'
 $PublishDir = Join-Path $Artifacts "DeskStats-$Arch"
 $SetupOut = Join-Path $Artifacts "DeskStats-Setup-$Version.exe"
-if ($DeferredDriver) { $SetupOut = Join-Path $Artifacts "DeskStats-Store-Setup-$Version.exe" }
+if ($StoreEdition) { $SetupOut = Join-Path $Artifacts "DeskStats-Store-Setup-$Version.exe" }
 
 # ---------------------------------------------------------------- .NET SDK
 $dotnet = Get-Command dotnet -ErrorAction SilentlyContinue
@@ -135,7 +135,6 @@ Write-Host "Building installer with Inno Setup: $isccPath" -ForegroundColor Cyan
 $iss = Join-Path $Root 'installer\installer.iss'
 & $isccPath $iss `
     "/DMyAppVersion=$Version" `
-    "/DDeferredDriver=$([int][bool]$DeferredDriver)" `
     "/DSourceDir=$PublishDir" `
     "/DOutputDir=$Artifacts" 2>&1 | Tee-Object -Variable out
 if ($LASTEXITCODE -ne 0) {
@@ -143,7 +142,7 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-if ($DeferredDriver) {
+if ($StoreEdition) {
     Move-Item -LiteralPath (Join-Path $Artifacts "DeskStats-Setup-$Version.exe") -Destination $SetupOut -Force
 }
 if (-not (Test-Path $SetupOut)) { throw "Expected installer $SetupOut was not produced." }

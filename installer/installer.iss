@@ -16,9 +16,6 @@
 #ifndef OutputDir
   #define OutputDir "..\artifacts"
 #endif
-#ifndef DeferredDriver
-  #define DeferredDriver "0"
-#endif
 
 #define MyAppName "DeskStats"
 #define MyAppExeName "DeskStats.exe"
@@ -77,9 +74,7 @@ Source: "..\NOTICE";                          DestDir: "{app}\docs"; Flags: igno
 Source: "..\README.md";                       DestDir: "{app}\docs"; Flags: ignoreversion
 Source: "..\docs\COMPLIANCE.md";              DestDir: "{app}\docs"; Flags: ignoreversion
 ; Sensor driver — always bundled, extracted only when it is not installed yet.
-#if DeferredDriver == "0"
 Source: "PawnIO_setup.exe"; Flags: dontcopy
-#endif
 ; Both editions keep the verified installer for explicit requests from the app.
 Source: "PawnIO_setup.exe"; DestDir: "{app}\Dependencies"; Flags: ignoreversion
 Source: "..\docs\THIRD_PARTY\*";              DestDir: "{app}\docs\third_party"; Flags: ignoreversion recursesubdirs
@@ -115,6 +110,7 @@ begin
       GetDateTimeString('yyyymmddhhnnss', '-', ':'), False) then
       RaiseException('Could not record the fresh installation.');
 end;
+
 function PawnIOInstalled(): Boolean;
 begin
   Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\PawnIO') and
@@ -165,10 +161,6 @@ var
 begin
   Result := CheckExistingApp();
   if Result <> '' then Exit;
-#if DeferredDriver == "1"
-  Log('Deferred sensor setup: driver installation requires an explicit choice in DeskStats.');
-  Exit;
-#else
   if PawnIOInstalled() then
   begin
     Log('Required PawnIO dependency already present; leaving it unchanged.');
@@ -201,7 +193,6 @@ begin
     Log(GetExceptionMessage);
     Result := 'Could not prepare the required PawnIO driver. See the setup log.';
   end;
-#endif
 end;
 
 function InitializeSetup(): Boolean;

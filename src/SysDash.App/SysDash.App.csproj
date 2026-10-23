@@ -12,6 +12,11 @@
     <Description>DeskStats — PC monitor widgets for your desktop.</Description>
   </PropertyGroup>
 
+  <!-- Microsoft Store (MSIX) build: no administrator elevation (see scripts\build-msix.ps1). -->
+  <PropertyGroup Condition="'$(StoreBuild)' == 'true'">
+    <ApplicationManifest>app.store.manifest</ApplicationManifest>
+  </PropertyGroup>
+
   <ItemGroup>
     <!-- Same icon embedded as a WPF resource for the tray and the windows. -->
     <Resource Include="Assets\DeskStats.ico" />

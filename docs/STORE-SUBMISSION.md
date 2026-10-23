@@ -12,13 +12,13 @@
 - Other standard mappings: leave blank unless the precise scenario matches the documented meaning.
 - Return-code documentation: https://talhazahid.github.io/deskstats/installer-return-codes.html
 
-Version 1.0.5 provides two distinct installers. `DeskStats-Setup-1.0.5.exe` is the website edition and installs PawnIO during setup. `DeskStats-Store-Setup-1.0.5.exe` is an EXE submission candidate that keeps the verified driver installer locally but waits for an explicit first-launch choice before installing it. The app also offers "Continue with limited readings" and remembers that choice. This candidate is not an MSIX package and is not claimed to be approved for Store distribution.
+Version 1.0.6 restores automatic PawnIO installation during setup in both the website and Store-named EXE. Windows requests administrator approval when setup needs elevation. There is no separate first-launch driver prompt. Existing versioned downloads remain unchanged. The Store-named file is an EXE submission candidate, not an approved Store package.
 
 Version 1.0.2 omitted the dependency entirely and is superseded. Never replace bytes behind an already-submitted versioned URL.
 
 ## Certification notes — required driver disclosure
 
-DeskStats uses LibreHardwareMonitor 0.9.6 and requires the third-party PawnIO kernel driver for CPU temperature, hardware clock and power readings. Both editions bundle the unmodified official PawnIO 2.2.0 installer and verify its hash and publisher signature at build time. The website edition installs the driver during setup. The deferred candidate waits for an explicit request in the running app before invoking the driver installer with `-install -silent`. DeskStats setup requires administrator privileges.
+DeskStats uses LibreHardwareMonitor 0.9.6 and requires the third-party PawnIO kernel driver for CPU temperature, hardware clock and power readings. Both editions bundle the unmodified official PawnIO 2.2.0 installer and verify its hash and publisher signature at build time. Both editions install the driver during setup using `-install -silent`, skipping installation when the required service and library already exist. DeskStats setup requires administrator privileges.
 
 Official dependency: https://github.com/namazso/PawnIO.Setup/releases/tag/2.2.0
 
@@ -26,13 +26,13 @@ Dependency installer SHA-256: `1F519A22E47187F70A1379A48CA604981C4FCF694F4E65B73
 
 The dependency installer is signed by namazso.eu. The installed driver signature is recorded in the verification report; a Microsoft Windows Hardware Compatibility Publisher signature is evidence for review, rather than a guarantee of policy approval or proof of every WHCP requirement.
 
-For the deferred 1.0.5 candidate, initial setup creates only DeskStats in Programs and Features. On first launch, the user can choose "Install sensor driver" or "Continue with limited readings." Choosing installation verifies the bundled installer against its pinned SHA-256 hash, requests administrator approval, and installs PawnIO silently. A successful installation restarts DeskStats to refresh sensors; a driver restart request instead asks the user to restart Windows. Cancellation and installation errors allow retrying or continuing with limited readings. PawnIO then has its own visible entry in Programs and Features.
+During a fresh 1.0.6 installation, both DeskStats and its required PawnIO dependency have visible Programs and Features entries. Setup verifies dependency installation before modifying app files and reports installation or reboot errors. The bundled installer remains available for an explicit repair request from the app.
 
-PawnIO is an explicitly disclosed functional dependency, not an unrelated optional application. We request case-by-case review of this driver dependency and its post-launch installation under policies 10.1.5 and 10.2.4. Moving installation to first launch does not establish compliance with those policies. No registry entries are concealed or renamed to alter validation results. Uninstalling DeskStats preserves the shared PawnIO installation and existing user settings.
+PawnIO is an explicitly disclosed functional dependency, not an unrelated optional application. We request case-by-case review of this driver dependency under policy 10.2.4. Automatic dependency installation does not establish Store compliance. No registry entries are concealed or renamed to alter validation results. Uninstalling DeskStats preserves the shared PawnIO installation and existing user settings.
 
 ## Store description prerequisite disclosure
 
-Full CPU temperature, hardware clock and power readings require the PawnIO sensor driver and administrator permissions. DeskStats offers driver installation after launch, or you can continue with limited readings.
+Full CPU temperature, hardware clock and power readings require the PawnIO sensor driver and administrator permissions. DeskStats setup installs this required dependency automatically, with Windows administrator approval when needed.
 
 Place this disclosure at the beginning of the Store description.
 

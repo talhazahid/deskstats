@@ -12,7 +12,8 @@ param(
     [Parameter(Mandatory = $true)][string]$ExpectedVersion,
     [string]$ExpectedPublisher = 'DeskStats Project (GPLv3)',
     [switch]$RequireFreshInstall,
-    [switch]$DeferredDriver
+    [switch]$DeferredDriver,
+    [switch]$ObserveInstallerUI
 )
 $ErrorActionPreference = 'Stop'
 $identity = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -43,10 +44,31 @@ if ($RequireFreshInstall -and ($before.DisplayName -contains 'DeskStats' -or
     (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Services\PawnIO'))) {
     throw 'Fresh-install verification requires a clean test PC without DeskStats or PawnIO.'
 }
-$process = Start-Process -FilePath $installerPath -WindowStyle Hidden -PassThru -ArgumentList @(
+# Interactive QA deliberately leaves window visibility under installer control.
+# CI can still run functional verification without claiming a visual pass.
+$startOptions = @{}
+if (-not $ObserveInstallerUI) { $startOptions.WindowStyle = 'Hidden' }
+if ($ObserveInstallerUI -and -not [Environment]::UserInteractive) {
+    throw 'UI observation requires an interactive desktop.'
+}
+$process = Start-Process -FilePath $installerPath @startOptions -PassThru -ArgumentList @(
     '/SP-', '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', ('/LOG="' + $log + '"')
 )
-if (-not $process.WaitForExit(600000)) {
+$observedWindows = @()
+$deadline = (Get-Date).AddMinutes(10)
+if ($ObserveInstallerUI) {
+    $installerBaseName = [IO.Path]::GetFileNameWithoutExtension($installerPath)
+    do {
+        # Inno's child executable retains the setup base name with a .tmp suffix.
+        $observedWindows += @(Get-Process -ErrorAction SilentlyContinue | Where-Object {
+            ($_.ProcessName -like "$installerBaseName*" -or $_.ProcessName -eq 'PawnIO_setup') -and
+            $_.MainWindowHandle -ne 0
+        } | Select-Object ProcessName, MainWindowTitle)
+        Start-Sleep -Milliseconds 100
+        $process.Refresh()
+    } while (-not $process.HasExited -and (Get-Date) -lt $deadline)
+}
+if (-not $process.WaitForExit([Math]::Max(0, [int]($deadline - (Get-Date)).TotalMilliseconds))) {
     throw "Setup is still running after ten minutes. Inspect it and $log before retrying."
 }
 $process.Refresh()
@@ -68,6 +90,9 @@ $installerSignature = Get-AuthenticodeSignature -LiteralPath $installerPath
 $result = [ordered]@{
     Installer = $installerPath
     SHA256 = (Get-FileHash -LiteralPath $installerPath -Algorithm SHA256).Hash
+    UIObservationRequested = [bool]$ObserveInstallerUI
+    ObservedMainWindows = @($observedWindows | Sort-Object ProcessName, MainWindowTitle -Unique)
+    UIObservationLimit = 'Samples named installer processes every 100ms; does not prove absence of every dialog, secure-desktop UAC or differently named child window.'
     ExitCode = $process.ExitCode
     InstallSucceeded = ($process.ExitCode -eq 0)
     AppName = $entry.DisplayName
@@ -101,6 +126,7 @@ if ($DeferredDriver) {
     $dependencyPassed = $result.NoExtraInstalledApps -and -not $result.RequiredDriverRegistered -and -not $result.RequiredDriverLibraryPresent
 }
 $passed = $result.InstallSucceeded -and $result.AppNameMatches -and $result.PublisherMatches -and $result.VersionMatches -and $result.AppPresent -and $result.UninstallCommandPresent -and $result.SilentUninstallCommandPresent -and $result.NoUnexpectedInstalledApps -and $result.ExactlyOneDeskStatsEntry -and $result.BundledInstallerVerified -and $dependencyPassed
+if ($ObserveInstallerUI -and $observedWindows.Count -gt 0) { $passed = $false }
 $result['Passed'] = $passed
 $result | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $report -Encoding UTF8
 Write-Host "Verification report: $report"

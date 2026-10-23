@@ -35,11 +35,6 @@ public static class PawnIOInstaller
         try
         {
             RestartRequired = false;
-            if (IsPackaged)
-            {
-                LastMessage = "This packaged edition cannot install the sensor driver. Continue with available readings.";
-                return false;
-            }
             if (SensorDriver.IsPawnIOInstalled) return true;
             string path = Path.Combine(AppContext.BaseDirectory, "Dependencies", "PawnIO_setup.exe");
             if (!File.Exists(path))

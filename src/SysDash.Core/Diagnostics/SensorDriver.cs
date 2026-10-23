@@ -20,6 +20,30 @@ public static class SensorDriver
     /// <summary>Raised (on a worker thread) after PawnIO was installed successfully.</summary>
     public static event Action? Installed;
 
+    [System.Runtime.InteropServices.DllImport("kernel32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern int GetCurrentPackageFullName(ref int length, System.Text.StringBuilder? name);
+
+    /// <summary>
+    /// True when running from an MSIX package (Microsoft Store build). Packaged apps cannot
+    /// elevate or install drivers, so the "needs administrator / PawnIO" prompts are skipped.
+    /// </summary>
+    public static bool IsPackaged
+    {
+        get
+        {
+            try
+            {
+                int length = 0;
+                // 15700 = APPMODEL_ERROR_NO_PACKAGE (not packaged).
+                return GetCurrentPackageFullName(ref length, null) != 15700;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+
     public static bool IsElevated
     {
         get
@@ -62,6 +86,13 @@ public static class SensorDriver
     {
         get
         {
+            if (IsPackaged)
+            {
+                return !IsPawnIOInstalled
+                    ? "Additional sensor readings need the PawnIO driver. You can install it from the tray menu."
+                    : (!IsElevated ? "PawnIO is installed; some hardware readings may also require administrator permissions." : null);
+            }
+
             if (!IsElevated)
             {
                 return "CPU temperature, clock and power need DeskStats to run as administrator.";

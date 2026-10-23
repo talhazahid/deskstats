@@ -218,21 +218,20 @@ public partial class App : Application
         StartupTrace.Mark("startup sequence complete");
         if (settings.AutomaticUpdates && !PawnIOInstaller.IsPackaged)
             _ = CheckStartupUpdateAsync();
-        // CPU sensors need the PawnIO driver: offer it once, and restart DeskStats
-        // automatically after it was installed so the sensors appear.
+        // EXE setup installs PawnIO. MSIX offers it after the widgets load;
+        // installation starts only when the user chooses the install action.
         SensorDriver.Installed += () => Dispatcher.BeginInvoke(new Action(RestartApp));
-        if (!PawnIOInstaller.IsPackaged && !SensorDriver.IsPawnIOInstalled && !settings.SensorDriverChoiceMade)
+        if (PawnIOInstaller.IsPackaged && !SensorDriver.IsPawnIOInstalled && !settings.SensorDriverChoiceMade)
         {
             Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
                 var dialog = new SensorSetupWindow();
-                // Save only after the window opens; cancellation or closing means "continue".
                 dialog.Loaded += (_, _) =>
                 {
                     settings.SensorDriverChoiceMade = true;
                     settingsService.Save();
                 };
-                dialog.ShowDialog();
+                dialog.Show();
             }));
         }
 

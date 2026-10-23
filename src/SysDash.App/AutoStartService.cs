@@ -49,6 +49,13 @@ public sealed class AutoStartService
     /// <summary>Reconciles the logon task with the settings flag (runs in the background).</summary>
     public void Apply()
     {
+        if (SensorDriver.IsPackaged)
+        {
+            // Microsoft Store (MSIX) build: autostart goes through the package's StartupTask.
+            _ = ApplyPackagedAsync(_settings.StartWithWindows);
+            return;
+        }
+
         bool enable = _settings.StartWithWindows && _executablePath.Length > 0;
         string path = _executablePath;
 
@@ -121,6 +128,27 @@ public sealed class AutoStartService
         catch
         {
             return -1;
+        }
+    }
+
+    private static async Task ApplyPackagedAsync(bool enable)
+    {
+        try
+        {
+            Windows.ApplicationModel.StartupTask task =
+                await Windows.ApplicationModel.StartupTask.GetAsync("DeskStatsStartup");
+            if (enable)
+            {
+                await task.RequestEnableAsync();
+            }
+            else
+            {
+                task.Disable();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warn($"AutoStart (packaged) failed: {ex.Message}");
         }
     }
 }
