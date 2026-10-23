@@ -7,6 +7,8 @@ namespace SysDash.App;
 /// </summary>
 public sealed class AppSettings
 {
+    public string InstallationInstance { get; set; } = string.Empty;
+    public bool AutomaticUpdates { get; set; } = true;
     /// <summary>Sensor polling interval in ms (200–60000).</summary>
     public int PollIntervalMs { get; set; } = 1000;
 

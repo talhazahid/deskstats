@@ -80,6 +80,12 @@ public partial class AppSettingsWindow : Window
         AutoHideCheck.IsChecked = _settings.SidebarAutoHide;
         PinCheck.IsChecked = _settings.SidebarPinned;
         AutostartCheck.IsChecked = _settings.StartWithWindows;
+        AutomaticUpdatesCheck.IsChecked = _settings.AutomaticUpdates;
+    }
+
+    private async void OnCheckUpdates(object sender, RoutedEventArgs e)
+    {
+        if (Application.Current is App app) await app.CheckUpdatesAsync(true);
     }
 
     private void OnSave(object sender, RoutedEventArgs e)
@@ -116,6 +122,7 @@ public partial class AppSettingsWindow : Window
             _settings.SidebarAutoHide = AutoHideCheck.IsChecked == true;
             _settings.SidebarPinned = PinCheck.IsChecked == true;
             _settings.StartWithWindows = AutostartCheck.IsChecked == true;
+            _settings.AutomaticUpdates = AutomaticUpdatesCheck.IsChecked == true;
 
             _settingsService.Save();
 

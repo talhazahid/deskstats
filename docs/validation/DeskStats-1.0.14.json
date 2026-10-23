@@ -1,0 +1,29 @@
+{
+  "SHA256": "035C9CB6204526C948735AC2CC1E8B02C91A2983FD5DD42AE74A9E97B46F0950",
+  "Checks": {
+    "CreatesAllSixWidgets": true,
+    "LiveContentGrowthDoesNotOverlap": true,
+    "ExitKeepsAllWidgetEntries": true,
+    "ExitStoresStableMonitorIdentities": true,
+    "UsesConnectedScreens": true,
+    "RestartRestoresExactMonitorAndPosition": true,
+    "DockOperationSucceeds": true,
+    "FloatingWidgetsClearSidebar": true,
+    "RestoreHardwareShowsAllSixWithoutDuplicates": true,
+    "EveryHardwareWidgetSupportsLargeSize": true,
+    "LargeWidgetsHaveNoHeightCap": true,
+    "LargeSizePersistsForEveryWidget": true,
+    "AutomaticRelocationRestoresUserAnchor": true,
+    "RestartKeepsHiddenRemovedAndLargeState": true,
+    "SavedEmptyLayoutDoesNotRepopulateDefaults": true,
+    "FreshInstallRestoresHardwareWidgets": true,
+    "UpgradePreservesCustomizedState": true,
+    "ReinstallGetsFreshDefaults": true,
+    "UpdateAcceptsVersionedRelease": true,
+    "UpdateRejectsUntrustedHost": true,
+    "UpdateRejectsUnversionedAsset": true,
+    "UpdateRejectsInvalidChecksum": true
+  },
+  "Scope": "Fresh/reinstall generation and upgrade-state logic, update manifest validation, WPF layout checks, settings render, release compile. Real uninstall/reinstall and UAC update execution not automated.",
+  "Version": "1.0.14"
+}

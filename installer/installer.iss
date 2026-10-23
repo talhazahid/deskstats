@@ -92,12 +92,29 @@ Name: "{autodesktop}\DeskStats"; Filename: "{app}\{#MyAppExeName}"; Tasks: deskt
 ; The required driver is installed and verified in PrepareToInstall before app files change.
 ; DeskStats runs as administrator; setup is elevated, so the app starts without another prompt.
 Filename: "{app}\{#MyAppExeName}"; Description: "Launch {#MyAppName} now"; Flags: nowait postinstall skipifsilent shellexec
+Filename: "{app}\{#MyAppExeName}"; Parameters: "--restarted"; Flags: nowait shellexec; Check: IsUpdateLaunch
 
 [UninstallDelete]
+Type: files; Name: "{app}\install-instance.txt"
 ; Only remove app files+shortcuts. NEVER delete %LOCALAPPDATA%\DeskStats: it holds the user's widgets,
 ; layouts and settings, which come back automatically after a reinstall or an update.
 
 [Code]
+var
+  FreshInstallation: Boolean;
+
+function IsUpdateLaunch(): Boolean;
+begin
+  Result := ExpandConstant('{param:UPDATEAPP|0}') = '1';
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if (CurStep = ssPostInstall) and FreshInstallation then
+    if not SaveStringToFile(ExpandConstant('{app}\install-instance.txt'),
+      GetDateTimeString('yyyymmddhhnnss', '-', ':'), False) then
+      RaiseException('Could not record the fresh installation.');
+end;
 function PawnIOInstalled(): Boolean;
 begin
   Result := RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\PawnIO') and
@@ -190,6 +207,8 @@ end;
 function InitializeSetup(): Boolean;
 begin
   Result := True;
+  FreshInstallation := not RegKeyExists(HKLM64,
+    'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{3F0A2E9C-7B1D-4C5A-8F6E-2D9B0A1C4E5F}_is1');
   KillApp();
 end;
 

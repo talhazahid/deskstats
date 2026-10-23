@@ -137,6 +137,9 @@ public partial class App : Application
         // Layouts first: ActiveLayout must reflect the saved/last-session layout.
         ILayoutService layouts = _provider.GetRequiredService<ILayoutService>();
         layouts.EnsureDefaults();
+        string installMarker = Path.Combine(AppContext.BaseDirectory, "install-instance.txt");
+        if (!PawnIOInstaller.IsPackaged && File.Exists(installMarker) &&
+            InstallationState.Apply(File.ReadAllText(installMarker).Trim(), settings, layouts)) settingsService.Save();
         StartupTrace.Mark("layouts ensured");
 
         // Theme: the dark/light dictionaries are already merged in App.xaml;
@@ -213,6 +216,8 @@ public partial class App : Application
         // hidden it based on its docked content (floating-first), so there is
         // deliberately no unconditional Show() here.
         StartupTrace.Mark("startup sequence complete");
+        if (settings.AutomaticUpdates && !PawnIOInstaller.IsPackaged)
+            _ = CheckStartupUpdateAsync();
         // CPU sensors need the PawnIO driver: offer it once, and restart DeskStats
         // automatically after it was installed so the sensors appear.
         SensorDriver.Installed += () => Dispatcher.BeginInvoke(new Action(RestartApp));
@@ -233,6 +238,16 @@ public partial class App : Application
 
         Log.Info($"DeskStats started — layout '{_layout.CurrentLayoutName}'.");
     }
+
+    private async Task CheckStartupUpdateAsync()
+    {
+        await Task.Delay(8000);
+        if (_layout is not null) await CheckUpdatesAsync(false);
+    }
+
+    internal Task CheckUpdatesAsync(bool manual) => UpdateService.CheckAsync(manual,
+        () => _layout?.FlushState(),
+        () => { _layout?.Dispose(); Shutdown(); });
 
     /// <summary>Starts a fresh copy (elevated, like this one) and exits this one.</summary>
     internal void RestartApp()

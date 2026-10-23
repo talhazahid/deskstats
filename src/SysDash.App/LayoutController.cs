@@ -1076,6 +1076,14 @@ public sealed class LayoutController : IDisposable
 
     // ---- teardown ----------------------------------------------------------
 
+    public void FlushState()
+    {
+        foreach (Guid windowId in _detachedWindows.Values.ToArray())
+            if (_widgetWindows.TryGetHost(windowId, out var host) && host is WidgetWindow window) window.CapturePlacement();
+        _saveCts?.Cancel();
+        _layouts.SaveActive(_current.Clone());
+    }
+
     public void Dispose()
     {
         if (_tearingDown) return;

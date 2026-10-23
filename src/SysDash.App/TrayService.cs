@@ -334,6 +334,9 @@ public sealed class TrayService : IDisposable
         menu.Items.Add(appSettings);
 
         var about = new MenuItem { Header = "About DeskStats" };
+        var updates = new MenuItem { Header = "Check for updates…" };
+        updates.Click += async (_, _) => { if (Application.Current is App app) await app.CheckUpdatesAsync(true); };
+        menu.Items.Add(updates);
         about.Click += (_, _) => ShowAbout();
         menu.Items.Add(about);
 

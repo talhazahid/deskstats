@@ -147,10 +147,48 @@ internal static class WindowPersistenceChecks
             var controller = services.GetRequiredService<LayoutController>();
             controller.ApplyActiveLayout(); Pump();
             checks["SavedEmptyLayoutDoesNotRepopulateDefaults"] = !controller.Instances.Any();
+            var preferences = services.GetRequiredService<AppSettingsService>();
+            var settingsWindow = new AppSettingsWindow(preferences.Settings, preferences, controller,
+                services.GetRequiredService<SidebarWindow>(), new AutoStartService(preferences.Settings, preferences));
+            settingsWindow.Show(); Pump();
+            var settingsBitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(settingsWindow.ActualWidth), (int)Math.Ceiling(settingsWindow.ActualHeight), 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            settingsBitmap.Render(settingsWindow);
+            var settingsEncoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            settingsEncoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(settingsBitmap));
+            using (var file = File.Create(Path.Combine(output, "settings-updates.png"))) settingsEncoder.Save(file);
+            settingsWindow.Close();
             controller.Dispose(); CloseSidebar(services);
         }
+        var installationLayouts = new LayoutService(Path.Combine(root, "installation"));
+        installationLayouts.EnsureDefaults();
+        var installationSettings = new AppSettings();
+        var customLayout = installationLayouts.ActiveLayout;
+        customLayout.Items.Clear();
+        installationLayouts.SaveActive(customLayout);
+        checks["FreshInstallRestoresHardwareWidgets"] = InstallationState.Apply("install-one", installationSettings, installationLayouts) &&
+            LayoutController.DefaultWidgetIds.All(id => installationLayouts.ActiveLayout.Items.Any(i => i.WidgetId == id));
+        customLayout = installationLayouts.ActiveLayout;
+        customLayout.Items.RemoveAll(i => i.WidgetId != "cpu");
+        customLayout.Items[0].Placement.LargeSize = true;
+        customLayout.Items[0].Placement.MonitorDeviceId = "retained-screen";
+        installationLayouts.SaveActive(customLayout);
+        checks["UpgradePreservesCustomizedState"] = !InstallationState.Apply("install-one", installationSettings, installationLayouts) &&
+            installationLayouts.ActiveLayout.Items.Count == 1 && installationLayouts.ActiveLayout.Items[0].Placement.LargeSize &&
+            installationLayouts.ActiveLayout.Items[0].Placement.MonitorDeviceId == "retained-screen";
+        checks["ReinstallGetsFreshDefaults"] = InstallationState.Apply("install-two", installationSettings, installationLayouts) && installationLayouts.ActiveLayout.Items.Count == 6;
+        string hash = new string('A', 64);
+        checks["UpdateAcceptsVersionedRelease"] = UpdateService.Parse(System.Text.Json.JsonSerializer.Serialize(new { version = "1.0.14", url = "https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", sha256 = hash })).Version == "1.0.14";
+        checks["UpdateRejectsUntrustedHost"] = RejectUpdate("https://example.com/deskstats/downloads/DeskStats-Setup-1.0.14.exe", hash);
+        checks["UpdateRejectsUnversionedAsset"] = RejectUpdate("https://talhazahid.github.io/deskstats/downloads/latest.exe", hash);
+        checks["UpdateRejectsInvalidChecksum"] = RejectUpdate("https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", "bad");
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
+    }
+
+    private static bool RejectUpdate(string url, string hash)
+    {
+        try { UpdateService.Parse(JsonSerializer.Serialize(new { version = "1.0.14", url, sha256 = hash })); return false; }
+        catch (InvalidDataException) { return true; }
     }
 
     private static ServiceProvider Build(string root)

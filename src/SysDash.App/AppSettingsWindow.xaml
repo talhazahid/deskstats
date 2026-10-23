@@ -148,6 +148,11 @@
                 <TextBlock Text="Startup"
                            Style="{StaticResource WidgetTitle}" />
                 <CheckBox x:Name="AutostartCheck" Content="Start DeskStats with Windows" Margin="0,10,0,0" />
+                <TextBlock Text="Updates" Style="{StaticResource WidgetTitle}" Margin="0,14,0,0" />
+                <CheckBox x:Name="AutomaticUpdatesCheck" Content="Check and download updates at startup" Margin="0,8,0,0" />
+                <TextBlock Text="Install when ready. Your layout is kept; Windows may request administrator approval. Store editions update through Microsoft Store."
+                           Style="{StaticResource WidgetLabel}" TextWrapping="Wrap" Margin="0,6,0,0" />
+                <Button Content="Check for updates…" HorizontalAlignment="Left" Margin="0,8,0,0" Click="OnCheckUpdates" />
             </StackPanel>
         </Border>
 
