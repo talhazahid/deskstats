@@ -10,7 +10,7 @@ public sealed class RamWidget : WidgetBase<RamSettings, RamViewModel>
 {
     public override string Id => "ram";
 
-    public override string DisplayName => "Memory";
+    public override string DisplayName => "Memory (RAM)";
 
     public override string Description => "RAM usage percent, used/total amount and history";
 

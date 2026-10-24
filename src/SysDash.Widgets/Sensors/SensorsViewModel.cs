@@ -60,7 +60,7 @@ public sealed class SensorsViewModel : WidgetViewModel
 
     public SensorsSettings Options => (SensorsSettings)Settings;
 
-    public override string Title => "Sensors";
+    public override string Title => "Hardware sensors";
 
     public double CpuTempPercent { get => _cpuTempPercent; private set => SetProperty(ref _cpuTempPercent, value); }
 
@@ -105,6 +105,9 @@ public sealed class SensorsViewModel : WidgetViewModel
     public string AlertText { get => _alertText; private set => SetProperty(ref _alertText, value); }
 
     public bool HasFans => Options.ShowFans && _fans.Count > 0;
+    private IReadOnlyList<SensorRow> _power = Array.Empty<SensorRow>();
+    public IReadOnlyList<SensorRow> Power => _power;
+    public string PowerHint { get; private set; } = "Power readings are unavailable on this hardware.";
 
     protected override void Update(MetricsSnapshot snapshot)
     {
@@ -127,6 +130,16 @@ public sealed class SensorsViewModel : WidgetViewModel
         AlertText = IsTempAlert ? $"HOT {FormatTemp(hottest, shortForm: true)}" : string.Empty;
 
         IReadOnlyList<SensorReading> sensors = snapshot.Sensors ?? Array.Empty<SensorReading>();
+        var power = sensors.Where(s => s.Kind == "power" && double.IsFinite(s.Value) && s.Value >= 0).ToList();
+        if (snapshot.Cpu?.PackagePowerW is { } cpuPower && double.IsFinite(cpuPower) && cpuPower >= 0 &&
+            !power.Any(s => s.Group == "CPU" && s.Name.Contains("Package", StringComparison.OrdinalIgnoreCase)))
+            power.Insert(0, new SensorReading("CPU", "Package", "power", cpuPower));
+        _power = power.Select(s => new SensorRow(Label(s), s.Value.ToString("0.0", CultureInfo.InvariantCulture) + " W", 0)).ToArray();
+        PowerHint = power.Any(s => s.Group.StartsWith("PSU", StringComparison.OrdinalIgnoreCase))
+            ? "Sensor readings can overlap. PSU output is not wall-socket consumption."
+            : "Total PC power unavailable: a supported PSU with telemetry is required. Component readings are not added together.";
+        OnPropertyChanged(nameof(Power));
+        OnPropertyChanged(nameof(PowerHint));
 
         var fanReadings = sensors.Where(s => s.Kind == "fan").ToList();
         double maxFan = fanReadings.Count > 0 ? fanReadings.Max(s => s.Value) : 0;

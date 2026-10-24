@@ -50,7 +50,7 @@
             <Border Style="{StaticResource WidgetSection}" Visibility="{Binding HasPerCore, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
                     <Grid>
-                        <TextBlock Style="{StaticResource SectionHeader}" Text="CORES" />
+                        <TextBlock Style="{StaticResource SectionHeader}" Text="CPU THREADS" />
                         <TextBlock Style="{StaticResource RowValue}" Margin="0" Text="{Binding CoresSummary}" TextTrimming="CharacterEllipsis" MaxWidth="180" />
                     </Grid>
                     <ItemsControl ItemsSource="{Binding Cores}" Margin="0,2,0,0">
@@ -77,7 +77,7 @@
             <Border Style="{StaticResource WidgetSection}" Margin="0"
                     Visibility="{Binding ShowDetails, Converter={StaticResource BoolToVisibility}}">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="DETAILS" />
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="CPU DETAILS" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />

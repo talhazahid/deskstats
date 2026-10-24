@@ -31,6 +31,7 @@ internal static class Program
                 Environment.Exit(1);
             };
             checks["PlacementScenariosPass"] = PlacementChecks.Run(output);
+            checks["PowerScenariosPass"] = PowerChecks.Run(output);
             checks["WindowPersistenceScenariosPass"] = WindowPersistenceChecks.Run(output);
             foreach (string theme in new[] { "Dark", "Light" })
             {

@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.15 — 2026-10-24
+
+- Added Hardware Power to Hardware Sensors, showing separate CPU, GPU and other available wattage sensors.
+- Enabled PSU discovery for telemetry-capable hardware supported by LibreHardwareMonitor.
+- Kept sensor scopes separate: package/core/rail readings are never summed into a fake whole-PC total. PSU output is not labeled as wall-socket consumption.
+- Clarified headings: CPU Details, CPU Threads, GPU Details, Memory (RAM), Process Memory, Hardware Sensors, Hardware Temperatures and Fan Speeds.
+- Added power tests for unavailable readings, valid zero values, invalid values, package fallback deduplication and PSU labeling. Existing layout and UI checks passed; Regular widget renders inspected.
+- Actual PSU telemetry has not been tested against a supported physical PSU. Availability depends on hardware.
+
 ## 1.0.14 — 2026-10-23
 
 ### Added

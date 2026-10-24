@@ -1,0 +1,22 @@
+{
+  "PowerChecks": {
+    "MissingPowerIsNotZeroOrFakeTotal": true,
+    "OverlappingSourcesRemainSeparate": true,
+    "PackageNotDuplicatedByFallback": true,
+    "ValidZeroWattReadingRetained": true,
+    "UnsupportedPsuDisclosed": true,
+    "PsuOutputNotLabeledWallConsumption": true
+  },
+  "Version": "1.0.15",
+  "SHA256": "E398A292FA5D82590765046F3F3676524DF94926B330BA4918861A53877D7CF1",
+  "PhysicalPsuTested": false,
+  "SetupChecks": {
+    "PlacementScenariosPass": true,
+    "PowerScenariosPass": true,
+    "WindowPersistenceScenariosPass": true,
+    "ContinueClosesDarkDialog": true,
+    "ContinueClosesLightDialog": true,
+    "RejectsTamperedInstaller": true,
+    "RejectsMissingInstaller": true
+  }
+}

@@ -119,6 +119,7 @@ public sealed class MetricsService : IMetricsService
                 IsMemoryEnabled = true,
                 IsControllerEnabled = true,
                 IsMotherboardEnabled = true,
+                IsPsuEnabled = true,
                 IsStorageEnabled = false,
                 IsNetworkEnabled = false,
             };

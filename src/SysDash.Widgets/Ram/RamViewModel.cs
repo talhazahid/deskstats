@@ -54,7 +54,7 @@ public sealed class RamViewModel : HardwareWidgetViewModel
 
     public RamSettings Options => (RamSettings)Settings;
 
-    public override string Title => "Memory";
+    public override string Title => "Memory (RAM)";
 
     public bool ShowProcesses => Options.ShowProcesses;
 

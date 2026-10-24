@@ -18,7 +18,7 @@
                 <s:SectionLayout>
                     <Grid>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource SectionHeader}" Text="SENSORS" />
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="HARDWARE SENSORS" />
                             <Border Style="{StaticResource AlertBadge}" Visibility="{Binding IsTempAlert, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding AlertText}" />
                             </Border>
@@ -48,7 +48,7 @@
                         <s:RingGauge Value="{Binding FanPercent}" Thickness="5" RingBrush="{DynamicResource AccentBrush}" TrackBrush="{DynamicResource TrackBrush}" />
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource RingValue}" FontSize="16" Text="{Binding FanText}" />
-                            <TextBlock Style="{StaticResource RingCaption}" Text="FANS" />
+                            <TextBlock Style="{StaticResource RingCaption}" Text="FAN RPM" />
                         </StackPanel>
                     </Grid>
                     </Grid>
@@ -56,7 +56,7 @@
             </Border>
             <Border Style="{StaticResource WidgetSection}" Visibility="{Binding HasTemperatures, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="TEMPERATURE" />
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="HARDWARE TEMPERATURES" />
                     <ItemsControl ItemsSource="{Binding Temperatures}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -80,7 +80,7 @@
             </Border>
             <Border Style="{StaticResource WidgetSection}" Margin="0" Visibility="{Binding HasFans, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="FANS" />
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="FAN SPEEDS" />
                     <ItemsControl ItemsSource="{Binding Fans}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -100,6 +100,23 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                </s:SectionLayout>
+            </Border>
+            <Border Style="{StaticResource WidgetSection}">
+                <s:SectionLayout>
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="HARDWARE POWER" />
+                    <ItemsControl ItemsSource="{Binding Power}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock Style="{StaticResource RowLabel}" Text="{Binding Name}" ToolTip="{Binding Name}" />
+                                    <TextBlock Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding ValueText}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Style="{StaticResource RowLabel}" Text="{Binding PowerHint}" TextWrapping="Wrap" TextTrimming="None" FontSize="11" Margin="0,8,0,0" />
                 </s:SectionLayout>
             </Border>
         </s:ResponsiveColumns>

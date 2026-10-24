@@ -59,7 +59,7 @@
             </Border>
             <Border Style="{StaticResource WidgetSection}" Margin="0" Visibility="{Binding ShowDetails, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="DETAILS" />
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="GPU DETAILS" />
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -75,7 +75,7 @@
                         </Grid.RowDefinitions>
                         <StackPanel Grid.Row="0" Orientation="Horizontal" Visibility="{Binding ShowVram, Converter={StaticResource BoolToVisibility}}">
                             <Ellipse Style="{StaticResource LegendDot}" Fill="{DynamicResource PurpleBrush}" />
-                            <TextBlock Style="{StaticResource RowLabel}" Text="Video memory" />
+                            <TextBlock Style="{StaticResource RowLabel}" Text="Video memory (VRAM)" />
                         </StackPanel>
                         <TextBlock Grid.Row="0" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding VramText}" Visibility="{Binding ShowVram, Converter={StaticResource BoolToVisibility}}" />
                         <StackPanel Grid.Row="1" Orientation="Horizontal" Visibility="{Binding ShowTemperature, Converter={StaticResource BoolToVisibility}}">
@@ -90,7 +90,7 @@
                         <TextBlock Grid.Row="2" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding ClockText}" Visibility="{Binding ShowClock, Converter={StaticResource BoolToVisibility}}" />
                         <TextBlock Grid.Row="3" Style="{StaticResource RowLabel}" Text="Memory clock" Visibility="{Binding ShowClock, Converter={StaticResource BoolToVisibility}}" />
                         <TextBlock Grid.Row="3" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding MemClockText}" Visibility="{Binding ShowClock, Converter={StaticResource BoolToVisibility}}" />
-                        <TextBlock Grid.Row="4" Style="{StaticResource RowLabel}" Text="Fan" />
+                        <TextBlock Grid.Row="4" Style="{StaticResource RowLabel}" Text="GPU fan" />
                         <TextBlock Grid.Row="4" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding FanText}" />
                         <TextBlock Grid.Row="5" Style="{StaticResource RowLabel}" Text="Voltage" />
                         <TextBlock Grid.Row="5" Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding VoltageText}" />

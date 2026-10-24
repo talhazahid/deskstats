@@ -10,7 +10,7 @@ public sealed class SensorsWidget : WidgetBase<SensorsSettings, SensorsViewModel
 {
     public override string Id => "sensors";
 
-    public override string DisplayName => "Sensors";
+    public override string DisplayName => "Hardware sensors";
 
     public override string Description => "CPU / GPU temperatures, fans and every temperature sensor";
 

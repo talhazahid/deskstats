@@ -344,6 +344,7 @@ public static class SensorCatalog
         HardwareType.GpuNvidia or HardwareType.GpuAmd or HardwareType.GpuIntel => "GPU",
         HardwareType.Motherboard => "Board",
         HardwareType.Memory => "Memory",
+        HardwareType.Psu => "PSU · " + h.Name,
         _ => h.HardwareType.ToString(),
     };
 }

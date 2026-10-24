@@ -11,7 +11,7 @@
                 <s:SectionLayout>
                     <Grid>
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Style="{StaticResource SectionHeader}" Text="MEMORY" />
+                            <TextBlock Style="{StaticResource SectionHeader}" Text="MEMORY (RAM)" />
                             <Border Style="{StaticResource AlertBadge}" Visibility="{Binding IsUsageAlert, Converter={StaticResource BoolToVisibility}}">
                                 <TextBlock Text="{Binding AlertText}" />
                             </Border>
@@ -26,14 +26,14 @@
                         <s:RingGauge Value="{Binding UsedPercent}" Thickness="7" RingBrush="{DynamicResource AccentBrush}" TrackBrush="{DynamicResource TrackBrush}" />
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource RingValue}" FontSize="20" Text="{Binding UsedText}" />
-                            <TextBlock Style="{StaticResource RingCaption}" Text="MEMORY" />
+                            <TextBlock Style="{StaticResource RingCaption}" Text="RAM" />
                         </StackPanel>
                     </Grid>
                     <Grid Grid.Column="1" Width="86" Height="86" HorizontalAlignment="Center" Margin="0,2">
                         <s:RingGauge Value="{Binding VirtualPercent}" Thickness="7" RingBrush="{DynamicResource PinkBrush}" TrackBrush="{DynamicResource TrackBrush}" />
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Style="{StaticResource RingValue}" FontSize="20" Text="{Binding VirtualText}" />
-                            <TextBlock Style="{StaticResource RingCaption}" Text="COMMIT" />
+                            <TextBlock Style="{StaticResource RingCaption}" Text="COMMITTED" />
                         </StackPanel>
                     </Grid>
                     </Grid>
@@ -77,7 +77,7 @@
             </Border>
             <Border Style="{StaticResource WidgetSection}" Margin="0" Visibility="{Binding ShowProcesses, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="PROCESSES" />
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="PROCESS MEMORY" />
                     <ItemsControl ItemsSource="{Binding Processes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
