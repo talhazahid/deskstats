@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.16 — 2026-10-24
+
+- Show update checking, download progress and verification in a dedicated update window.
+- Bring the ready-to-install prompt to the front with a taskbar entry.
+- Explicitly say Install update and restart DeskStats so the prompt cannot be mistaken for a system restart.
+- Start automatic checks shortly after launch and show download or installer errors.
+- Verified update-window visibility, Later behavior, existing layout persistence and sensor checks.
+
 ## 1.0.15 — 2026-10-24
 
 - Added Hardware Power to Hardware Sensors, showing separate CPU, GPU and other available wattage sensors.
@@ -34,3 +42,4 @@
 - Physical monitor timeout and the full download/UAC/install/relaunch update cycle still require live testing. Installer and app remain unsigned.
 
 The update service consumes published installers and release metadata; pushing source changes alone does not distribute an update. Installation requests confirmation and Windows administrator approval when required.
+

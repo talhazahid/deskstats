@@ -36,6 +36,9 @@ public static class UpdateService
         }
         if (!await Gate.WaitAsync(0)) return;
         string? download = null;
+        var status = new UpdateWindow();
+        status.Show();
+        bool keepStatus = false;
         try
         {
             using var handler = new HttpClientHandler { AllowAutoRedirect = false };
@@ -46,12 +49,14 @@ public static class UpdateService
             var latest = Version.Parse(release.Version);
             if (new Version(latest.Major, latest.Minor, Math.Max(0, latest.Build)) <= new Version(current.Major, current.Minor, Math.Max(0, current.Build)))
             {
-                if (manual) MessageBox.Show("You have the latest version of DeskStats.", "DeskStats updates");
+                status.ShowResult("You have the latest version of DeskStats.");
+                keepStatus = manual;
                 return;
             }
             string folder = Path.Combine(AppPaths.DataDirectory, "updates", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(folder);
             download = Path.Combine(folder, "DeskStats-Setup-" + release.Version + ".exe");
+            status.SetStatus($"Downloading DeskStats {release.Version}…");
             using var response = await client.GetAsync(release.Url, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
             if (response.Content.Headers.ContentLength > 250 * 1024 * 1024) throw new InvalidDataException("Update is larger than expected.");
@@ -66,13 +71,16 @@ public static class UpdateService
                     total += count;
                     if (total > 250 * 1024 * 1024) throw new InvalidDataException("Update is larger than expected.");
                     await output.WriteAsync(buffer.AsMemory(0, count));
+                    double? percent = response.Content.Headers.ContentLength is > 0 ? total * 100.0 / response.Content.Headers.ContentLength.Value : null;
+                    status.SetStatus($"Downloading DeskStats {release.Version}… {total / 1048576.0:0.0} MB", percent);
                 }
             }
+            status.SetStatus("Verifying the downloaded update…");
             await using (var file = File.OpenRead(download))
                 if (!Convert.ToHexString(await SHA256.HashDataAsync(file)).Equals(release.Sha256, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException("Update checksum does not match. Installation was stopped.");
-            if (MessageBox.Show($"DeskStats {release.Version} is downloaded and ready. Install and restart now? Your widgets and positions will be kept. Windows may request administrator approval.",
-                "DeskStats update", MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes) return;
+            if (!await status.AskToInstallAsync(release.Version)) return;
+            status.SetStatus("Starting the update installer…");
             saveState();
             using var process = Process.Start(new ProcessStartInfo(download, "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /UPDATEAPP=1")
             { UseShellExecute = true, Verb = "runas" });
@@ -82,15 +90,18 @@ public static class UpdateService
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
-            if (manual) MessageBox.Show("Update canceled. DeskStats will keep running.", "DeskStats updates");
+            status.ShowResult("Update canceled. DeskStats will keep running.");
+            keepStatus = true;
         }
         catch (Exception ex)
         {
             Log.Warn("Update check failed: " + ex.Message);
-            if (manual) MessageBox.Show("Could not update DeskStats. " + ex.Message, "DeskStats updates");
+            status.ShowResult("Could not update DeskStats. " + ex.Message);
+            keepStatus = true;
         }
         finally
         {
+            if (!keepStatus) status.Finish();
             if (download is not null) { try { File.Delete(download); } catch (IOException) { } }
             Gate.Release();
         }

@@ -32,6 +32,29 @@ internal static class Program
             };
             checks["PlacementScenariosPass"] = PlacementChecks.Run(output);
             checks["PowerScenariosPass"] = PowerChecks.Run(output);
+            var updateWindow = new UpdateWindow();
+            updateWindow.Show();
+            updateWindow.SetStatus("Downloading DeskStats 1.0.16… 24.0 MB", 45);
+            updateWindow.UpdateLayout();
+            var updateBitmap = new RenderTargetBitmap((int)Math.Ceiling(updateWindow.ActualWidth), (int)Math.Ceiling(updateWindow.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+            updateBitmap.Render(updateWindow);
+            var updateEncoder = new PngBitmapEncoder();
+            updateEncoder.Frames.Add(BitmapFrame.Create(updateBitmap));
+            using (var file = File.Create(Path.Combine(output, "update-progress.png"))) updateEncoder.Save(file);
+            var answer = updateWindow.AskToInstallAsync("1.0.16");
+            updateWindow.UpdateLayout();
+            var readyBitmap = new RenderTargetBitmap((int)Math.Ceiling(updateWindow.ActualWidth), (int)Math.Ceiling(updateWindow.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+            readyBitmap.Render(updateWindow);
+            var readyEncoder = new PngBitmapEncoder(); readyEncoder.Frames.Add(BitmapFrame.Create(readyBitmap));
+            using (var file = File.Create(Path.Combine(output, "update-ready.png"))) readyEncoder.Save(file);
+            checks["UpdateReadyVisibleInTaskbarAndFront"] = updateWindow.IsVisible && updateWindow.Topmost && updateWindow.ShowInTaskbar;
+            ((StackPanel)updateWindow.Content).Children.OfType<Button>().Last().RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            var updateFrame = new DispatcherFrame();
+            var updateTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
+            updateTimer.Tick += (_, _) => { updateTimer.Stop(); updateFrame.Continue = false; };
+            updateTimer.Start(); Dispatcher.PushFrame(updateFrame);
+            checks["UpdateLaterDoesNotApproveInstallation"] = answer.IsCompletedSuccessfully && !answer.Result;
+            updateWindow.Finish();
             checks["WindowPersistenceScenariosPass"] = WindowPersistenceChecks.Run(output);
             foreach (string theme in new[] { "Dark", "Light" })
             {

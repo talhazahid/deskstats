@@ -240,7 +240,7 @@ public partial class App : Application
 
     private async Task CheckStartupUpdateAsync()
     {
-        await Task.Delay(8000);
+        await Task.Delay(1000);
         if (_layout is not null) await CheckUpdatesAsync(false);
     }
 
