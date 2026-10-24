@@ -22,9 +22,9 @@
       <a class="brand" href="#top"><img src="assets/logo-256.png" alt="">DeskStats</a>
       <div class="links">
         <a class="hide-m" href="#features">Features</a>
-        <a class="hide-m" href="#gallery">Screenshots</a>
+        <a class="hide-m" href="#how">Get started</a>
         <a class="hide-m" href="#faq">FAQ</a>
-        <a class="hide-m" href="https://github.com/talhazahid/deskstats">GitHub</a>
+        <a class="github-stars" href="https://github.com/talhazahid/deskstats/stargazers" aria-label="Star DeskStats on GitHub"><span aria-hidden="true">☆</span> <span>Star on GitHub</span><span id="star-count" hidden></span></a>
         <a class="btn primary sm" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe">Download</a>
       </div>
     </div>
@@ -41,16 +41,16 @@
           Download for Windows</a>
         <a class="btn" href="https://github.com/talhazahid/deskstats">View on GitHub</a>
       </div>
-      <div class="fine">Free · No account · No telemetry · GPLv3 open source</div>
+      <div class="fine"><span>Free forever</span><span>No account</span><span>No telemetry</span><a href="#license">GPLv3 open source ↗</a></div>
 
       <div class="stage rv">
-        <div class="frame"><img src="assets/shot-widgets.jpg" alt="DeskStats widgets on the Windows desktop" width="1600" height="900"></div>
+        <div class="frame"><img src="assets/deskstats-box-art.png" alt="DeskStats logo above CPU, GPU and sensor widgets" width="2160" height="2160" fetchpriority="high"></div>
       </div>
 
       <div class="strip rv">
         <div><b>10+</b><span>widgets, one platform</span></div>
-        <div><b>256</b><span>CPU threads supported</span></div>
-        <div><b>1&nbsp;click</b><span>floating ⇄ sidebar</span></div>
+        <div><b>Your setup</b><span>multiple screens, one workspace</span></div>
+        <div><b>1&nbsp;click</b><span>floating widgets ⇄ sidebar</span></div>
         <div><b>0</b><span>accounts, ads or tracking</span></div>
       </div>
     </div>
@@ -62,7 +62,7 @@
         <div class="center rv">
           <div class="eyebrow">Features</div>
           <h2>Everything your PC is doing, at a glance.</h2>
-          <p class="sub">Real readings from your hardware, drawn in a design you will actually want on your desktop.</p>
+          <p class="sub">From busy cores to background apps. Keep the useful details in view, without opening another dashboard.</p>
         </div>
 
         <div class="bento">
@@ -70,14 +70,14 @@
             <div class="txt">
               <div class="ico">🧠</div>
               <h3>CPU, down to every thread</h3>
-              <p>Per-thread load, effective clock, real temperature, package power, core voltage and fan speed — on Intel and AMD, desktop and laptop.</p>
+              <p>CPU activity, per-thread load and supported temperature, clock and power readings, all in one place.</p>
             </div>
             <img src="assets/shot-cpu-sm.jpg" alt="CPU widget" loading="lazy">
           </div>
           <div class="card s2 rv"><div class="ico">🎮</div><h3>GPU &amp; hot spot</h3><p>Load, VRAM, core and hot-spot temperature, clocks and fan. Picks the right GPU on hybrid laptops.</p></div>
 
           <div class="card s2 rv"><div class="ico">💾</div><h3>Memory &amp; top apps</h3><p>In use, available, committed — and the apps using the most memory, up to 30.</p></div>
-          <div class="card s2 rv"><div class="ico">🌡️</div><h3>Every sensor</h3><p>All motherboard temperatures and fans in one tidy list.</p></div>
+          <div class="card s2 rv"><div class="ico">🌡️</div><h3>Every sensor</h3><p>Available hardware temperatures and fan speeds in one tidy list. Sensor support varies by device.</p></div>
           <div class="card s2 rv"><div class="ico">🌐</div><h3>Network &amp; storage</h3><p>Live download / upload, adapters, today's totals, drive capacity and activity.</p></div>
 
           <div class="card big s4 rv">
@@ -93,24 +93,9 @@
           <div class="card s3 rv"><div class="ico">🎨</div><h3>Dark &amp; light, per widget</h3><p>Choose a theme for each widget, fade only the background, hide the frame — and text contrast adapts to any wallpaper automatically.</p></div>
           <div class="card s3 rv"><div class="ico">🖥️</div><h3>Any monitor</h3><p>Float widgets on any screen or dock a sidebar to the edge. Screens are named by position and model — never confusing numbers.</p></div>
 
-          <div class="card s2 rv"><div class="ico">💡</div><h3>It remembers</h3><p>Your widgets and settings survive every update and reinstall.</p></div>
+          <div class="card s2 rv"><div class="ico">💡</div><h3>It remembers</h3><p>Your widgets, sizes and screen positions stay with you through app restarts and updates.</p></div>
           <div class="card s2 rv"><div class="ico">🔒</div><h3>Private</h3><p>No account, no analytics. Hardware data never leaves your PC.</p></div>
           <div class="card s2 rv"><div class="ico">🍃</div><h3>Light &amp; quiet</h3><p>Low idle CPU, lives in the tray, starts with Windows.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="gallery">
-      <div class="wrap">
-        <div class="center rv">
-          <div class="eyebrow">Screenshots</div>
-          <h2>See it in action.</h2>
-        </div>
-        <div class="tabs" role="tablist" aria-label="Widget previews" id="tabs"></div>
-        <div class="gallery rv" id="gallery-panel" role="tabpanel" aria-labelledby="preview-tab-0">
-          <div class="frame"><img id="shot" src="assets/shot-widgets.jpg" alt="" width="1600" height="900"></div>
-          <div class="caption" id="cap"></div>
-          <div class="note">Design renders of the real widgets — values on your PC will differ.</div>
         </div>
       </div>
     </section>
@@ -119,12 +104,12 @@
       <div class="wrap">
         <div class="center rv">
           <div class="eyebrow">Get started</div>
-          <h2>Up and running in a minute.</h2>
+          <h2>Your desktop. Your layout.</h2>
         </div>
         <div class="steps">
-          <div class="step rv"><h3>Install</h3><p>Download the <a href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe">Windows installer</a> and run it. It installs the sensor driver for you.</p></div>
-          <div class="step rv"><h3>Add widgets</h3><p>Right-click the tray icon → <code>Add widget</code>. Drag them anywhere, or choose <code>Switch to Sidebar</code>.</p></div>
-          <div class="step rv"><h3>Make it yours</h3><p>Right-click a widget for theme, opacity, size and settings. DeskStats remembers everything.</p></div>
+          <div class="step rv"><h3>Install</h3><p>Run the <a href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe">Windows installer</a>. Your hardware widgets are ready on first launch, with the sensor driver included.</p></div>
+          <div class="step rv"><h3>Find your arrangement</h3><p>Right-click the tray icon → <code>Add widget</code>. Drag them anywhere, or choose <code>Switch to Sidebar</code>.</p></div>
+          <div class="step rv"><h3>Make it feel like home</h3><p>Choose Regular or Large, light or dark, and the background opacity you like. Your layout is saved for next time.</p></div>
         </div>
       </div>
     </section>
@@ -138,9 +123,9 @@
         <div class="faq rv">
           <details><summary>Is DeskStats free?</summary><p>Yes. It is free and open source under the GPLv3 license.</p></details>
           <details><summary>Why does it need administrator rights?</summary><p>Windows only allows apps to read hardware sensors, such as CPU temperature, with elevated rights. The installer also installs the free, signed PawnIO driver (if it is not already there) that DeskStats uses to read CPU sensors. Both are used only to read sensors.</p></details>
-          <details><summary>Does it collect my data?</summary><p>No. There is no account, no analytics and no ads. Your hardware readings never leave your PC. The only internet requests are the optional Weather widget (city search, forecast, air quality from Open-Meteo) and the optional public-IP lookup. Read the <a href="privacy.html">privacy policy</a>.</p></details>
-          <details><summary>Will my widgets survive an update?</summary><p>Yes. Your widgets, positions and settings are stored in <code>%LocalAppData%\DeskStats</code>, which the installer and uninstaller never touch. A backup is also made before a new version first runs.</p></details>
-          <details><summary>My antivirus flags it. Is it safe?</summary><p>DeskStats reads sensors through LibreHardwareMonitor and the PawnIO driver, like other well-known hardware monitors. Some antivirus programs are cautious about anything that talks to a hardware driver; you can add an exclusion for the install folder and report a false positive to the vendor.</p></details>
+          <details><summary>Does it collect my data?</summary><p>No. There is no account, no analytics and no ads. Your hardware readings never leave your PC. Optional weather and public-IP features contact their providers. Startup update checks contact GitHub Pages when enabled and can be turned off in settings. Read the <a href="privacy.html">privacy policy</a>.</p></details>
+          <details><summary>Will my widgets survive an update?</summary><p>Yes. In-place updates keep your widgets, sizes and screen positions. A fresh reinstall starts with hardware defaults and archives your previous layout.</p></details>
+          <details><summary>My antivirus flags it. Is it safe?</summary><p>DeskStats reads sensors through LibreHardwareMonitor and the PawnIO driver, like other well-known hardware monitors. Some antivirus programs are cautious about anything that talks to a hardware driver; check the detection details and report a suspected false positive to your security vendor. Do not bypass a warning without investigating it.</p></details>
           <details><summary>Which Windows versions are supported?</summary><p>Windows 10 (version 2004) and Windows 11, 64-bit. You do not need to install .NET.</p></details>
           <details><summary>How is this related to Sidebar Diagnostics?</summary><p>DeskStats is a new version of the idea behind Sidebar Diagnostics, rebuilt on .NET 8 as a widget platform. It adapts parts of Sidebar Diagnostics' logic (GPLv3) and credits it — see below. It is not affiliated with the original project or its author.</p></details>
         </div>
@@ -151,10 +136,10 @@
       <div class="wrap">
         <div class="center rv">
           <div class="eyebrow">Open source</div>
-          <h2>Free to use. Honest about its roots.</h2>
-          <p class="sub">DeskStats is licensed under the GNU GPL v3 — not MIT — because it builds on Sidebar Diagnostics, which is GPLv3 too.</p>
+          <h2>Open source.<br>Open to your ideas.</h2>
+          <p class="sub">Free to use, inspect and improve. Built in the open under GPLv3, with credit to the projects that made it possible.</p>
         </div>
-        <div class="license">
+        <div class="open-source-cta"><a class="btn primary" href="https://github.com/talhazahid/deskstats">Explore the source on GitHub ↗</a><a href="https://github.com/talhazahid/deskstats/issues">Share an idea or report an issue →</a></div><div class="license">
           <div class="card rv">
             <h3 style="margin-top:0">What the license means</h3>
             <ul>
@@ -228,39 +213,10 @@
         el.setAttribute('aria-hidden', 'true');
         el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="' + iconPaths[i % iconPaths.length] + '"/></svg>';
       });
-      var shots = [
-        ["widgets", "Floating widgets", "Your PC's vitals — CPU, GPU, memory and sensors — right on your desktop."],
-        ["sidebar", "Sidebar", "Prefer a sidebar? Dock every widget to the edge of any screen in one click."],
-        ["cpu", "CPU", "Every core, every clock: per-thread load, real temperature, power and fan speed."],
-        ["sensors", "Sensors", "Real temperatures and fan speeds, read straight from your hardware."],
-        ["columns", "Resize", "Drag a widget wider and its cards flow into two or three columns."],
-        ["customize", "Customize", "Make it yours: theme, background opacity and layer for each widget."]
-      ];
-      var tabs = document.getElementById("tabs"), img = document.getElementById("shot"), cap = document.getElementById("cap");
-      shots.forEach(function (s, i) {
-        var b = document.createElement("button");
-        b.className = "tab"; b.type = "button"; b.setAttribute("role", "tab");
-        b.id = "preview-tab-" + i; b.setAttribute("aria-controls", "gallery-panel"); b.tabIndex = i === 0 ? 0 : -1;
-        b.textContent = s[1]; b.setAttribute("aria-selected", i === 0 ? "true" : "false");
-        b.addEventListener("click", function () { show(i); });
-        b.addEventListener("keydown", function (event) {
-          var next = event.key === 'ArrowRight' ? (i + 1) % shots.length : event.key === 'ArrowLeft' ? (i + shots.length - 1) % shots.length : event.key === 'Home' ? 0 : event.key === 'End' ? shots.length - 1 : -1;
-          if (next < 0) return;
-          event.preventDefault(); show(next); tabs.children[next].focus();
-        });
-        tabs.appendChild(b);
-      });
-      function show(i) {
-        var all = tabs.children;
-        for (var k = 0; k < all.length; k++) { all[k].setAttribute("aria-selected", k === i ? "true" : "false"); all[k].tabIndex = k === i ? 0 : -1; }
-        document.getElementById("gallery-panel").setAttribute("aria-labelledby", "preview-tab-" + i);
-        img.style.opacity = 0;
-        setTimeout(function () { img.src = "assets/shot-" + shots[i][0] + ".jpg"; img.alt = shots[i][1]; img.style.opacity = 1; }, 160);
-        cap.textContent = shots[i][2];
-      }
-      cap.textContent = shots[0][2]; img.alt = shots[0][1];
-      // Deliberate browsing: don't change the preview while someone is reading.
-
+      fetch('https://api.github.com/repos/talhazahid/deskstats', {headers: {'Accept': 'application/vnd.github+json'}})
+        .then(function (response) { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
+        .then(function (repo) { if (Number.isInteger(repo.stargazers_count)) { var count = document.getElementById('star-count'); count.textContent = repo.stargazers_count.toLocaleString(); count.hidden = false; } })
+        .catch(function () {});
       var els = document.querySelectorAll(".rv");
       if ("IntersectionObserver" in window) {
         var io = new IntersectionObserver(function (e) { e.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }); }, { threshold: 0.12 });
