@@ -1,0 +1,17 @@
+{
+  "name": "deskstats-macos",
+  "productName": "DeskStats",
+  "version": "1.0.14",
+  "description": "DeskStats for macOS — desktop hardware monitor widgets (Apple Silicon port of talhazahid/deskstats)",
+  "main": "src/main/index.js",
+  "license": "GPL-3.0-or-later",
+  "author": "DeskStats macOS port",
+  "scripts": {
+    "start": "electron .",
+    "pack": "node scripts/pack.js"
+  },
+  "devDependencies": {
+    "@electron/packager": "^18.4.2",
+    "electron": "^45.0.0"
+  }
+}

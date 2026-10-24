@@ -1,0 +1,44 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "SBOM-SPDX-nowplaying-cli-2.1.0",
+  "creationInfo": {
+    "created": "2026-04-06T02:02:49Z",
+    "creators": [
+      "Tool: https://github.com/Homebrew/brew"
+    ]
+  },
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://formulae.brew.sh/spdx/nowplaying-cli-2.1.0.json",
+  "documentDescribes": [
+    "SPDXRef-Archive-nowplaying-cli-src"
+  ],
+  "files": [],
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Archive-nowplaying-cli-src",
+      "name": "nowplaying-cli",
+      "versionInfo": "2.1.0",
+      "filesAnalyzed": false,
+      "licenseDeclared": "NOASSERTION",
+      "builtDate": "2026-04-06 02:02:49 UTC",
+      "licenseConcluded": "GPL-3.0-or-later",
+      "downloadLocation": "https://github.com/kirtan-shah/nowplaying-cli/archive/refs/tags/v2.1.0.tar.gz",
+      "copyrightText": "NOASSERTION",
+      "externalRefs": [],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "c7c23564657bf5b5598bdf58f79e11c8dffbde909e364df4da7c3a49a26e3753"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "spdxElementId": "SPDXRef-File-nowplaying-cli",
+      "relationshipType": "PACKAGE_OF",
+      "relatedSpdxElement": "SPDXRef-Archive-nowplaying-cli-src"
+    }
+  ]
+}

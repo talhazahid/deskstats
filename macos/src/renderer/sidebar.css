@@ -1,0 +1,85 @@
+/* Edge-docked sidebar shell. Mirrors SidebarWindow.xaml: a quiet product title
+   followed by a scrolling stack of the same widget cards, 10 px apart. */
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+body.sidebar {
+  display: flex;
+  flex-direction: column;
+  color: var(--text-primary);
+}
+
+body.has-background {
+  background: var(--sidebar-tint);
+}
+
+/* Native vibrancy supplies the blur; this tint is the readable fallback when
+   vibrancy is unavailable (e.g. "reduce transparency" is on). */
+body.has-background.no-vibrancy {
+  background: var(--sidebar-tint-solid, var(--sidebar-tint));
+}
+
+.sidebar-header {
+  flex: 0 0 auto;
+  margin: 14px 16px 8px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.no-title .sidebar-header { display: none; }
+body.no-title .sidebar-scroll { padding-top: 12px; }
+
+.sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2px 12px 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sidebar-stack { display: flex; flex-direction: column; }
+
+.sidebar-slot {
+  margin: 0 0 10px;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.sidebar-scale { width: 100%; min-width: 0; }
+
+/* WPF uses LayoutTransform 1.35 on the view while the sidebar reserves
+   1.35 × its base width. `zoom` reproduces that: the card lays out at the
+   base width (the slot divided by the zoom) and paints 1.35× larger, so
+   width:100% still fills the reserved sidebar width. */
+.sidebar-slot.large .sidebar-scale {
+  zoom: 1.35;
+}
+
+.sidebar-slot .widget-card { width: 100%; }
+
+/* While the sidebar is collapsed to its 8 px strip there is nothing useful to
+   paint (and the window is click-through anyway). */
+body.collapsed .sidebar-header,
+body.collapsed .sidebar-scroll { visibility: hidden; }
+
+/* Clicking anywhere that is not a card opens the tray menu; cards get their
+   own instance menu. */
+.sidebar-scroll, .sidebar-header { cursor: default; }
+
+.sidebar-empty {
+  color: var(--text-tertiary);
+  font-size: 12px;
+  line-height: 1.45;
+  padding: 14px 8px;
+}

@@ -1,0 +1,77 @@
+/* Floating widget host: 10 px shadow/breathing room around the card, like the
+   WPF WidgetWindow chrome. The card itself draws the only visible surface. */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+body {
+  padding: 10px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+body.dragging { cursor: grabbing; }
+body.resizing { cursor: ew-resize; }
+body.resizing .widget-card { pointer-events: none; }
+
+#root { display: block; }
+
+/* Native drag fallback for the very top edge. The rest of the card is dragged
+   through pointer events, which also allows snapping and persistence. */
+.drag-strip {
+  position: fixed;
+  top: 0;
+  left: 12px;
+  right: 12px;
+  height: 6px;
+  z-index: 60;
+  -webkit-app-region: drag;
+}
+
+.resize-handle {
+  position: fixed;
+  top: 14px;
+  bottom: 14px;
+  width: 14px;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: ew-resize;
+  -webkit-app-region: no-drag;
+}
+.resize-handle.left { left: 3px; }
+.resize-handle.right { right: 3px; }
+.resize-handle[hidden] { display: none; }
+.resize-badge[hidden] { display: none; }
+
+.resize-pill {
+  width: 5px;
+  height: 46px;
+  border-radius: 2.5px;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12);
+}
+
+.resize-badge {
+  position: fixed;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 80;
+  background: rgba(22, 22, 26, 0.88);
+  color: #fff;
+  border-radius: 9px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+body.light-theme .resize-badge { background: rgba(255, 255, 255, 0.94); color: #0f172a; }

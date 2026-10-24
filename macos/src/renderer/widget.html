@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DeskStats</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="widget.css" />
+  </head>
+  <body>
+    <div class="drag-strip" aria-hidden="true"></div>
+    <div id="root"></div>
+    <div class="resize-handle left" data-side="left" hidden><span class="resize-pill"></span></div>
+    <div class="resize-handle right" data-side="right" hidden><span class="resize-pill"></span></div>
+    <div class="resize-badge" hidden><span id="resize-hint">1 column · drag the edges · Esc to finish</span></div>
+    <script type="module" src="widget.js"></script>
+  </body>
+</html>
