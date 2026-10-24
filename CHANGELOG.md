@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.17 — 2026-10-24
+
+- Moved Hardware Power into an independent hardware widget with its own position, Regular/Large size and saved settings. Fresh default layouts include it; existing layouts can add it from Hardware > Hardware power.
+- Added read-only AMD driver queries for separately supported total board and ASIC/chip power. No scaling, TDP substitution or guessed total.
+- Label unsupported board power explicitly and identify each GPU by name. Clear old watts when readings disappear and show the sample time.
+- Stop treating an arbitrary CPU power sensor as CPU package power.
+- QA: power scope/unsupported/invalid/zero/stale-data checks, layout persistence, Large sizing and standalone registration passed. Live RX 6600 probe returned ASIC power only (34–40 W across 12 low-load samples); this interface did not expose total board power. A gaming-load comparison against Radeon metrics remains unverified.
+
 ## 1.0.16 — 2026-10-24
 
 - Show update checking, download progress and verification in a dedicated update window.
@@ -42,4 +50,3 @@
 - Physical monitor timeout and the full download/UAC/install/relaunch update cycle still require live testing. Installer and app remain unsigned.
 
 The update service consumes published installers and release metadata; pushing source changes alone does not distribute an update. Installation requests confirmation and Windows administrator approval when required.
-

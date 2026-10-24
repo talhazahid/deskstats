@@ -104,7 +104,7 @@ public sealed class LayoutController : IDisposable
     }
 
     /// <summary>The hardware widgets every fresh / empty layout starts with.</summary>
-    public static readonly string[] DefaultWidgetIds = { "cpu", "gpu", "ram", "network", "drive", "sensors" };
+    public static readonly string[] DefaultWidgetIds = { "cpu", "gpu", "ram", "network", "drive", "sensors", "power" };
 
     /// <summary>Restore the complete hardware set without moving existing widgets.</summary>
     public void ShowAllHardwareWidgets()

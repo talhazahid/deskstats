@@ -13,7 +13,7 @@ internal static class WebsitePreviews
     public static void Render(string output)
     {
         var registry = new WidgetRegistry();
-        foreach (string id in new[] { "cpu", "gpu", "ram", "sensors", "network", "drive" })
+        foreach (string id in new[] { "cpu", "gpu", "ram", "sensors", "network", "drive", "power" })
             RenderWidget(registry, output, id, 340, "dark");
         RenderWidget(registry, output, "gpu", 720, "dark", "resize");
         RenderWidget(registry, output, "cpu", 340, "light", "theme-light");
@@ -68,7 +68,7 @@ internal static class WebsitePreviews
                 new[] { new GpuReading("Radeon RX 6600", load, 42, 1320, 1740, 58, .8, 24, 3.36 * 1073741824, 8 * 1073741824d) },
                 new[] { new DriveReading("C:", 512e9, 285e9, 227e9, (6 + load / 10) * 1e6, 2.4e6), new DriveReading("D:", 2e12, .7e12, 1.3e12, 1.2e6, .4e6) },
                 new[] { new NetworkAdapterReading("Ethernet", (3 + load / 20) * 1e6, 420000, "192.168.1.24", true) },
-                new[] { new SensorReading("CPU", "Package", "power", 45), new SensorReading("GPU", "GPU Package", "power", 82), new SensorReading("CPU", "Core", "temperature", 64), new SensorReading("GPU", "Core", "temperature", 58), new SensorReading("Board", "System", "temperature", 42), new SensorReading("Board", "VRM", "temperature", 48), new SensorReading("CPU", "CPU Fan", "fan", 1240), new SensorReading("GPU", "GPU Fan", "fan", 820) });
+                new[] { new SensorReading("CPU", "Package", "power", 45), new SensorReading("GPU · Radeon RX 6600", "ASIC / chip power", "power", 82), new SensorReading("CPU", "Core", "temperature", 64), new SensorReading("GPU", "Core", "temperature", 58), new SensorReading("Board", "System", "temperature", 42), new SensorReading("Board", "VRM", "temperature", 48), new SensorReading("CPU", "CPU Fan", "fan", 1240), new SensorReading("GPU", "GPU Fan", "fan", 820) });
             SnapshotReceived?.Invoke(Latest);
         }
     }

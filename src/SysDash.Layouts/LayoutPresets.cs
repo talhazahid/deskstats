@@ -62,7 +62,8 @@ public static class LayoutPresets
             Item("ram"),
             Item("network"),
             Item("drive"),
-            Item("sensors")),
+            Item("sensors"),
+            Item("power")),
     };
 
     private static Layout Layout(string name, string? theme, params LayoutItem[] items)

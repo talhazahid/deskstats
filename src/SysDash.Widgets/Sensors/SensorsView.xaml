@@ -102,23 +102,6 @@
                     </ItemsControl>
                 </s:SectionLayout>
             </Border>
-            <Border Style="{StaticResource WidgetSection}">
-                <s:SectionLayout>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="HARDWARE POWER" />
-                    <ItemsControl ItemsSource="{Binding Power}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
-                                    <TextBlock Style="{StaticResource RowLabel}" Text="{Binding Name}" ToolTip="{Binding Name}" />
-                                    <TextBlock Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding ValueText}" />
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    <TextBlock Style="{StaticResource RowLabel}" Text="{Binding PowerHint}" TextWrapping="Wrap" TextTrimming="None" FontSize="11" Margin="0,8,0,0" />
-                </s:SectionLayout>
-            </Border>
         </s:ResponsiveColumns>
     </Border>
 </UserControl>

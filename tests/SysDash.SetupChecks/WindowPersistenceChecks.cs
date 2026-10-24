@@ -34,7 +34,7 @@ internal static class WindowPersistenceChecks
             Pump();
             var windows = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
             File.WriteAllText(Path.Combine(output, "initial-window-bounds.json"), JsonSerializer.Serialize(windows.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight, w.MaxHeight }), new JsonSerializerOptions { WriteIndented = true }));
-            checks["CreatesAllSixWidgets"] = windows.Length == 6;
+            checks["CreatesAllDefaultWidgets"] = windows.Length == LayoutController.DefaultWidgetIds.Length;
             checks["LiveContentGrowthDoesNotOverlap"] = !windows.SelectMany((a, i) => windows.Skip(i + 1).Select(b =>
                 new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight).IntersectsWith(new Rect(b.Left, b.Top, b.ActualWidth, b.ActualHeight)))).Any(x => x);
             controller.BeginManualPlacement();
@@ -51,7 +51,7 @@ internal static class WindowPersistenceChecks
             var disk = new LayoutService(Path.Combine(root, "layouts"));
             disk.EnsureDefaults();
             expected = disk.ActiveLayout.Items.ToDictionary(i => i.InstanceId, i => (i.Placement.MonitorDeviceId, i.Placement.MonitorOffsetX, i.Placement.MonitorOffsetY));
-            checks["ExitKeepsAllWidgetEntries"] = expected.Count == 6;
+            checks["ExitKeepsAllWidgetEntries"] = expected.Count == LayoutController.DefaultWidgetIds.Length;
             checks["ExitStoresStableMonitorIdentities"] = expected.Values.All(x => !string.IsNullOrEmpty(x.Screen));
             checks["UsesConnectedScreens"] = expected.Values.Select(x => x.Screen).Distinct().Count() == Math.Min(windows.Length, monitors.Count);
             CloseSidebar(services);
@@ -91,7 +91,7 @@ internal static class WindowPersistenceChecks
             controller.ShowAllHardwareWidgets();
             controller.ShowAllHardwareWidgets();
             Pump();
-            checks["RestoreHardwareShowsAllSixWithoutDuplicates"] = controller.Instances.Count() == 6 &&
+            checks["RestoreHardwareShowsDefaultsWithoutDuplicates"] = controller.Instances.Count() == LayoutController.DefaultWidgetIds.Length &&
                 LayoutController.DefaultWidgetIds.All(controller.IsWidgetShown) && controller.Instances.Any(i => i.Id == retained);
             foreach (var instance in controller.Instances) controller.SetWidgetLarge(instance.Id, true);
             Pump();
@@ -132,7 +132,7 @@ internal static class WindowPersistenceChecks
         {
             var controller = services.GetRequiredService<LayoutController>();
             controller.ApplyActiveLayout(); Pump();
-            checks["RestartKeepsHiddenRemovedAndLargeState"] = controller.Instances.Count() == 4 &&
+            checks["RestartKeepsHiddenRemovedAndLargeState"] = controller.Instances.Count() == LayoutController.DefaultWidgetIds.Length - 2 &&
                 !controller.IsWidgetShown("gpu") && !controller.IsWidgetShown("ram") &&
                 controller.IsLargeWidget(controller.Instances.First(i => i.WidgetId == "cpu").Id);
             controller.ClearAll();
@@ -175,7 +175,7 @@ internal static class WindowPersistenceChecks
         checks["UpgradePreservesCustomizedState"] = !InstallationState.Apply("install-one", installationSettings, installationLayouts) &&
             installationLayouts.ActiveLayout.Items.Count == 1 && installationLayouts.ActiveLayout.Items[0].Placement.LargeSize &&
             installationLayouts.ActiveLayout.Items[0].Placement.MonitorDeviceId == "retained-screen";
-        checks["ReinstallGetsFreshDefaults"] = InstallationState.Apply("install-two", installationSettings, installationLayouts) && installationLayouts.ActiveLayout.Items.Count == 6;
+        checks["ReinstallGetsFreshDefaults"] = InstallationState.Apply("install-two", installationSettings, installationLayouts) && installationLayouts.ActiveLayout.Items.Count == LayoutController.DefaultWidgetIds.Length;
         string hash = new string('A', 64);
         checks["UpdateAcceptsVersionedRelease"] = UpdateService.Parse(System.Text.Json.JsonSerializer.Serialize(new { version = "1.0.14", url = "https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", sha256 = hash })).Version == "1.0.14";
         checks["UpdateRejectsUntrustedHost"] = RejectUpdate("https://example.com/deskstats/downloads/DeskStats-Setup-1.0.14.exe", hash);

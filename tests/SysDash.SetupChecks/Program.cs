@@ -24,6 +24,7 @@ internal static class Program
             app.Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new Uri("pack://application:,,,/SysDash.Theming;component/Themes/Dark.xaml") });
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             if (args.Contains("--website-previews")) { WebsitePreviews.Render(output); return 0; }
+            if (args.Contains("--power-probe")) { PowerProbe.Run(output); return 0; }
             app.DispatcherUnhandledException += (_, e) =>
             {
                 File.WriteAllText(Path.Combine(output, "dispatcher-error.txt"), e.Exception.ToString());

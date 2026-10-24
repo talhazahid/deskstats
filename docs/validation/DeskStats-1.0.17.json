@@ -1,0 +1,40 @@
+{
+  "SHA256": "461CB288F594D8BF4133B0CEB77918F9466B2D35E8E2646BF0B197EE5885DF22",
+  "PowerChecks": {
+    "MissingPowerIsNotZeroOrFakeTotal": true,
+    "OverlappingSourcesRemainSeparate": true,
+    "PackageNotDuplicatedByFallback": true,
+    "ValidZeroWattReadingRetained": true,
+    "UnsupportedPsuDisclosed": true,
+    "PsuOutputNotLabeledWallConsumption": true,
+    "BoardAndChipRemainSeparate": true,
+    "SupportedBoardHasNoUnavailableWarning": true,
+    "UnsupportedBoardCannotUseItsValueOrFakeTotal": true,
+    "InvalidNativeValuesRejected": true,
+    "IndependentWidgetRegistered": true,
+    "SensorWidgetHasNoPowerBranch": true,
+    "UnavailableSnapshotClearsOldWatts": true
+  },
+  "VisualInspectionPassed": true,
+  "SetupChecks": {
+    "PlacementScenariosPass": true,
+    "PowerScenariosPass": true,
+    "UpdateReadyVisibleInTaskbarAndFront": true,
+    "UpdateLaterDoesNotApproveInstallation": true,
+    "WindowPersistenceScenariosPass": true,
+    "ContinueClosesDarkDialog": true,
+    "ContinueClosesLightDialog": true,
+    "RejectsTamperedInstaller": true,
+    "RejectsMissingInstaller": true
+  },
+  "Version": "1.0.17",
+  "LiveProbe": {
+    "Device": "AMD Radeon RX 6600",
+    "AsicWattsMin": 34,
+    "AsicWattsMax": 40,
+    "BoardPowerExposedByAdlPmLog": false,
+    "Samples": 12,
+    "GamingLoadComparisonVerified": false
+  },
+  "FullInstallerUacCycleTested": false
+}

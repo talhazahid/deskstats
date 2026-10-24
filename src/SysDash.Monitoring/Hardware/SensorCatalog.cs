@@ -106,8 +106,7 @@ public static class SensorCatalog
 
             double? packagePower = Value(sensors.FirstOrDefault(s =>
                     s.SensorType == SensorType.Power &&
-                    s.Name.Contains("Package", StringComparison.OrdinalIgnoreCase))
-                ?? sensors.FirstOrDefault(s => s.SensorType == SensorType.Power));
+                    s.Name.Contains("Package", StringComparison.OrdinalIgnoreCase)));
 
             // A 0 reading means "sensor not accessible" (no admin / driver blocked).
             static double? Positive(double? v) => v is > 0 ? v : null;
@@ -274,7 +273,7 @@ public static class SensorCatalog
     /// (including sub-hardware such as the motherboard Super I/O chip) for the
     /// Sensors widget. CPU first, then GPUs, then the rest.
     /// </summary>
-    public static List<SensorReading> ReadSensors(IEnumerable<IHardware> hardware)
+    public static List<SensorReading> ReadSensors(IEnumerable<IHardware> hardware, AmdPowerTelemetry? amdPower = null)
     {
         var result = new List<SensorReading>();
 
@@ -283,6 +282,22 @@ public static class SensorCatalog
             foreach (IHardware node in hardware.OrderBy(Rank))
             {
                 AddSensors(result, node, GroupName(node));
+                if (node.HardwareType == HardwareType.GpuAmd)
+                {
+                    string group = "GPU · " + node.Name;
+                    var direct = amdPower?.Read(node) ?? Array.Empty<SensorReading>();
+                    bool hasAsic = direct.Any(s => s.Name == "ASIC / chip power");
+                    // LHM uses one Package slot for ASIC or board power depending on
+                    // GPU generation. Do not silently label that slot as total board power.
+                    for (int i = result.Count - 1; i >= 0; i--)
+                    {
+                        var s = result[i];
+                        if (s.Group != group || s.Kind != "power" || s.Name != "GPU Package") continue;
+                        if (hasAsic || direct.Any(s => s.Name == "Total board power")) result.RemoveAt(i);
+                        else result[i] = s with { Name = "Package power (scope unverified)" };
+                    }
+                    result.AddRange(direct);
+                }
                 foreach (IHardware sub in node.SubHardware)
                 {
                     AddSensors(result, sub, GroupName(node));
@@ -326,7 +341,9 @@ public static class SensorCatalog
                 continue; // empty fan header
             }
 
-            result.Add(new SensorReading(group, sensor.Name, kind, value));
+            string sensorGroup = kind == "power" && hardware.HardwareType is HardwareType.GpuAmd or HardwareType.GpuNvidia or HardwareType.GpuIntel
+                ? "GPU · " + hardware.Name : group;
+            result.Add(new SensorReading(sensorGroup, sensor.Name, kind, value));
         }
     }
 

@@ -1,0 +1,28 @@
+<UserControl x:Class="SysDash.Widgets.Power.PowerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" MinWidth="240">
+    <Border Style="{StaticResource WidgetCard}">
+        <Border Style="{StaticResource WidgetSection}" Margin="0">
+            <StackPanel>
+                <TextBlock Style="{StaticResource SectionHeader}" FontWeight="Medium" Text="HARDWARE POWER" />
+                <ItemsControl ItemsSource="{Binding Power}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Grid Margin="0,4">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource RowLabel}" Text="{Binding Name}" TextWrapping="Wrap" TextTrimming="None"/>
+                                    <TextBlock FontSize="10.5" Foreground="{DynamicResource TextTertiaryBrush}" Text="{Binding Device}" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Style="{StaticResource RowValue}" FontWeight="Medium" Text="{Binding ValueText}"/>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Style="{StaticResource RowLabel}" Text="{Binding BoardHint}" TextWrapping="Wrap" TextTrimming="None" FontSize="11" Margin="0,8,0,0"/>
+                <TextBlock Style="{StaticResource RowLabel}" Text="{Binding PowerHint}" TextWrapping="Wrap" TextTrimming="None" FontSize="11" Margin="0,8,0,0"/>
+                <TextBlock Text="{Binding UpdatedText}" Foreground="{DynamicResource TextTertiaryBrush}" FontSize="10.5" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>

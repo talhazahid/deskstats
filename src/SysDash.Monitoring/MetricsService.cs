@@ -26,6 +26,7 @@ public sealed class MetricsService : IMetricsService
     private DriveSampler? _driveSampler;
     private NetworkSampler? _networkSampler;
     private readonly CpuFallbackSampler _cpuFallback = new();
+    private readonly AmdPowerTelemetry _amdPower = new();
     private IHardware[] _cpuNodes = Array.Empty<IHardware>();
 
     // ARM PCs (Snapdragon): the PawnIO driver cannot help there, so never suggest it.
@@ -301,7 +302,7 @@ public sealed class MetricsService : IMetricsService
                     ram = SensorCatalog.ReadRam(_ramHardware);
                 }
 
-                sensors = SensorCatalog.ReadSensors(computer.Hardware);
+                sensors = SensorCatalog.ReadSensors(computer.Hardware, _amdPower);
 
                 if (gpus is not null)
                 {
@@ -408,6 +409,7 @@ public sealed class MetricsService : IMetricsService
             }
 
             drives?.Dispose();
+            _amdPower.Dispose();
             _cpuFallback.Dispose();
         });
 
