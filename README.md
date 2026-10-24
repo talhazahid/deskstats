@@ -6,11 +6,13 @@
 
 **Your PC's vitals, including CPU, GPU, memory, network and sensors, as beautiful widgets on your desktop, or docked in a sidebar.**
 
-[![Download](https://img.shields.io/badge/Download-latest%20release-3d8bff?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/talhazahid/deskstats/releases/latest)
+[![Download for Windows](https://img.shields.io/badge/Download-Windows-3d8bff?style=for-the-badge&logo=windows11&logoColor=white)](https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe)
+&nbsp;
+[![Download for Mac](https://img.shields.io/badge/Download-Mac%20(Apple%20Silicon)-e8f1ff?style=for-the-badge&logo=apple&logoColor=black)](https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg)
 &nbsp;
 [![Website](https://img.shields.io/badge/Website-talhazahid.github.io%2Fdeskstats-1c1c20?style=for-the-badge)](https://talhazahid.github.io/deskstats/)
 
-![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0b1020?style=flat-square&logo=windows&logoColor=white)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011%20%7C%20macOS%20(Apple%20Silicon)-0b1020?style=flat-square)
 ![.NET](https://img.shields.io/badge/.NET-8-512bd4?style=flat-square&logo=dotnet&logoColor=white)
 ![UI](https://img.shields.io/badge/UI-WPF-3d8bff?style=flat-square)
 ![License](https://img.shields.io/badge/license-GPLv3-32d74b?style=flat-square)
@@ -25,6 +27,10 @@
 ---
 
 ## What is DeskStats?
+
+> **New: DeskStats for Mac.** A native-feeling menu bar app for Apple Silicon Macs (M1–M5, macOS 11+)
+> with CPU/GPU temperature, clocks, power, core voltage, memory and fanless-aware sensors.
+> [Download the .dmg](https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg) · source in [`macos/`](macos/).
 
 DeskStats is a modern hardware monitor for Windows. It reads your CPU, GPU, memory,
 drives, network and every temperature and fan sensor your motherboard exposes, and

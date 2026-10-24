@@ -1,56 +1,121 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DeskStats — PC monitor widgets for your Windows desktop</title>
-  <meta name="description" content="DeskStats shows live CPU, GPU, memory, network and sensor readings as beautiful widgets — floating on your desktop or docked in a sidebar. A new version of Sidebar Diagnostics.">
-  <meta name="theme-color" content="#07090f">
+  <title>DeskStats: Free CPU, GPU &amp; Temperature Monitor Widgets for Windows and Mac</title>
+  <meta name="description" content="DeskStats is a free, open-source system monitor for Windows 10/11 and Apple Silicon Macs. Live CPU, GPU, RAM, temperature, network and disk widgets on your desktop or in a sidebar.">
+  <meta name="keywords" content="system monitor widget, CPU temperature monitor, GPU monitor, desktop widgets Windows 11, Mac system monitor, Apple Silicon temperature, menu bar system monitor, Sidebar Diagnostics alternative, hardware monitor, free">
+  <link rel="canonical" href="https://talhazahid.github.io/deskstats/">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="theme-color" content="#0a0d12">
+  <meta name="author" content="Talha Zahid">
   <link rel="icon" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/logo-256.png">
+
   <meta property="og:type" content="website">
-  <meta property="og:title" content="DeskStats — PC monitor widgets for Windows">
-  <meta property="og:description" content="Live CPU, GPU, memory, network and sensor widgets. Floating or docked in a sidebar.">
+  <meta property="og:site_name" content="DeskStats">
+  <meta property="og:url" content="https://talhazahid.github.io/deskstats/">
+  <meta property="og:title" content="DeskStats: system monitor widgets for Windows and Mac">
+  <meta property="og:description" content="Free, open-source CPU, GPU, memory, temperature and network widgets. Floating on your desktop or docked in a sidebar. Windows 10/11 and Apple Silicon Macs.">
   <meta property="og:image" content="https://talhazahid.github.io/deskstats/assets/og.jpg">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css?v=20261024-3">
+  <meta name="twitter:site" content="@talhazahid56">
+  <meta name="twitter:creator" content="@talhazahid56">
+  <meta name="twitter:title" content="DeskStats: system monitor widgets for Windows and Mac">
+  <meta name="twitter:description" content="Free, open-source CPU, GPU, RAM, temperature and network widgets for Windows 10/11 and Apple Silicon Macs.">
+  <meta name="twitter:image" content="https://talhazahid.github.io/deskstats/assets/og.jpg">
+
+  <link rel="preload" as="image" href="assets/shot-widgets.jpg">
+  <link rel="stylesheet" href="style.css?v=20261024-mac">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "DeskStats",
+    "applicationCategory": "UtilitiesApplication",
+    "applicationSubCategory": "System monitor",
+    "operatingSystem": "Windows 10, Windows 11, macOS 11 or later (Apple Silicon)",
+    "description": "Free, open-source desktop widgets that show live CPU, GPU, memory, temperature, network and storage readings on Windows and Apple Silicon Macs.",
+    "url": "https://talhazahid.github.io/deskstats/",
+    "image": "https://talhazahid.github.io/deskstats/assets/og.jpg",
+    "screenshot": "https://talhazahid.github.io/deskstats/assets/shot-widgets.jpg",
+    "softwareVersion": "1.0.17",
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "downloadUrl": [
+      "https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe",
+      "https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg"
+    ],
+    "author": { "@type": "Person", "name": "Talha Zahid", "url": "https://github.com/talhazahid", "sameAs": ["https://x.com/talhazahid56"] },
+    "codeRepository": "https://github.com/talhazahid/deskstats"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {"@type":"Question","name":"Is DeskStats free?","acceptedAnswer":{"@type":"Answer","text":"Yes. DeskStats is free and open source under the GPLv3 license, on both Windows and macOS. There is no account, no ads and no telemetry."}},
+      {"@type":"Question","name":"Does DeskStats work on Mac?","acceptedAnswer":{"@type":"Answer","text":"Yes. The macOS version runs on Apple Silicon Macs (M1, M2, M3, M4 and M5) with macOS 11 Big Sur or later. It shows CPU and GPU load, clocks, power, temperatures, core voltage, memory, network, storage and Now Playing, and lives in the menu bar."}},
+      {"@type":"Question","name":"Can I see CPU temperature on a MacBook Air?","acceptedAnswer":{"@type":"Answer","text":"Yes. DeskStats reads CPU and GPU temperatures on Apple Silicon without sudo or extra drivers. MacBook Air has no fan, so DeskStats shows No fan instead of a fake 0 RPM reading."}},
+      {"@type":"Question","name":"Which Windows versions are supported?","acceptedAnswer":{"@type":"Answer","text":"Windows 10 (version 2004 or later) and Windows 11, 64-bit. You do not need to install .NET."}},
+      {"@type":"Question","name":"Why does the Windows version need administrator rights?","acceptedAnswer":{"@type":"Answer","text":"Windows only lets apps read hardware sensors such as CPU temperature with elevated rights. The installer also adds the free, signed PawnIO driver used to read CPU sensors. Both are used only to read sensors."}},
+      {"@type":"Question","name":"Is DeskStats a Sidebar Diagnostics alternative?","acceptedAnswer":{"@type":"Answer","text":"Yes. DeskStats is a new take on the idea behind Sidebar Diagnostics, rebuilt as a widget platform with floating widgets, a docked sidebar, themes and a macOS version. It credits Sidebar Diagnostics (GPLv3) and is not affiliated with it."}},
+      {"@type":"Question","name":"Does DeskStats collect my data?","acceptedAnswer":{"@type":"Answer","text":"No. Hardware readings never leave your computer. Optional weather and public-IP features contact their providers, and update checks can be turned off."}}
+    ]
+  }
+  </script>
 </head>
 <body>
-  <div class="aurora"></div><div class="grid-bg"></div>
+  <div class="glow" aria-hidden="true"></div>
 
-  <nav class="top">
+  <nav class="top" aria-label="Main">
     <div class="wrap">
-      <a class="brand" href="#top"><img src="assets/logo-256.png" alt="">DeskStats</a>
+      <a class="brand" href="#top"><img src="assets/logo-256.png" alt="" width="30" height="30">DeskStats</a>
       <div class="links">
         <a class="hide-m" href="#features">Features</a>
-        <a class="hide-m" href="#how">Get started</a>
+        <a class="hide-m" href="#mac">Mac</a>
+        <a class="hide-m" href="#download">Download</a>
         <a class="hide-m" href="#faq">FAQ</a>
-        <a class="github-stars" href="https://github.com/talhazahid/deskstats/stargazers" aria-label="Star DeskStats on GitHub"><span aria-hidden="true">☆</span> <span>Star on GitHub</span><span id="star-count" hidden></span></a>
-        <a class="btn primary sm" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">Download</a>
+        <a class="gh" href="https://github.com/talhazahid/deskstats" aria-label="DeskStats on GitHub">
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+          <span class="lbl">Star</span><span id="star-count" hidden></span></a>
+        <a class="btn primary sm" href="#download" data-dl-auto>Download</a>
       </div>
     </div>
   </nav>
 
   <header class="hero" id="top">
     <div class="wrap">
-      <span class="pill"><i></i> Desktop monitoring, thoughtfully simple · Windows 10 &amp; 11</span>
-      <h1>Know your PC.<br><span class="grad">Without the clutter.</span></h1>
-      <p class="lead">CPU, GPU, memory and sensors. The readings you need, quietly on your desktop. Float your widgets anywhere or bring them together in a sidebar.</p>
-      <div class="cta">
-        <a class="btn primary" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16"/></svg>
-          Download for Windows</a>
-        <a class="btn" href="https://github.com/talhazahid/deskstats">View on GitHub</a>
-      </div>
-      <div class="fine"><span>Free forever</span><span>No account</span><span>No telemetry</span><a href="#license">GPLv3 open source ↗</a></div>
+      <span class="pill"><i></i>Free &amp; open source · Windows 10/11 · macOS on Apple Silicon</span>
+      <h1>System monitor widgets for <span class="grad">Windows &amp; Mac.</span></h1>
+      <p class="lead">Live CPU, GPU, memory, temperature, network and disk readings, right on your desktop. Float widgets anywhere or dock them in a sidebar. No clutter, no account.</p>
 
-      <div class="stage rv">
-        <div class="frame"><img src="assets/deskstats-box-art.png" alt="DeskStats logo above CPU, GPU and sensor widgets" width="2160" height="2160" fetchpriority="high"></div>
+      <div class="dl" id="hero-dl">
+        <a class="dl-btn" data-os="win" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zm0 13 7.5 1.1v-7H3zm8.4 1.2L21 21v-8.4h-9.6zm0-15.4v7.2H21V3z"/></svg>
+          <span><b>Download for Windows</b><small>v1.0.17 · Windows 10 &amp; 11 · 64-bit</small></span>
+        </a>
+        <a class="dl-btn" data-os="mac" href="https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.25 1.84-3.33 1.92-3.38-1.05-1.53-2.68-1.74-3.26-1.76-1.39-.14-2.71.82-3.42.82-.7 0-1.79-.8-2.94-.78-1.51.02-2.91.88-3.69 2.24-1.57 2.73-.4 6.77 1.13 8.98.75 1.08 1.64 2.3 2.81 2.25 1.13-.05 1.55-.73 2.92-.73 1.36 0 1.75.73 2.94.71 1.21-.02 1.98-1.1 2.72-2.19.86-1.25 1.21-2.47 1.23-2.53-.03-.01-2.35-.9-2.36-3.63zM14.12 6c.62-.75 1.04-1.8.93-2.84-.9.04-1.98.6-2.62 1.35-.58.66-1.08 1.72-.95 2.74 1 .08 2.02-.51 2.64-1.25z"/></svg>
+          <span><b>Download for Mac</b><small>v1.0.14 · Apple Silicon (M1–M5) · macOS 11+</small></span>
+        </a>
+      </div>
+      <div class="fine"><span>Free forever</span><span>No account</span><span>No telemetry</span><a href="#license">GPLv3 open source</a></div>
+
+      <div class="showcase rv">
+        <div class="frame"><img src="assets/shot-widgets.jpg" alt="DeskStats CPU, GPU, memory and sensor widgets showing live load, clock speed, temperatures and fan speeds on a desktop" width="1600" height="900" fetchpriority="high"></div>
       </div>
 
       <div class="strip rv">
-        <div><b>10+</b><span>widgets, one platform</span></div>
-        <div><b>Your setup</b><span>multiple screens, one workspace</span></div>
-        <div><b>1&nbsp;click</b><span>floating widgets ⇄ sidebar</span></div>
+        <div><b>10+</b><span>widgets in one app</span></div>
+        <div><b>2 platforms</b><span>Windows and Apple Silicon Mac</span></div>
+        <div><b>1 click</b><span>floating widgets ⇄ sidebar</span></div>
         <div><b>0</b><span>accounts, ads or tracking</span></div>
       </div>
     </div>
@@ -59,88 +124,185 @@
   <main>
     <section id="features">
       <div class="wrap">
-        <div class="center rv">
-          <div class="eyebrow">Features</div>
-          <h2>Everything your PC is doing, at a glance.</h2>
-          <p class="sub">From busy cores to background apps. Keep the useful details in view, without opening another dashboard.</p>
+        <div class="head rv">
+          <span class="eyebrow">Features</span>
+          <h2>Everything your computer is doing, at a glance.</h2>
+          <p class="sub">From busy cores to background apps. Keep CPU temperature, GPU load and RAM usage in view without opening Task Manager or Activity Monitor.</p>
         </div>
 
-        <div class="bento feature-previews">
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">01</span><h3>CPU, down to every thread</h3><p>CPU activity, per-thread load, temperature, clock and power readings on supported hardware.</p></div><div class="widget-preview  "><img src="assets/widget-cpu.png" alt="CPU, down to every thread - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">02</span><h3>GPU &amp; hot spot</h3><p>GPU load, video memory, temperature and clock speed, with graphs and ring indicators.</p></div><div class="widget-preview  "><img src="assets/widget-gpu.png" alt="GPU &amp; hot spot - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">03</span><h3>Memory &amp; top apps</h3><p>Used, available and committed memory, plus the processes using the most RAM.</p></div><div class="widget-preview  "><img src="assets/widget-ram.png" alt="Memory &amp; top apps - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">04</span><h3>Temperatures &amp; fans</h3><p>Supported CPU, GPU and motherboard temperatures and fan speeds, together.</p></div><div class="widget-preview  "><img src="assets/widget-sensors.png" alt="Temperatures &amp; fans - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">05</span><h3>Network, in real time</h3><p>Live upload and download speeds, traffic history, adapter status and session totals.</p></div><div class="widget-preview  "><img src="assets/widget-network.png" alt="Network, in real time - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">06</span><h3>Storage, at a glance</h3><p>Available space on each drive, usage rings and live disk read and write activity.</p></div><div class="widget-preview  "><img src="assets/widget-drive.png" alt="Storage, at a glance - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">07</span><h3>Room to resize</h3><p>Widen a widget to arrange its sections in columns. Choose Regular or Large to match your setup.</p></div><div class="widget-preview wide-preview "><img src="assets/widget-resize.png" alt="Room to resize - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
-<article class="card preview-card"><div class="preview-copy"><span class="preview-number">08</span><h3>Light or dark. Your choice.</h3><p>Pick a theme for each widget, adjust its background opacity, or follow the app theme.</p></div><div class="widget-preview  light-preview"><img src="assets/widget-theme-light.png" alt="Light or dark. Your choice. - actual DeskStats widget interface with illustrative readings" loading="lazy"></div></article>
+        <div class="feature-previews">
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">01</span><h3>CPU, down to every thread</h3><p>CPU load, per-core usage, temperature, clock speed, package power and core voltage.</p></div><div class="widget-preview"><img src="assets/widget-cpu.png" alt="DeskStats CPU widget with per-core load, temperature, clock speed and power" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">02</span><h3>GPU load &amp; temperature</h3><p>GPU usage, video memory, temperature, core and memory clock, with graphs and rings.</p></div><div class="widget-preview"><img src="assets/widget-gpu.png" alt="DeskStats GPU monitor widget with load, VRAM, temperature and clock" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">03</span><h3>Memory &amp; top apps</h3><p>Used, available and committed RAM, plus the processes using the most memory.</p></div><div class="widget-preview"><img src="assets/widget-ram.png" alt="DeskStats RAM usage widget with top memory-hungry processes" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">04</span><h3>Temperatures &amp; fans</h3><p>CPU, GPU and motherboard temperatures and fan speeds. Fanless Macs say so.</p></div><div class="widget-preview"><img src="assets/widget-sensors.png" alt="DeskStats temperature and fan speed sensor widget" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">05</span><h3>Network speed, live</h3><p>Upload and download speed, traffic history, adapter status, local and public IP.</p></div><div class="widget-preview"><img src="assets/widget-network.png" alt="DeskStats network speed widget with upload and download graph" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">06</span><h3>Storage at a glance</h3><p>Free space on every drive, usage rings and live disk read and write activity.</p></div><div class="widget-preview"><img src="assets/widget-drive.png" alt="DeskStats disk usage widget with read and write speed" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">07</span><h3>Room to resize</h3><p>Widen a widget to lay its sections out in columns. Pick Regular or Large.</p></div><div class="widget-preview wide-preview"><img src="assets/widget-resize.png" alt="Wide DeskStats widget arranged in columns" loading="lazy" width="900" height="480"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">08</span><h3>Light or dark</h3><p>Choose a theme per widget, set background opacity, or follow the app theme.</p></div><div class="widget-preview light-preview"><img src="assets/widget-theme-light.png" alt="DeskStats widget in light theme" loading="lazy" width="560" height="760"></div></article>
+          <article class="card preview-card rv"><div class="preview-copy"><span class="preview-number">09</span><h3>And a few more</h3><p>Float widgets across monitors or stack them in a sidebar. Your layout is remembered between updates.</p></div><div class="widget-preview extras"><ul><li>Weather &amp; air quality</li><li>World clock</li><li>Date &amp; time</li><li>Now Playing</li><li>Recycle Bin / Trash</li><li>Hardware power</li></ul></div></article>
         </div>
-        <p class="preview-disclosure">Actual widget UI with illustrative readings. Sensor availability varies by hardware.</p>
-        <div class="feature-footnotes"><p><span>Made for your desktop</span>Float widgets across your monitors or bring them together in a sidebar.</p><p><span>Your layout stays yours</span>Widget choices, sizes and positions are remembered between sessions and updates.</p><p><span>Quietly private</span>No account, ads or telemetry. Hardware readings stay on your PC.</p></div>
+        <p class="preview-disclosure">Actual widget UI with illustrative readings. Sensor availability depends on your hardware.</p>
       </div>
     </section>
 
-    <section id="how">
-      <div class="wrap">
-        <div class="center rv">
-          <div class="eyebrow">Get started</div>
-          <h2>Your desktop. Your layout.</h2>
+    <section id="mac">
+      <div class="wrap mac">
+        <div class="rv">
+          <span class="eyebrow">New · macOS</span>
+          <h2>Now on Mac, built for Apple&nbsp;Silicon.</h2>
+          <p class="sub">The same widgets, themes and sidebar, rebuilt for M-series Macs. DeskStats runs from the menu bar and reads real sensors without sudo, kernel extensions or extra drivers.</p>
+          <ul class="ticks">
+            <li><span><b>CPU &amp; GPU temperature</b> on MacBook Air, MacBook Pro, iMac, Mac mini and Mac Studio.</span></li>
+            <li><span><b>Core and GPU voltage</b> from the chip's own power tables, at the live clock speed.</span></li>
+            <li><span><b>Fanless aware.</b> A MacBook Air shows “No fan” instead of a fake 0 RPM.</span></li>
+            <li><span><b>Power, clocks and memory:</b> package power, P/E-cluster clocks, unified memory, swap and memory clock.</span></li>
+            <li><span><b>Menu bar app</b> with Now Playing, Weather, World Clock and Trash widgets.</span></li>
+          </ul>
+          <div class="chips"><span class="chip">M1</span><span class="chip">M2</span><span class="chip">M3</span><span class="chip">M4</span><span class="chip">M5</span><span class="chip">macOS 11 Big Sur or later</span></div>
+          <a class="btn primary" style="margin-top:30px" href="https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 20h16"/></svg>
+            Download for Apple Silicon</a>
         </div>
-        <div class="steps">
-          <div class="step rv"><h3>Install</h3><p>Run the <a href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">Windows installer</a>. Your hardware widgets are ready on first launch, with the sensor driver included.</p></div>
-          <div class="step rv"><h3>Find your arrangement</h3><p>Right-click the tray icon → <code>Add widget</code>. Drag them anywhere, or choose <code>Switch to Sidebar</code>.</p></div>
-          <div class="step rv"><h3>Make it feel like home</h3><p>Choose Regular or Large, light or dark, and the background opacity you like. Your layout is saved for next time.</p></div>
+        <div class="mac-shots rv">
+          <figure><img src="assets/mac-sidebar.jpg" alt="DeskStats on a MacBook Air M3: CPU widget with core voltage and No fan, GPU widget with voltage and memory clock" loading="lazy" width="640" height="1560"></figure>
+          <figure><img src="assets/mac-sensors.jpg" alt="DeskStats sensors widget on a fanless MacBook Air showing CPU and GPU temperature" loading="lazy" width="640" height="440"></figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare">
+      <div class="wrap">
+        <div class="head rv">
+          <span class="eyebrow">Windows vs Mac</span>
+          <h2>One app, two platforms.</h2>
+          <p class="sub">What each version can read. Exact sensors depend on your hardware.</p>
+        </div>
+        <div class="compare rv">
+          <table>
+            <thead><tr><th scope="col">Reading</th><th scope="col">Windows 10 / 11</th><th scope="col">macOS (Apple Silicon)</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">CPU load, per-core, clock</th><td class="y">✓</td><td class="y">✓</td></tr>
+              <tr><th scope="row">CPU &amp; GPU temperature</th><td class="y">✓</td><td class="y">✓ no sudo</td></tr>
+              <tr><th scope="row">Package power</th><td class="y">✓</td><td class="y">✓</td></tr>
+              <tr><th scope="row">Core voltage</th><td class="y">✓ supported boards</td><td class="y">✓ from DVFS tables</td></tr>
+              <tr><th scope="row">GPU load, clock, VRAM</th><td class="y">✓</td><td class="y">✓ unified memory</td></tr>
+              <tr><th scope="row">Fan speed</th><td class="y">✓</td><td class="y">✓ or “No fan” on Air</td></tr>
+              <tr><th scope="row">Motherboard sensors</th><td class="y">✓</td><td>Not exposed by macOS</td></tr>
+              <tr><th scope="row">Network, storage, RAM</th><td class="y">✓</td><td class="y">✓</td></tr>
+              <tr><th scope="row">Lives in</th><td>System tray</td><td>Menu bar</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="download">
+      <div class="wrap">
+        <div class="head rv">
+          <span class="eyebrow">Get started</span>
+          <h2>Up and running in a minute.</h2>
+        </div>
+        <div class="platforms">
+          <div class="card platform rv">
+            <h3><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zm0 13 7.5 1.1v-7H3zm8.4 1.2L21 21v-8.4h-9.6zm0-15.4v7.2H21V3z"/></svg>Windows</h3>
+            <ol>
+              <li>Run the <b>DeskStats installer</b>. The sensor driver is included and your hardware widgets appear on first launch.</li>
+              <li>Right-click the tray icon → <code>Add widget</code>. Drag widgets anywhere, or choose <code>Switch to Sidebar</code>.</li>
+              <li>Pick Regular or Large, light or dark, and the opacity you like. Your layout is saved.</li>
+            </ol>
+            <a class="btn primary" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">Download for Windows</a>
+          </div>
+          <div class="card platform rv">
+            <h3><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.25 1.84-3.33 1.92-3.38-1.05-1.53-2.68-1.74-3.26-1.76-1.39-.14-2.71.82-3.42.82-.7 0-1.79-.8-2.94-.78-1.51.02-2.91.88-3.69 2.24-1.57 2.73-.4 6.77 1.13 8.98.75 1.08 1.64 2.3 2.81 2.25 1.13-.05 1.55-.73 2.92-.73 1.36 0 1.75.73 2.94.71 1.21-.02 1.98-1.1 2.72-2.19.86-1.25 1.21-2.47 1.23-2.53-.03-.01-2.35-.9-2.36-3.63zM14.12 6c.62-.75 1.04-1.8.93-2.84-.9.04-1.98.6-2.62 1.35-.58.66-1.08 1.72-.95 2.74 1 .08 2.02-.51 2.64-1.25z"/></svg>macOS</h3>
+            <ol>
+              <li>Open the <b>.dmg</b> and drag <b>DeskStats</b> into <b>Applications</b>.</li>
+              <li>The first time, right-click DeskStats → <b>Open</b> → <b>Open</b> (or System Settings → Privacy &amp; Security → <b>Open Anyway</b>). The app is free and not notarized by Apple.</li>
+              <li>Find the DeskStats icon in the menu bar and add widgets from there.</li>
+            </ol>
+            <a class="btn primary" href="https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg">Download for Mac</a>
+          </div>
         </div>
       </div>
     </section>
 
     <section id="faq">
       <div class="wrap">
-        <div class="center rv">
-          <div class="eyebrow">FAQ</div>
+        <div class="head rv">
+          <span class="eyebrow">FAQ</span>
           <h2>Questions, answered.</h2>
         </div>
         <div class="faq rv">
-          <details><summary>Is DeskStats free?</summary><p>Yes. It is free and open source under the GPLv3 license.</p></details>
-          <details><summary>Why does it need administrator rights?</summary><p>Windows only allows apps to read hardware sensors, such as CPU temperature, with elevated rights. The installer also installs the free, signed PawnIO driver (if it is not already there) that DeskStats uses to read CPU sensors. Both are used only to read sensors.</p></details>
-          <details><summary>Does it collect my data?</summary><p>No. There is no account, no analytics and no ads. Your hardware readings never leave your PC. Optional weather and public-IP features contact their providers. Startup update checks contact GitHub Pages when enabled and can be turned off in settings. Read the <a href="privacy.html">privacy policy</a>.</p></details>
-          <details><summary>Will my widgets survive an update?</summary><p>Yes. In-place updates keep your widgets, sizes and screen positions. A fresh reinstall starts with hardware defaults and archives your previous layout.</p></details>
-          <details><summary>My antivirus flags it. Is it safe?</summary><p>DeskStats reads sensors through LibreHardwareMonitor and the PawnIO driver, like other well-known hardware monitors. Some antivirus programs are cautious about anything that talks to a hardware driver; check the detection details and report a suspected false positive to your security vendor. Do not bypass a warning without investigating it.</p></details>
-          <details><summary>Which Windows versions are supported?</summary><p>Windows 10 (version 2004) and Windows 11, 64-bit. You do not need to install .NET.</p></details>
-          <details><summary>How is this related to Sidebar Diagnostics?</summary><p>DeskStats is a new version of the idea behind Sidebar Diagnostics, rebuilt on .NET 8 as a widget platform. It adapts parts of Sidebar Diagnostics' logic (GPLv3) and credits it — see below. It is not affiliated with the original project or its author.</p></details>
+          <details><summary>Is DeskStats free?</summary><p>Yes. DeskStats is free and open source under the GPLv3 license, on both Windows and macOS. There is no account, no ads and no telemetry.</p></details>
+          <details><summary>Does DeskStats work on Mac?</summary><p>Yes. The macOS version runs on Apple Silicon Macs (M1, M2, M3, M4 and M5) with macOS 11 Big Sur or later. It lives in the menu bar and shows CPU and GPU load, clocks, power, temperatures, core voltage, memory, network, storage and Now Playing. Intel Macs are not supported yet.</p></details>
+          <details><summary>Can I see CPU temperature on a MacBook Air?</summary><p>Yes. DeskStats reads CPU and GPU temperatures on Apple Silicon without sudo or extra drivers. MacBook Air has no fan, so DeskStats shows “No fan” instead of a fake 0 RPM reading.</p></details>
+          <details><summary>macOS says the app can't be opened. What do I do?</summary><p>DeskStats is free and isn't notarized by Apple, so the first launch needs one extra step: right-click the app → <b>Open</b> → <b>Open</b>, or go to System Settings → Privacy &amp; Security → <b>Open Anyway</b>. Move the app into Applications first. Running it from Downloads makes macOS ask for folder access before it starts.</p></details>
+          <details><summary>Which Windows versions are supported?</summary><p>Windows 10 (version 2004 or later) and Windows 11, 64-bit. You do not need to install .NET.</p></details>
+          <details><summary>Why does the Windows version need administrator rights?</summary><p>Windows only lets apps read hardware sensors, such as CPU temperature, with elevated rights. The installer also adds the free, signed PawnIO driver (if it isn't already there) that DeskStats uses to read CPU sensors. Both are used only to read sensors.</p></details>
+          <details><summary>Does it collect my data?</summary><p>No. There is no account, no analytics and no ads. Your hardware readings never leave your computer. Optional weather and public-IP features contact their providers. Update checks can be turned off in settings. Read the <a href="privacy.html">privacy policy</a>.</p></details>
+          <details><summary>Will my widgets survive an update?</summary><p>Yes. Updates keep your widgets, sizes and screen positions. A fresh reinstall starts with hardware defaults and archives your previous layout.</p></details>
+          <details><summary>My antivirus flags the Windows installer. Is it safe?</summary><p>DeskStats reads sensors through LibreHardwareMonitor and the PawnIO driver, like other well-known hardware monitors. Some antivirus programs are cautious about anything that talks to a hardware driver. Check the detection details and report a suspected false positive to your security vendor. Don't bypass a warning without looking into it.</p></details>
+          <details><summary>Is DeskStats a Sidebar Diagnostics alternative?</summary><p>Yes. DeskStats is a new take on the idea behind Sidebar Diagnostics, rebuilt as a widget platform with floating widgets, a docked sidebar, themes and a macOS version. It adapts parts of Sidebar Diagnostics' logic (GPLv3) and credits it below. It is not affiliated with the original project or its author.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="wrap">
+        <div class="head rv">
+          <span class="eyebrow">Contact</span>
+          <h2>Found a bug? Say hi.</h2>
+          <p class="sub">Report bugs, ask questions or share ideas. GitHub issues are best for bugs, but a quick message works too.</p>
+        </div>
+        <div class="contact">
+          <a class="card rv" href="https://github.com/talhazahid/deskstats/issues/new" rel="noopener">
+            <span class="ic"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.65-.89-3.65-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></span>
+            <b>GitHub Issues</b><span>Best for bug reports and feature requests.</span><span class="handle">Open an issue →</span>
+          </a>
+          <a class="card rv" href="https://x.com/talhazahid56" rel="noopener">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75 3h3.07l-6.7 7.66L22 21h-6.17l-4.83-6.32L5.47 21H2.4l7.17-8.2L2 3h6.33l4.36 5.77zm-1.08 16.17h1.7L7.4 4.74H5.58z"/></svg></span>
+            <b>X / Twitter</b><span>Quick questions and updates.</span><span class="handle">@talhazahid56</span>
+          </a>
+          <button class="card rv" type="button" id="discord" data-handle="talha56" aria-label="Copy Discord username talha56">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.6 5.3A17 17 0 0 0 15.4 4l-.5 1.1a15.7 15.7 0 0 0-5.8 0L8.6 4a17 17 0 0 0-4.2 1.3C1.7 9.3 1 13.2 1.3 17a17 17 0 0 0 5.2 2.6l1.1-1.8c-.6-.2-1.2-.5-1.8-.9l.4-.3a12.1 12.1 0 0 0 11.6 0l.4.3c-.6.4-1.2.7-1.8.9l1.1 1.8a17 17 0 0 0 5.2-2.6c.4-4.4-.7-8.3-3.1-11.7zM8.5 14.7c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1zm7 0c-1 0-1.9-1-1.9-2.1s.8-2.1 1.9-2.1 1.9 1 1.9 2.1-.8 2.1-1.9 2.1z"/></svg></span>
+            <b>Discord</b><span>Message me directly. Click to copy.</span><span class="handle" id="discord-handle">talha56</span>
+          </button>
         </div>
       </div>
     </section>
 
     <section id="license">
       <div class="wrap">
-        <div class="center rv">
-          <div class="eyebrow">Open source</div>
-          <h2>Open source.<br>Open to your ideas.</h2>
-          <p class="sub">Free to use, inspect and improve. Built in the open under GPLv3, with credit to the projects that made it possible.</p>
-        </div>
-        <div class="open-source-cta"><a class="btn primary" href="https://github.com/talhazahid/deskstats">Explore the source on GitHub ↗</a><a href="https://github.com/talhazahid/deskstats/issues">Share an idea or report an issue →</a></div><div class="license">
-          <div class="card rv">
-            <h3 style="margin-top:0">What the license means</h3>
-            <ul>
-              <li><span class="ok">✓</span> Use it for free, at home or at work.</li>
-              <li><span class="ok">✓</span> Read, study and modify the source code.</li>
-              <li><span class="ok">✓</span> Share it — with the source, under GPLv3, with credits kept and changes marked.</li>
-              <li><span class="no">✕</span> Make it closed-source, re-license it as MIT, or remove the credits.</li>
-              <li><span class="no">✕</span> Use the DeskStats name, logo or icon for a fork or another product.</li>
-            </ul>
+        <div class="inner rv">
+          <div class="head left" style="margin-bottom:0">
+            <span class="eyebrow">Open source</span>
+            <h2>Open source. Open to your ideas.</h2>
+            <p class="sub">Free to use, inspect and improve. Built in the open under GPLv3, with credit to the projects that made it possible.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:26px"><a class="btn primary" href="https://github.com/talhazahid/deskstats">Explore the source</a><a class="btn" href="https://github.com/talhazahid/deskstats/issues">Share an idea</a></div>
           </div>
-          <div class="card rv">
-            <h3 style="margin-top:0">Credits &amp; lineage</h3>
-            <p>Built with the help of open-source projects:</p>
-            <div class="credits">
-              <a class="chip" href="https://github.com/ArcadeRenegade/SidebarDiagnostics">Sidebar Diagnostics · GPLv3</a>
-              <a class="chip" href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor">LibreHardwareMonitor · MPL-2.0</a>
-              <a class="chip" href="https://pawnio.eu/">PawnIO</a>
-              <a class="chip" href="https://open-meteo.com/">Open-Meteo · CC BY 4.0</a>
-              <a class="chip" href="https://www.ipify.org/">ipify</a>
+          <div class="license">
+            <div class="card">
+              <h3>What the license means</h3>
+              <ul>
+                <li><span class="ok">✓</span> Use it for free, at home or at work.</li>
+                <li><span class="ok">✓</span> Read, study and modify the source code.</li>
+                <li><span class="ok">✓</span> Share it with the source, under GPLv3, with credits kept and changes marked.</li>
+                <li><span class="no">✕</span> Make it closed-source, re-license it as MIT, or remove the credits.</li>
+                <li><span class="no">✕</span> Use the DeskStats name, logo or icon for a fork or another product.</li>
+              </ul>
             </div>
-            <p style="margin-top:14px"><a href="https://github.com/talhazahid/deskstats/blob/main/NOTICE">Read the full NOTICE →</a></p>
+            <div class="card">
+              <h3>Credits &amp; lineage</h3>
+              <p>Built with the help of open-source projects:</p>
+              <div class="credits">
+                <a class="chip" href="https://github.com/ArcadeRenegade/SidebarDiagnostics">Sidebar Diagnostics · GPLv3</a>
+                <a class="chip" href="https://github.com/LibreHardwareMonitor/LibreHardwareMonitor">LibreHardwareMonitor · MPL-2.0</a>
+                <a class="chip" href="https://pawnio.eu/">PawnIO</a>
+                <a class="chip" href="https://github.com/vladkens/macmon">macmon · MIT</a>
+                <a class="chip" href="https://open-meteo.com/">Open-Meteo · CC BY 4.0</a>
+                <a class="chip" href="https://www.ipify.org/">ipify</a>
+              </div>
+              <p style="margin-top:14px"><a href="https://github.com/talhazahid/deskstats/blob/main/NOTICE">Read the full NOTICE →</a></p>
+            </div>
           </div>
         </div>
       </div>
@@ -149,12 +311,18 @@
     <div class="final">
       <div class="wrap">
         <div class="box rv">
-          <img class="logo" src="assets/logo-256.png" alt="DeskStats">
-          <h2 style="margin-top:0">Put your PC's vitals on your desktop.</h2>
-          <p class="sub" style="margin-bottom:24px">Free. Private. Beautiful.</p>
-          <div class="cta" style="margin:0">
-            <a class="btn primary" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">Download DeskStats</a>
-            <a class="btn" href="https://github.com/talhazahid/deskstats/issues">Report an issue</a>
+          <img class="logo" src="assets/logo-256.png" alt="DeskStats logo" width="64" height="64">
+          <h2>Put your computer's vitals on your desktop.</h2>
+          <p class="sub">Free. Private. Open source. For Windows and Apple Silicon Macs.</p>
+          <div class="dl">
+            <a class="dl-btn" data-os="win" href="https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.5 10.5 4.4v7.1H3zm0 13 7.5 1.1v-7H3zm8.4 1.2L21 21v-8.4h-9.6zm0-15.4v7.2H21V3z"/></svg>
+              <span><b>Download for Windows</b><small>Windows 10 &amp; 11 · 64-bit</small></span>
+            </a>
+            <a class="dl-btn" data-os="mac" href="https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.37 12.6c-.02-2.25 1.84-3.33 1.92-3.38-1.05-1.53-2.68-1.74-3.26-1.76-1.39-.14-2.71.82-3.42.82-.7 0-1.79-.8-2.94-.78-1.51.02-2.91.88-3.69 2.24-1.57 2.73-.4 6.77 1.13 8.98.75 1.08 1.64 2.3 2.81 2.25 1.13-.05 1.55-.73 2.92-.73 1.36 0 1.75.73 2.94.71 1.21-.02 1.98-1.1 2.72-2.19.86-1.25 1.21-2.47 1.23-2.53-.03-.01-2.35-.9-2.36-3.63zM14.12 6c.62-.75 1.04-1.8.93-2.84-.9.04-1.98.6-2.62 1.35-.58.66-1.08 1.72-.95 2.74 1 .08 2.02-.51 2.64-1.25z"/></svg>
+              <span><b>Download for Mac</b><small>Apple Silicon · macOS 11+</small></span>
+            </a>
           </div>
         </div>
       </div>
@@ -165,43 +333,50 @@
     <div class="wrap">
       <span>© 2026 DeskStats · GPLv3 · Not affiliated with Sidebar Diagnostics</span>
       <span class="r">
-        <a href="privacy.html">Privacy policy</a>
+        <a href="privacy.html">Privacy</a>
         <a href="https://github.com/talhazahid/deskstats">GitHub</a>
-        <a href="https://github.com/talhazahid/deskstats/issues">Support</a>
+        <a href="https://github.com/talhazahid/deskstats/releases">Releases</a>
+        <a href="https://x.com/talhazahid56">X @talhazahid56</a>
+        <a href="#contact">Discord: talha56</a>
       </span>
     </div>
   </footer>
 
   <script>
     (function () {
-      // One consistent, lightweight line-icon vocabulary. No icon library or CDN.
-      var iconPaths = [
-        'M7 7h10v10H7z M9 3v4m6-4v4M9 17v4m6-4v4M3 9h4m-4 6h4m10-6h4m-4 6h4',
-        'M3 6h18v12H3z M7 10h4v4H7z M15 10h3m-3 4h3M7 18v3m4-3v3',
-        'M4 7h16v10H4z M7 10v4m4-4v4m4-4v4M7 17v3m4-3v3m4-3v3',
-        'M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0z M12 9v8',
-        'M3 7h18v10H3z M7 11h.01M11 11h.01M16 14h3 M12 3v4m0 10v4',
-        'M4 5h16v14H4z M8 9l-3 3 3 3m8-6 3 3-3 3 M10 12h4',
-        'M7 17h10a4 4 0 1 0-1-8 5 5 0 0 0-9-1 4.5 4.5 0 0 0 0 9z',
-        'M12 3a9 9 0 1 0 0 18z M12 3v18',
-        'M3 4h18v13H3z M8 21h8m-4-4v4',
-        'M4 7h13m-4-4 4 4-4 4 M20 17H7m4-4-4 4 4 4',
-        'M6 10h12v11H6z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3',
-        'M3 12h4l3-7 4 14 3-7h4'
-      ];
-      document.querySelectorAll('.ico').forEach(function (el, i) {
-        el.setAttribute('aria-hidden', 'true');
-        el.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="' + iconPaths[i % iconPaths.length] + '"/></svg>';
+      document.documentElement.classList.remove('no-js');
+
+      // Put the visitor's platform first and highlight it; both stay visible.
+      var ua = navigator.userAgent || '';
+      var os = /Mac|iPhone|iPad/.test(ua) ? 'mac' : /Windows/.test(ua) ? 'win' : '';
+      document.querySelectorAll('.dl').forEach(function (group) {
+        var match = os && group.querySelector('[data-os="' + os + '"]');
+        if (match) { match.classList.add('rec'); group.insertBefore(match, group.firstChild); }
+        else { var first = group.querySelector('.dl-btn'); if (first) first.classList.add('rec'); }
       });
-      fetch('https://api.github.com/repos/talhazahid/deskstats', {headers: {'Accept': 'application/vnd.github+json'}})
-        .then(function (response) { if (!response.ok) throw new Error('Unavailable'); return response.json(); })
-        .then(function (repo) { if (Number.isInteger(repo.stargazers_count)) { var count = document.getElementById('star-count'); count.textContent = repo.stargazers_count.toLocaleString(); count.hidden = false; } })
+      var auto = document.querySelector('[data-dl-auto]');
+      var rec = document.querySelector('#hero-dl .rec');
+      if (auto && rec && os) { auto.href = rec.href; auto.title = os === 'mac' ? 'Download for Mac' : 'Download for Windows'; }
+
+      // Copy Discord username.
+      var discord = document.getElementById('discord');
+      if (discord) discord.addEventListener('click', function () {
+        var handle = discord.getAttribute('data-handle');
+        var label = document.getElementById('discord-handle');
+        var done = function () { label.textContent = 'Copied: ' + handle; setTimeout(function () { label.textContent = handle; }, 1800); };
+        if (navigator.clipboard) navigator.clipboard.writeText(handle).then(done, done); else done();
+      });
+
+      fetch('https://api.github.com/repos/talhazahid/deskstats', { headers: { Accept: 'application/vnd.github+json' } })
+        .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+        .then(function (repo) { if (Number.isInteger(repo.stargazers_count)) { var c = document.getElementById('star-count'); c.textContent = repo.stargazers_count.toLocaleString(); c.hidden = false; } })
         .catch(function () {});
-      var els = document.querySelectorAll(".rv");
-      if ("IntersectionObserver" in window) {
-        var io = new IntersectionObserver(function (e) { e.forEach(function (x) { if (x.isIntersecting) { x.target.classList.add("in"); io.unobserve(x.target); } }); }, { threshold: 0.12 });
+
+      var els = document.querySelectorAll('.rv');
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) { entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.1 });
         els.forEach(function (el) { io.observe(el); });
-      } else { els.forEach(function (el) { el.classList.add("in"); }); }
+      } else { els.forEach(function (el) { el.classList.add('in'); }); }
     })();
   </script>
 </body>
