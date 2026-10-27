@@ -33,6 +33,7 @@ internal static class Program
             };
             checks["PlacementScenariosPass"] = PlacementChecks.Run(output);
             checks["PowerScenariosPass"] = PowerChecks.Run(output);
+            checks["TrayTooltipScenariosPass"] = TrayTooltipChecks.Run(output);
             var updateWindow = new UpdateWindow();
             updateWindow.Show();
             updateWindow.SetStatus("Downloading DeskStats 1.0.16… 24.0 MB", 45);

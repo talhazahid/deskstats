@@ -54,6 +54,8 @@ public sealed class TrayService : IDisposable
         _tray = new TaskbarIcon
         {
             Icon = AppIcons.CreateTrayIcon(),
+            // Keep this plain text: v2 uses the native Windows tooltip. A custom
+            // WPF TrayToolTip can become an orphan popup at (0, 0) (upstream #128).
             ToolTipText = "DeskStats",
             ContextMenu = new ContextMenu(),
         };
