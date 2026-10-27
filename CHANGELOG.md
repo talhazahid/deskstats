@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.19 — 2026-10-27
+
+- Corrected the release packaging: silent updates now use the committed installer that honors /UPDATEAPP=1 and relaunches DeskStats after installation.
+- Production builds require a clean source checkout to prevent local installer overrides from removing the update relaunch step.
+- Added installer logs alongside downloaded updates so installation and relaunch failures can be diagnosed.
+- Includes the native Windows tray-tooltip fix from 1.0.18.
+
 ## 1.0.18 — 2026-10-27
 
 - Fixed the stray DeskStats label that could appear at the primary screen's top-left without clicking the tray icon.

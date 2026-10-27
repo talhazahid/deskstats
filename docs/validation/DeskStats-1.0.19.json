@@ -1,0 +1,23 @@
+{
+  "CleanSourceCommit": "0974c8a",
+  "LiveWidgetsRestored": 4,
+  "SHA256": "5A9207A38100128560CBFDED9D676CC1EC179494EE2ECA83A95C81567CFAF96D",
+  "SetupChecks": {
+    "PlacementScenariosPass": true,
+    "PowerScenariosPass": true,
+    "TrayTooltipScenariosPass": true,
+    "UpdateReadyVisibleInTaskbarAndFront": true,
+    "UpdateLaterDoesNotApproveInstallation": true,
+    "WindowPersistenceScenariosPass": true,
+    "ContinueClosesDarkDialog": true,
+    "ContinueClosesLightDialog": true,
+    "RejectsTamperedInstaller": true,
+    "RejectsMissingInstaller": true
+  },
+  "SavedWidgetStateUnchanged": true,
+  "FullInstallerUacCycleTested": true,
+  "InstalledVersion": "1.0.19.0",
+  "SilentUpdateExitCode": 0,
+  "Version": "1.0.19",
+  "InstallerLaunchedAppWithRestartedArgument": true
+}
