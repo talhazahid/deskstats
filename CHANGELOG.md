@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.18 — 2026-10-27
+
+- Fixed the stray DeskStats label that could appear at the primary screen's top-left without clicking the tray icon.
+- Updated the tray library to 2.0.1 so plain hover text uses the native Windows tooltip instead of a WPF popup.
+- Verified repeated tooltip-open callbacks, text changes, layout persistence, widget sizing, power readings and update prompt behavior.
+
 ## 1.0.17 — 2026-10-24
 
 - Moved Hardware Power into an independent hardware widget with its own position, Regular/Large size and saved settings. Fresh default layouts include it; existing layouts can add it from Hardware > Hardware power.

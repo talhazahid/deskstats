@@ -1,0 +1,28 @@
+{
+  "SHA256": "8624E6306112400DBB6972C50BA18A176DC353D24CAC3B7F8C1C8E91B41206C5",
+  "TrayTooltipChecks": {
+    "PlainTextUsesNoWpfTooltip": true,
+    "RepeatedShellCallbacksCannotOpenOrphanPopup": true,
+    "TextChangeKeepsNativeTooltip": true,
+    "NoCustomPopupWasConfigured": true
+  },
+  "LiveOrphanPopupConfirmed": {
+    "Bounds": "0,0,65,26",
+    "WindowType": "WPF popup",
+    "Process": "DeskStats"
+  },
+  "Version": "1.0.18",
+  "SetupChecks": {
+    "PlacementScenariosPass": true,
+    "PowerScenariosPass": true,
+    "TrayTooltipScenariosPass": true,
+    "UpdateReadyVisibleInTaskbarAndFront": true,
+    "UpdateLaterDoesNotApproveInstallation": true,
+    "WindowPersistenceScenariosPass": true,
+    "ContinueClosesDarkDialog": true,
+    "ContinueClosesLightDialog": true,
+    "RejectsTamperedInstaller": true,
+    "RejectsMissingInstaller": true
+  },
+  "FullInstallerUacCycleTested": false
+}
