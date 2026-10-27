@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Save layout as…</title>
+    <link rel="stylesheet" href="theme.css" />
+    <link rel="stylesheet" href="dialog.css" />
+  </head>
+  <body class="dialog-body name-dialog">
+    <div class="field-label">Layout name</div>
+    <div class="field-help">A copy of the current arrangement is saved under this name.</div>
+    <input id="name" type="text" style="width: 100%; margin-top: 10px" spellcheck="false" />
+    <div class="dialog-error" id="error"></div>
+    <div class="dialog-actions">
+      <button class="btn" id="cancel" type="button">Cancel</button>
+      <button class="btn primary" id="save" type="button">Save</button>
+    </div>
+    <script type="module" src="name.js"></script>
+  </body>
+</html>

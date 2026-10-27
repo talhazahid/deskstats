@@ -1,0 +1,67 @@
+DeskStats for macOS
+Copyright (C) 2026 DeskStats contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+This macOS app is a port of the Windows DeskStats app by Talha Zahid
+(https://github.com/talhazahid/deskstats). The widget set, visual design,
+layout/settings schema and behaviour are preserved; the platform layer
+(windows, collectors, tray, dialogs) is new.
+
+------------------------------------------------------------------------
+
+Third-party notices
+------------------------------------------------------------------------
+
+1. DeskStats / SysDash (https://github.com/talhazahid/deskstats)
+   Copyright (C) 2026 DeskStats contributors — GPLv3.
+   The WPF application, XAML themes, widget layouts and settings model were
+   used as the reference for this port and are reproduced here under the
+   GPLv3. DeskStats itself is a modernisation of SidebarDiagnostics
+   (https://github.com/ArcadeRenegade/SidebarDiagnostics, GPLv3), and parts
+   of the sensor-selection heuristics, unit conversion and multi-monitor
+   logic originate there.
+
+2. macmon (https://github.com/vladkens/macmon) — MIT.
+   Bundled unmodified at resources/macmon-bin and used to read Apple Silicon
+   CPU/GPU power, clocks, per-core load, temperatures and memory without
+   sudo. License text: resources/macmon-LICENSE.
+
+3. nowplaying-cli (https://github.com/kirtan-shah/nowplaying-cli) — GPLv3.
+   Bundled at resources/nowplaying-cli/2.1.0 and used by the Now Playing
+   widget to query the system media session. License text:
+   resources/nowplaying-cli/2.1.0/LICENSE.
+
+4. Electron (https://www.electronjs.org) — MIT.
+   Application runtime. Chromium (BSD-style) and Node.js (MIT) are included
+   in the Electron distribution and are covered by its license files.
+
+5. Weather data by Open-Meteo (https://open-meteo.com) — CC BY 4.0.
+   Forecast, air-quality and geocoding requests are made directly from the
+   app; no API key is required.
+
+6. Apple system tools (netstat, ioreg, diskutil, df, ps, pmset, networksetup,
+   sw_vers, sysctl, osascript) are invoked read-only through the operating
+   system and are not redistributed.
+
+------------------------------------------------------------------------
+
+Compliance notes for contributors
+------------------------------------------------------------------------
+
+* Do NOT add proprietary, closed-source files to this repository.
+* If you copy code from another GPLv3 project, preserve its copyright
+  header and add an attribution entry to this NOTICE file.
+* The "DeskStats" name, logo and app icon are not licensed for use in forks
+  or other products under the GPL; forks should use their own name and
+  artwork.
+* Any user-generated data (layouts, settings) is NOT covered by this
+  license; it belongs to the user who created it.

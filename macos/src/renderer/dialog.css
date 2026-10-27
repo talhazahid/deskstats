@@ -1,0 +1,159 @@
+/* Native-framed dialog layout shared by widget settings, app settings, layout
+   naming, About, identify and the click-through rescue pill. */
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body.dialog-body {
+  min-height: 100vh;
+  padding: 0;
+  background: var(--panel-bg);
+  color: var(--text-primary);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body.app-dialog {
+  height: 100vh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dialog-header {
+  flex: 0 0 auto;
+  padding: 18px 20px 0;
+}
+
+.dialog-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 20px 6px;
+}
+
+.dialog-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px 16px;
+  border-top: 1px solid var(--panel-border-soft);
+  background: var(--panel-bg);
+}
+
+.dialog-footer .left { margin-right: auto; }
+
+.field-left { min-width: 0; flex: 1 1 auto; }
+.field-col-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.field-col .field-label { flex: 1 1 auto; }
+.field-col .field-value { flex: 0 0 auto; }
+.field-col .range { margin-top: 5px; }
+.card-body > .field + .field,
+.card-body > .field-col + .field-col,
+.card-body > .field + .field-col,
+.card-body > .field-col + .field { margin-top: 9px; }
+
+.dialog-card h2 { margin-bottom: 8px; }
+
+.city-wrap { position: relative; }
+.city-wrap input[type="text"] { width: 100%; }
+
+.about-links { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 4px; }
+.link-button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  color: var(--accent);
+  font-size: 12px;
+  cursor: pointer;
+}
+.link-button:hover { text-decoration: underline; }
+
+.about-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 15px;
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.about-meta { font-size: 11.5px; color: var(--text-tertiary); line-height: 1.55; margin-top: 10px; white-space: pre-line; overflow-wrap: anywhere; }
+.about-credits { font-size: 11.5px; color: var(--text-secondary); line-height: 1.55; margin-top: 10px; }
+body.about { padding: 20px 24px; }
+
+/* Layout name dialog */
+body.name-dialog { padding: 20px; }
+.name-dialog .dialog-actions { margin-top: 18px; }
+
+/* Identify overlay: each screen gets one big label. */
+body.identify-body {
+  background: rgba(10, 10, 14, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+/* Rescue pill: tiny floating window that restores mouse access. */
+body.rescue-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 4px;
+}
+
+.rescue-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(24, 24, 28, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 13px;
+  padding: 4px 5px 4px 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+body.light-theme .rescue-wrap {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(30, 41, 59, 0.16);
+}
+.rescue-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #f4f4f6;
+  white-space: nowrap;
+}
+body.light-theme .rescue-label { color: #1b2433; }
+.rescue-btn {
+  border: 0;
+  border-radius: 8px;
+  padding: 4px 9px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent);
+  color: #fff;
+}
+.rescue-btn.ghost {
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f4f6;
+}
+body.light-theme .rescue-btn.ghost { background: rgba(30, 41, 59, 0.08); color: #1b2433; }
+.rescue-btn:hover { filter: brightness(1.08); }

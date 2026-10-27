@@ -4,15 +4,18 @@
 
 # DeskStats
 
-**Your PC's vitals, including CPU, GPU, memory, network and sensors, as beautiful widgets on your desktop, or docked in a sidebar.**
+**Free, open-source system monitor widgets for Windows and macOS (Apple Silicon).**
+**CPU, GPU, memory, temperatures, network and storage, floating on your desktop or docked in a sidebar.**
 
-[![Download](https://img.shields.io/badge/Download-latest%20release-3d8bff?style=for-the-badge&logo=windows11&logoColor=white)](https://github.com/talhazahid/deskstats/releases/latest)
+[![Download for Windows](https://img.shields.io/badge/Download-Windows%2010%20%7C%2011-3d8bff?style=for-the-badge&logo=windows11&logoColor=white)](https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe)
+&nbsp;
+[![Download for Mac](https://img.shields.io/badge/Download-Mac%20(Apple%20Silicon)-e8f1ff?style=for-the-badge&logo=apple&logoColor=black)](https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg)
 &nbsp;
 [![Website](https://img.shields.io/badge/Website-talhazahid.github.io%2Fdeskstats-1c1c20?style=for-the-badge)](https://talhazahid.github.io/deskstats/)
 
-![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0b1020?style=flat-square&logo=windows&logoColor=white)
-![.NET](https://img.shields.io/badge/.NET-8-512bd4?style=flat-square&logo=dotnet&logoColor=white)
-![UI](https://img.shields.io/badge/UI-WPF-3d8bff?style=flat-square)
+![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-0b1020?style=flat-square&logo=windows&logoColor=white)
+![macOS](https://img.shields.io/badge/macOS-11%2B%20Apple%20Silicon-0b1020?style=flat-square&logo=apple&logoColor=white)
+![Chips](https://img.shields.io/badge/M1%20%7C%20M2%20%7C%20M3%20%7C%20M4%20%7C%20M5-supported-3d8bff?style=flat-square)
 ![License](https://img.shields.io/badge/license-GPLv3-32d74b?style=flat-square)
 ![Not MIT](https://img.shields.io/badge/not%20MIT-copyleft-ff4f8b?style=flat-square)
 
@@ -26,12 +29,23 @@
 
 ## What is DeskStats?
 
-DeskStats is a modern hardware monitor for Windows. It reads your CPU, GPU, memory,
-drives, network and every temperature and fan sensor your motherboard exposes, and
-shows them as clean, glass-style widgets that you can
+DeskStats is a modern hardware monitor for **Windows** and **macOS**. It reads your CPU, GPU,
+memory, drives, network and temperature sensors, and shows them as clean, glass-style widgets
+that you can
 
 - **float anywhere** on any monitor, or
 - **dock into a sidebar** on the edge of the screen. Switch between the two in one click.
+
+| | Windows | macOS |
+|---|---|---|
+| **Supported systems** | Windows 10 (2004+) and Windows 11, 64-bit | macOS 11 Big Sur or later |
+| **Hardware** | Intel, AMD, NVIDIA, Intel Arc, laptops and desktops | Apple Silicon: M1, M2, M3, M4, M5 (all Pro/Max/Ultra variants) |
+| **Lives in** | System tray | Menu bar |
+| **Sensors via** | LibreHardwareMonitor + PawnIO driver | macmon (no sudo, no kernel extension) |
+| **Download** | [Windows installer (.exe)](https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe) | [Mac disk image (.dmg)](https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg) |
+| **Source** | [`src/`](src/) (.NET 8, WPF) | [`macos/`](macos/) (Electron) |
+
+Intel Macs are not supported yet.
 
 It is a **new version of [Sidebar Diagnostics](https://github.com/ArcadeRenegade/SidebarDiagnostics)**,
 rebuilt from the ground up for today's Windows: .NET 8, a widget platform instead of a single
@@ -56,23 +70,42 @@ sidebar, resizable responsive widgets, per-widget themes, and universal hardware
     <td width="50%"><img src="docs/assets/shot-columns-sm.jpg" alt="Responsive columns"><br><sub><b>Responsive</b>: drag a widget wider and its cards flow into 2 or 3 columns.</sub></td>
     <td width="50%"><img src="docs/assets/shot-customize-sm.jpg" alt="Customisation menu"><br><sub><b>Make it yours</b>: theme, opacity and layer per widget.</sub></td>
   </tr>
+  <tr>
+    <td width="50%"><img src="docs/assets/mac-sidebar.jpg" alt="DeskStats on a MacBook Air M3" width="320"><br><sub><b>On a MacBook Air (M3)</b>: CPU with core voltage and “No fan”, GPU with voltage and memory clock.</sub></td>
+    <td width="50%"><img src="docs/assets/mac-sensors.jpg" alt="DeskStats sensors on a fanless Mac"><br><sub><b>Fanless aware</b>: CPU and GPU temperatures on a passively cooled Mac.</sub></td>
+  </tr>
 </table>
 
-<sub>Images are design renders of the real widgets. Colours and values on your PC will differ.</sub>
+<sub>Windows images are design renders of the real widgets. Colours and values on your PC will differ.</sub>
 
 ## Features
 
-**Monitoring**
+## Widgets
 
-- **CPU**: total load, per-thread load (up to 256 threads), effective clock, temperature, package power, core voltage, fan.
-- **GPU**: load, VRAM, core and *hot-spot* temperature, core / memory clock, fan, voltage. Picks the right GPU automatically on hybrid laptops, and lets you choose when there are several.
-- **Memory**: in use, available, committed, installed, and the **top apps by memory (up to 30)**.
-- **Sensors**: every motherboard temperature and fan in one place.
-- **Network**: live download / upload with history, adapter choice, today's totals, optional public IP.
-- **Storage**: capacity and read / write activity per drive.
-- **Date & time, World clock**: clock with calendar, several time zones.
-- **Weather**: current conditions, humidity, rain chance, wind, **air quality (US AQI)**, feels-like, UV, dew point, visibility, hourly and daily forecast. City search with autocomplete (type "kar" → *Karachi, Sindh, Pakistan*).
-- **Extras**: Now Playing, Recycle Bin.
+Every widget can float on its own or sit in the sidebar, and each one has its own settings, theme and size.
+
+| Widget | What it shows | Windows | macOS |
+|---|---|:---:|:---:|
+| **CPU** | Total load with history graph, per-core/thread load rings (up to 256 threads), clock speed, temperature, package power, core voltage and CPU fan | ✅ | ✅ |
+| **GPU** | Load, video memory (VRAM), core and hot-spot temperature, core and memory clock, fan and voltage. Picks the right GPU on hybrid laptops | ✅ | ✅ |
+| **Memory (RAM)** | Used, available, committed and installed memory, swap, and the top apps by memory (up to 30) | ✅ | ✅ |
+| **Hardware sensors** | CPU/GPU temperature rings, fan ring, and every temperature and fan sensor the hardware exposes. Fanless Macs show “No fan” | ✅ | ✅ |
+| **Network** | Live download/upload speed with history, adapter picker, local and public IP, session totals | ✅ | ✅ |
+| **Disks / Storage** | Capacity ring per drive, free space, live read/write speed and history | ✅ | ✅ |
+| **Hardware power** | CPU, GPU and supported PSU power readings | ✅ | — |
+| **Clock** | Big clock with date and a month calendar | ✅ | ✅ |
+| **World Clock** | Current time in several time zones of your choice | ✅ | ✅ |
+| **Weather** | Current conditions, feels-like, humidity, wind, UV, rain chance, air quality (US AQI), hourly and daily forecast, city search | ✅ | ✅ |
+| **Now Playing** | Title, artist, album art, progress and play/pause/next controls for the media you are playing | ✅ | ✅ |
+| **Recycle Bin / Trash** | Item count and size with a one-click empty action | ✅ | ✅ |
+
+**macOS extras**
+
+- **Core and GPU voltage** come from the chip's own DVFS tables at the live clock speed. Apple Silicon has no public voltage sensor.
+- **Memory clock** shows the chip's rated unified-memory speed (for example M3: LPDDR5-6400), plus live memory power.
+- **P- and E-cluster** clocks and voltages in the hardware report.
+
+## Features
 
 **Look & feel**
 
@@ -85,14 +118,16 @@ sidebar, resizable responsive widgets, per-widget themes, and universal hardware
 
 **Reliable**
 
-- **Your setup is remembered.** Widgets, positions and settings are stored in `%LocalAppData%\DeskStats` and come back after every update or reinstall. A backup is taken automatically before a new version first runs.
+- **Your setup is remembered.** Widgets, positions and settings are stored in `%LocalAppData%\DeskStats` (Windows) or `~/Library/Application Support/DeskStats` (macOS) and come back after every update or reinstall. A backup is taken automatically before a new version first runs.
 - **Universal hardware support**: graceful fallbacks when a sensor is not available; a hardware report (tray → *Hardware report…*) helps debug unusual PCs.
-- **Quiet**: low idle CPU, lives in the system tray, starts with Windows.
-- **Privacy first**: no account, no telemetry, no ads. Hardware data never leaves your PC. See the [privacy policy](https://talhazahid.github.io/deskstats/privacy.html).
+- **Quiet**: low idle CPU, lives in the system tray (Windows) or menu bar (macOS), optional launch at login.
+- **Privacy first**: no account, no telemetry, no ads. Hardware data never leaves your computer. See the [privacy policy](https://talhazahid.github.io/deskstats/privacy.html).
 
 ## Install
 
-1. Download **`DeskStats-Setup-x.y.z.exe`** from the [latest release](https://github.com/talhazahid/deskstats/releases/latest).
+### Windows
+
+1. Download **[`DeskStats-Setup-1.0.17.exe`](https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.17.exe)**.
 2. Run it and accept the Windows (UAC) prompt.
 3. Launch **DeskStats**. Right-click the tray icon → **Add widget**.
 
@@ -105,11 +140,22 @@ CPU sensors. Both are used only for reading sensors.
 
 **Requirements:** Windows 10 (2004) or Windows 11, 64-bit. No .NET install needed. The app is self-contained.
 
+### macOS (Apple Silicon)
+
+1. Download **[`DeskStats-1.0.14-arm64.dmg`](https://github.com/talhazahid/deskstats/releases/download/macos-v1.0.14/DeskStats-1.0.14-arm64.dmg)** ([all Mac releases](https://github.com/talhazahid/deskstats/releases/tag/macos-v1.0.14)).
+2. Open it and drag **DeskStats** into **Applications**.
+3. The first time, right-click DeskStats → **Open** → **Open**, or go to System Settings → Privacy & Security → **Open Anyway**. The app is free and not notarized by Apple.
+4. Click the DeskStats icon in the menu bar → **Add widget**.
+
+Run it from Applications. Opening it from Downloads or Documents makes macOS ask for folder access before it starts.
+
+**Requirements:** Apple Silicon Mac (M1 or newer), macOS 11 Big Sur or later. No sudo or extra drivers needed.
+
 ## Using it
 
 | I want to… | Do this |
 |---|---|
-| Add a widget | Tray icon → **Add widget** |
+| Add a widget | Tray / menu bar icon → **Add widget** |
 | Switch between floating and sidebar | Tray icon → **Switch to Widgets / Sidebar** |
 | Resize a widget | Right-click it → **Resize width**, then drag the left or right edge |
 | Change theme / opacity / layer | Right-click the widget → **Theme**, **Background opacity**, **Layer** |
@@ -138,6 +184,17 @@ powershell -ExecutionPolicy Bypass -File scripts\build-release.ps1 -InstallSdk
 The script publishes a self-contained single-file build, downloads the PawnIO setup and
 produces `artifacts\DeskStats-Setup-<version>.exe`.
 
+### macOS app
+
+Prerequisites: an Apple Silicon Mac and Node.js 18+. Xcode is not required.
+
+```sh
+cd macos
+npm install
+npm start          # run from source
+npm run pack       # build dist/DeskStats-darwin-arm64/DeskStats.app + zip
+```
+
 ### Repository layout
 
 ```
@@ -149,6 +206,7 @@ src/
   SysDash.Layouts      layout persistence + presets
   SysDash.Widgets      the widget implementations
   SysDash.App          composition root, sidebar + floating windows, tray, settings
+macos/                 macOS app for Apple Silicon (Electron): main process, widgets, sensor helpers
 installer/             Inno Setup installer (bundles the PawnIO driver)
 scripts/               build-release.ps1
 docs/                  GitHub Pages website, compliance notes
@@ -175,6 +233,8 @@ DeskStats stands on the shoulders of other open-source work, and says so:
 - **[PawnIO](https://pawnio.eu/)**: the signed kernel driver used to read CPU sensors.
 - **[Open-Meteo](https://open-meteo.com/)**: weather and air-quality data (CC BY 4.0), free for non-commercial use.
 - **[ipify](https://www.ipify.org/)**: public IP lookup (optional).
+- **[macmon](https://github.com/vladkens/macmon)** (MIT): Apple Silicon sensors on macOS without sudo.
+- **[nowplaying-cli](https://github.com/kirtan-shah/nowplaying-cli)**: Now Playing on macOS.
 - **Hardcodet.NotifyIcon.Wpf**, **Microsoft.Extensions.DependencyInjection**: tray icon and dependency injection.
 
 ## License
@@ -206,6 +266,8 @@ When you report a hardware problem, please attach the file from tray → **Hardw
 ## Support
 
 - Bugs and ideas: [GitHub Issues](https://github.com/talhazahid/deskstats/issues)
+- X / Twitter: [@talhazahid56](https://x.com/talhazahid56)
+- Discord: **talha56**
 - Website and privacy policy: <https://talhazahid.github.io/deskstats/>
 
-<div align="center"><sub>© 2026 DeskStats · Made for people who like to see what their PC is doing.</sub></div>
+<div align="center"><sub>© 2026 DeskStats · Made for people who like to see what their computer is doing.</sub></div>
