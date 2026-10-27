@@ -26,11 +26,18 @@ param(
     [string]$Arch = 'win-x64',
     [switch]$InstallSdk,
     [switch]$SkipInstaller,
-    [switch]$StoreEdition
+    [switch]$StoreEdition,
+    [switch]$RequireCleanSource
 )
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
+if ($RequireCleanSource) {
+    $dirtySource = git -C $Root status --porcelain -- src installer scripts
+    if ($LASTEXITCODE -ne 0 -or $dirtySource) {
+        throw 'Release build requires committed source. Use a clean checkout so local installer changes cannot remove update relaunch behavior.'
+    }
+}
 $AppProj = Join-Path $Root 'src\SysDash.App\SysDash.App.csproj'
 $Artifacts = Join-Path $Root 'artifacts'
 $PublishDir = Join-Path $Artifacts "DeskStats-$Arch"

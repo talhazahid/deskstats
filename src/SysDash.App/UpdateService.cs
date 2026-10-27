@@ -82,7 +82,9 @@ public static class UpdateService
             if (!await status.AskToInstallAsync(release.Version)) return;
             status.SetStatus("Starting the update installer…");
             saveState();
-            using var process = Process.Start(new ProcessStartInfo(download, "/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /UPDATEAPP=1")
+            string installLog = Path.Combine(folder, "install.log");
+            Log.Info("Starting update " + release.Version + ". Installer log: " + installLog);
+            using var process = Process.Start(new ProcessStartInfo(download, $"/SP- /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /UPDATEAPP=1 /LOG=\"{installLog}\"")
             { UseShellExecute = true, Verb = "runas" });
             if (process is null) throw new InvalidOperationException("The update installer could not start.");
             download = null; // Installer still needs the file; retain it until later cleanup.
