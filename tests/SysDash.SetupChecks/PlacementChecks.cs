@@ -42,7 +42,21 @@ internal static class PlacementChecks
         Point moved = FloatingPlacement.RestorePixels(movedMonitor, 150, 210, 320, 450);
         checks["MonitorReorderPreservesLocalPosition"] = moved == new Point((1600 + 150) * 1.5, (-500 + 210) * 1.5);
         Point edge = FloatingPlacement.RestorePixels(monitor, 1100, 600, 320, 450);
-        checks["IntentionalEdgePositionIsNotReset"] = edge == new Point((-1280 + 1100) * 1.5, 600 * 1.5);
+        checks["TaskbarBoundaryClampsManualAndSavedPositions"] = edge == new Point((-1280 + 944) * 1.5, 224 * 1.5);
+        foreach (Size screen in new[] { new Size(1920, 1080), new Size(1024, 768), new Size(640, 480) })
+        {
+            Rect work = new(0, 0, screen.Width, screen.Height);
+            var fit = FloatingPlacement.FitWithin(work, sizes, sizes.Select(_ => new Point(0, 0)).ToArray());
+            Rect safe = work; safe.Inflate(-FloatingPlacement.Margin, -FloatingPlacement.Margin);
+            bool valid = fit.Bounds.All(safe.Contains);
+            for (int i = 0; i < fit.Bounds.Length; i++)
+                for (int j = i + 1; j < fit.Bounds.Length; j++)
+                {
+                    Rect padded = fit.Bounds[i]; padded.Inflate(FloatingPlacement.Gap, FloatingPlacement.Gap);
+                    valid &= !padded.IntersectsWith(fit.Bounds[j]);
+                }
+            checks[$"BalancedInsideTaskbarBoundary{screen.Width}x{screen.Height}"] = valid;
+        }
         File.WriteAllText(Path.Combine(output, "placement-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
     }

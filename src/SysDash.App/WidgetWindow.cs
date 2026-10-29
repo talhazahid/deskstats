@@ -50,7 +50,19 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private TextBlock? _resizeHint;
     private bool _restoringPlacement = true;
     private bool _missingSavedMonitor;
-    private bool _spacingPosition;
+    internal double DesktopScale { get; private set; } = 1;
+    internal MonitorDescriptor? PlacementMonitor => MonitorGeometry.FindById(_savedMonitorDeviceId)
+        ?? MonitorGeometry.MonitorAt(new Point(Left + 20, Top + 20));
+
+    internal void SetDesktopScale(double scale)
+    {
+        if (Math.Abs(DesktopScale - scale) < 0.0001) return;
+        double width = Width / DesktopScale;
+        DesktopScale = scale;
+        if (Content is FrameworkElement root) root.LayoutTransform = new ScaleTransform(scale, scale);
+        Width = width * scale;
+        UpdateLayout();
+    }
     private string? _savedMonitorDeviceId;
     private double _savedOffsetX, _savedOffsetY;
     private readonly DispatcherTimer _placementTimer;
@@ -491,14 +503,15 @@ public sealed class WidgetWindow : Window, IWidgetHost
     public void MoveTo(double x, double y)
     {
         _missingSavedMonitor = false;
-        Left = x;
-        Top = y;
+        Rect work = (MonitorGeometry.MonitorAt(new Point(x + 20, y + 20)) ?? PlacementMonitor)?.WorkAreaDip
+            ?? MonitorGeometry.PrimaryWorkAreaDip();
+        Left = Math.Clamp(x, work.Left + FloatingPlacement.Margin, Math.Max(work.Left + FloatingPlacement.Margin, work.Right - ActualWidth - FloatingPlacement.Margin));
+        Top = Math.Clamp(y, work.Top + FloatingPlacement.Margin, Math.Max(work.Top + FloatingPlacement.Margin, work.Bottom - ActualHeight - FloatingPlacement.Margin));
         CapturePlacement(userMove: true);
     }
 
     public void MoveForSpacing(double x, double y)
     {
-        _spacingPosition = true;
         MoveTo(x, y);
     }
 
@@ -602,8 +615,10 @@ public sealed class WidgetWindow : Window, IWidgetHost
             DragMove();
             double snappedX = SnapAxis(Left);
             double snappedY = SnapAxis(Top);
-            Left = snappedX;
-            Top = snappedY;
+            // A manual drop obeys the same taskbar boundary as automatic placement.
+            MoveTo(snappedX, snappedY);
+            snappedX = Left;
+            snappedY = Top;
 
             // Remember which screen it was dropped on (Windows display number; 0 = unknown).
             Point center = new(snappedX + ActualWidth / 2, snappedY + Math.Min(ActualHeight, 80) / 2);
@@ -806,10 +821,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _restoringPlacement = true;
         try
         {
-            Point pixels = _spacingPosition
-                ? new Point((saved.WorkAreaDip.X + _savedOffsetX) * saved.DpiX / 96.0,
-                    (saved.WorkAreaDip.Y + _savedOffsetY) * saved.DpiY / 96.0)
-                : FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
+            Point pixels = FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
             if (GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect current) &&
                 Math.Abs(current.Left - pixels.X) <= 1 && Math.Abs(current.Top - pixels.Y) <= 1) return;
             SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
@@ -969,6 +981,27 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private IntPtr ContentHeightWindowProc(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
+        if (message == 0x0216) // WM_MOVING: enforce the boundary during the drag, not only after release.
+        {
+            var rect = Marshal.PtrToStructure<PixelRect>(lParam);
+            var monitors = MonitorGeometry.EnumerateMonitors();
+            var monitor = monitors.FirstOrDefault(m => FloatingPlacement.PixelWorkArea(m).Contains(
+                new Point((rect.Left + rect.Right) / 2.0, rect.Top + 20))) ?? PlacementMonitor;
+            if (monitor is not null)
+            {
+                Rect work = FloatingPlacement.PixelWorkArea(monitor);
+                double marginX = FloatingPlacement.Margin * monitor.DpiX / 96;
+                double marginY = FloatingPlacement.Margin * monitor.DpiY / 96;
+                int width = rect.Right - rect.Left, height = rect.Bottom - rect.Top;
+                rect.Left = (int)Math.Ceiling(Math.Clamp(rect.Left, work.Left + marginX, Math.Max(work.Left + marginX, work.Right - marginX - width)));
+                rect.Top = (int)Math.Ceiling(Math.Clamp(rect.Top, work.Top + marginY, Math.Max(work.Top + marginY, work.Bottom - marginY - height)));
+                rect.Right = rect.Left + width;
+                rect.Bottom = rect.Top + height;
+                Marshal.StructureToPtr(rect, lParam, false);
+                handled = true;
+                return new IntPtr(1);
+            }
+        }
         if (message == 0x0024) // WM_GETMINMAXINFO: Windows otherwise caps even auto-sized windows to the screen.
         {
             var limits = Marshal.PtrToStructure<MinMaxInfo>(lParam);

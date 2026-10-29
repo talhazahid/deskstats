@@ -104,7 +104,10 @@ internal static class WindowPersistenceChecks
             tall.View.MinHeight = requiredHeight;
             Pump();
             var tallWindow = Application.Current.Windows.OfType<WidgetWindow>().Single(w => w.InstanceId == tall.Id);
-            checks["ContentTallerThanScreenIsNotClipped"] = tallWindow.ActualHeight >= requiredHeight && tall.View.ActualHeight >= requiredHeight;
+            Rect safeWork = MonitorGeometry.WorkAreaFor(new Point(tallWindow.Left + 20, tallWindow.Top + 20), 0);
+            safeWork.Inflate(-FloatingPlacement.Margin + 1, -FloatingPlacement.Margin + 1);
+            checks["TallContentFitsScreenWithoutClippingOrScrolling"] = tall.View.ActualHeight >= requiredHeight &&
+                safeWork.Contains(new Rect(tallWindow.Left, tallWindow.Top, tallWindow.ActualWidth, tallWindow.ActualHeight)) && !HasScrollViewer(tallWindow);
             var floatingNow = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
             // Existing saved/manual positions must reflow when sensor data grows.
             controller.BeginManualPlacement();
@@ -124,6 +127,12 @@ internal static class WindowPersistenceChecks
                 return !padded.IntersectsWith(other);
             }));
             File.WriteAllText(Path.Combine(output, "reflow-bounds.json"), JsonSerializer.Serialize(floatingNow.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight }), new JsonSerializerOptions { WriteIndented = true }));
+            checks["AllWidgetsClearTaskbarAfterReflow"] = floatingNow.All(w =>
+            {
+                Rect safe = MonitorGeometry.WorkAreaFor(new Point(w.Left + 20, w.Top + 20), 0);
+                safe.Inflate(-FloatingPlacement.Margin + 1, -FloatingPlacement.Margin + 1);
+                return safe.Contains(new Rect(w.Left, w.Top, w.ActualWidth, w.ActualHeight));
+            });
             File.WriteAllText(Path.Combine(output, "tall-widget-bounds.json"), JsonSerializer.Serialize(new { requiredHeight, WindowHeight = tallWindow.ActualHeight, ContentHeight = tall.View.ActualHeight }));
             tall.View.MinHeight = previousMinHeight;
             Pump();

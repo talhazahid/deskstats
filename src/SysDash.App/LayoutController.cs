@@ -904,11 +904,17 @@ public sealed class LayoutController : IDisposable
     {
         if (FindItem(instanceId) is { } item)
         {
+            if (_detachedWindows.TryGetValue(instanceId, out var windowId) &&
+                _widgetWindows.TryGetHost(windowId, out var host) && host is WidgetWindow live)
+            {
+                width /= live.DesktopScale;
+                height /= live.DesktopScale;
+            }
             if (Math.Abs(item.Placement.Width - width) < 0.1 && Math.Abs(item.Placement.Height - height) < 0.1) return;
             item.Placement.Width = width;
             item.Placement.Height = height;
             ScheduleSave();
-            if (!_tearingDown && _initialArrangement.Contains(instanceId) && !_arrangingInitial) ArrangeInitialWindows();
+            if (!_tearingDown && !_adjustingSpacing && _initialArrangement.Contains(instanceId) && !_arrangingInitial) ArrangeInitialWindows();
             QueueWidgetSpacing();
         }
     }
@@ -929,26 +935,23 @@ public sealed class LayoutController : IDisposable
                     .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
                     .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible)
                     .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
-                var occupied = new List<Rect>();
-                foreach (var window in windows)
+                foreach (var group in windows.GroupBy(w => w.PlacementMonitor?.DeviceId))
                 {
-                    var bounds = new Rect(window.Left, window.Top, window.ActualWidth, window.ActualHeight);
-                    bool moved;
-                    do
+                    var members = group.ToArray();
+                    Rect work = members[0].PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip();
+                    // Iterate because wrapping text can change height after fitting the width.
+                    for (int pass = 0; pass < 3; pass++)
                     {
-                        moved = false;
-                        foreach (var previous in occupied)
+                        var sizes = members.Select(w => new Size(w.ActualWidth / w.DesktopScale,
+                            w.ActualHeight / w.DesktopScale)).ToArray();
+                        var preferred = members.Select(w => new Point(w.Left, w.Top)).ToArray();
+                        var plan = FloatingPlacement.FitWithin(work, sizes, preferred);
+                        for (int i = 0; i < members.Length; i++)
                         {
-                            var padded = previous;
-                            padded.Inflate(FloatingPlacement.Gap - 0.25, FloatingPlacement.Gap - 0.25);
-                            if (!padded.IntersectsWith(bounds)) continue;
-                            // Leave room for WPF's rounding to physical monitor pixels.
-                            bounds.Y = Math.Ceiling(previous.Bottom + FloatingPlacement.Gap) + 1;
-                            moved = true;
+                            members[i].SetDesktopScale(plan.Scale);
+                            members[i].MoveForSpacing(plan.Bounds[i].Left, plan.Bounds[i].Top);
                         }
-                    } while (moved);
-                    if (Math.Abs(bounds.Top - window.Top) > 0.1) window.MoveForSpacing(bounds.Left, bounds.Top);
-                    occupied.Add(bounds);
+                    }
                 }
             }
             finally { _adjustingSpacing = false; }
