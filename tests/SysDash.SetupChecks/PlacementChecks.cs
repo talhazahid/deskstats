@@ -22,7 +22,8 @@ internal static class PlacementChecks
         {
             Rect work = new(-1600, -100, screen.Width, screen.Height);
             var plan = FloatingPlacement.ArrangeInitial(work, sizes);
-            bool valid = plan.All(p => work.Contains(p.Bounds));
+            bool valid = plan.Select((p, i) => p.Bounds.Height == sizes[i].Height && p.HeightLimit == 0 &&
+                p.Bounds.Left >= work.Left && p.Bounds.Right <= work.Right).All(x => x);
             for (int i = 0; i < plan.Length; i++)
                 for (int j = i + 1; j < plan.Length; j++)
                 {
@@ -32,7 +33,7 @@ internal static class PlacementChecks
                     other.Inflate(FloatingPlacement.Gap / 2 - 0.01, FloatingPlacement.Gap / 2 - 0.01);
                     valid &= !probe.IntersectsWith(other);
                 }
-            checks[$"InitialLayoutFitsWithoutOverlap{screen.Width}x{screen.Height}"] = valid;
+            checks[$"InitialLayoutPreservesFullHeightWithoutOverlap{screen.Width}x{screen.Height}"] = valid;
         }
         var monitor = new MonitorDescriptor(1, "display2", new Rect(-1280, 0, 1280, 720), new Rect(-1280, 0, 1280, 690), 144, 144, false) { DeviceId = "stable-id" };
         Point pixels = FloatingPlacement.RestorePixels(monitor, 150, 210, 320, 450);

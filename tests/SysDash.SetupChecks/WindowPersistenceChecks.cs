@@ -33,7 +33,7 @@ internal static class WindowPersistenceChecks
             foreach (var instance in controller.Instances) instance.View.MinHeight = 900;
             Pump();
             var windows = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
-            File.WriteAllText(Path.Combine(output, "initial-window-bounds.json"), JsonSerializer.Serialize(windows.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight, w.MaxHeight }), new JsonSerializerOptions { WriteIndented = true }));
+            File.WriteAllText(Path.Combine(output, "initial-window-bounds.json"), JsonSerializer.Serialize(windows.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight, MaxHeight = double.IsPositiveInfinity(w.MaxHeight) ? (double?)null : w.MaxHeight }), new JsonSerializerOptions { WriteIndented = true }));
             checks["CreatesAllDefaultWidgets"] = windows.Length == LayoutController.DefaultWidgetIds.Length;
             checks["LiveContentGrowthDoesNotOverlap"] = !windows.SelectMany((a, i) => windows.Skip(i + 1).Select(b =>
                 new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight).IntersectsWith(new Rect(b.Left, b.Top, b.ActualWidth, b.ActualHeight)))).Any(x => x);
@@ -93,10 +93,29 @@ internal static class WindowPersistenceChecks
             Pump();
             checks["RestoreHardwareShowsDefaultsWithoutDuplicates"] = controller.Instances.Count() == LayoutController.DefaultWidgetIds.Length &&
                 LayoutController.DefaultWidgetIds.All(controller.IsWidgetShown) && controller.Instances.Any(i => i.Id == retained);
+            checks["NormalWidgetsHaveNoHeightCapOrScrollHost"] = Application.Current.Windows.OfType<WidgetWindow>().All(w =>
+                double.IsPositiveInfinity(w.MaxHeight) && w.SizeToContent == SizeToContent.Height &&
+                !HasScrollViewer(w));
+            var tall = controller.Instances.First(i => Application.Current.Windows.OfType<WidgetWindow>().Any(w => w.InstanceId == i.Id));
+            double previousMinHeight = tall.View.MinHeight;
+            double requiredHeight = MonitorGeometry.PrimaryWorkAreaDip().Height + 300;
+            tall.View.MinHeight = requiredHeight;
+            Pump();
+            var tallWindow = Application.Current.Windows.OfType<WidgetWindow>().Single(w => w.InstanceId == tall.Id);
+            checks["ContentTallerThanScreenIsNotClipped"] = tallWindow.ActualHeight >= requiredHeight && tall.View.ActualHeight >= requiredHeight;
+            File.WriteAllText(Path.Combine(output, "tall-widget-bounds.json"), JsonSerializer.Serialize(new { requiredHeight, WindowHeight = tallWindow.ActualHeight, ContentHeight = tall.View.ActualHeight }));
+            tall.View.MinHeight = previousMinHeight;
+            Pump();
             foreach (var instance in controller.Instances) controller.SetWidgetLarge(instance.Id, true);
             Pump();
             checks["EveryHardwareWidgetSupportsLargeSize"] = controller.Instances.All(i => controller.IsLargeWidget(i.Id) && Math.Abs(i.View.LayoutTransform.Value.M11 - 1.35) < 0.001);
             checks["LargeWidgetsHaveNoHeightCap"] = Application.Current.Windows.OfType<WidgetWindow>().All(w => double.IsPositiveInfinity(w.MaxHeight) && w.SizeToContent == SizeToContent.Height);
+            foreach (var instance in controller.Instances) controller.SetWidgetLarge(instance.Id, false);
+            Pump();
+            checks["ReturningToNormalNeverRestoresScrolling"] = Application.Current.Windows.OfType<WidgetWindow>().All(w =>
+                double.IsPositiveInfinity(w.MaxHeight) && !HasScrollViewer(w));
+            foreach (var instance in controller.Instances) controller.SetWidgetLarge(instance.Id, true);
+            Pump();
             foreach (var window in Application.Current.Windows.OfType<WidgetWindow>())
             {
                 var bitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(window.ActualWidth), (int)Math.Ceiling(window.ActualHeight), 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
@@ -183,6 +202,14 @@ internal static class WindowPersistenceChecks
         checks["UpdateRejectsInvalidChecksum"] = RejectUpdate("https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", "bad");
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
+    }
+
+    private static bool HasScrollViewer(DependencyObject root)
+    {
+        if (root is System.Windows.Controls.ScrollViewer) return true;
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+            if (HasScrollViewer(System.Windows.Media.VisualTreeHelper.GetChild(root, i))) return true;
+        return false;
     }
 
     private static bool RejectUpdate(string url, string hash)

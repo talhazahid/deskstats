@@ -55,10 +55,19 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private readonly DispatcherTimer _placementTimer;
     [StructLayout(LayoutKind.Sequential)]
     private struct PixelRect { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PixelPoint { public int X, Y; }
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MinMaxInfo
+    {
+        public PixelPoint Reserved, MaxSize, MaxPosition, MinTrackSize, MaxTrackSize;
+    }
     [DllImport("user32.dll")]
     private static extern bool GetWindowRect(IntPtr hwnd, out PixelRect rect);
     [DllImport("user32.dll")]
     private static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
 
     private event EventHandler? _hostClosed;
 
@@ -98,9 +107,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
         Width = Math.Clamp(spec.Width, 220, 1200);
         Height = Math.Clamp(spec.Height, 120, 1600);
         PlaceAt(spec);
-        MaxHeight = spec.HeightLimit > 0 ? spec.HeightLimit :
-            (MonitorGeometry.FindById(spec.MonitorDeviceId)?.WorkAreaDip ??
-             MonitorGeometry.WorkAreaFor(new Point(spec.X + 20, spec.Y + 20), spec.MonitorIndex)).Height;
+        // Saved layout limits must never turn a widget into a scrollable viewport.
+        MaxHeight = double.PositiveInfinity;
 
         // Height always follows the widget's content, so detailed widgets are
         // never clipped; the user only chooses the width (right-click → Resize width).
@@ -133,7 +141,25 @@ public sealed class WidgetWindow : Window, IWidgetHost
         base.Closed += (_, _) => _theme.ThemeChanged -= OnThemeChanged;
         base.Closed += (_, _) => _clickThroughWatch?.Stop();
 
-        SourceInitialized += (_, _) => ApplyChrome();
+        SourceInitialized += (_, _) =>
+        {
+            HwndSource.FromHwnd(new WindowInteropHelper(this).Handle)?.AddHook(ContentHeightWindowProc);
+            // The HWND received its first size limits before SourceInitialized.
+            // Refresh WPF's cached native limits after installing our hook.
+            IntPtr buffer = Marshal.AllocHGlobal(Marshal.SizeOf<MinMaxInfo>());
+            try
+            {
+                var limits = new MinMaxInfo
+                {
+                    MaxSize = new PixelPoint { X = 32767, Y = 32767 },
+                    MaxTrackSize = new PixelPoint { X = 32767, Y = 32767 },
+                };
+                Marshal.StructureToPtr(limits, buffer, false);
+                SendMessage(new WindowInteropHelper(this).Handle, 0x0024, IntPtr.Zero, buffer);
+            }
+            finally { Marshal.FreeHGlobal(buffer); }
+            ApplyChrome();
+        };
 
         // Monitor plugged / unplugged / resolution changed: keep the widget reachable.
         Microsoft.Win32.SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
@@ -164,7 +190,6 @@ public sealed class WidgetWindow : Window, IWidgetHost
             // is still a logical child of this window's card.
             if (_card is not null)
             {
-                if (_card.Child is ScrollViewer scroll) scroll.Content = null;
                 _card.Child = null;
                 _card = null;
             }
@@ -472,9 +497,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     public void ApplyContentSizing(bool large)
     {
-        if (_card?.Child is not ScrollViewer scroll) return;
-        scroll.VerticalScrollBarVisibility = large ? ScrollBarVisibility.Disabled : ScrollBarVisibility.Auto;
-        MaxHeight = large ? double.PositiveInfinity : MonitorGeometry.PrimaryWorkAreaDip().Height;
+        MaxHeight = double.PositiveInfinity;
         SizeToContent = SizeToContent.Height;
         InvalidateMeasure();
     }
@@ -505,13 +528,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             Background = Brushes.Transparent,
         };
         ViewParenting.Release(_instance.View);
-        card.Child = new ScrollViewer
-        {
-            Content = _instance.View,
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
-            CanContentScroll = false,
-        };
+        card.Child = _instance.View;
         _card = card;
         root.Children.Add(card);
 
@@ -556,8 +573,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private void OnStripDrag(object sender, MouseButtonEventArgs e)
     {
-        // ScrollViewer handles bubbling mouse events; listen during preview,
-        // while preserving real controls such as buttons and scrollbars.
+        // Listen during preview while preserving interactive controls in the view.
         for (DependencyObject? node = e.OriginalSource as DependencyObject;
              node is not null && !ReferenceEquals(node, sender);
              node = node is Visual ? VisualTreeHelper.GetParent(node) : null)
@@ -936,6 +952,18 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _layout.SetDetachedPosition(_instance.Id, Left, Top, monitor.Number);
         _layout.SetDetachedAnchor(_instance.Id, monitor.DeviceId, _savedOffsetX, _savedOffsetY);
         _layout.SetDetachedSize(_instance.Id, ActualWidth, ActualHeight);
+    }
+
+    private IntPtr ContentHeightWindowProc(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        if (message == 0x0024) // WM_GETMINMAXINFO: Windows otherwise caps even auto-sized windows to the screen.
+        {
+            var limits = Marshal.PtrToStructure<MinMaxInfo>(lParam);
+            limits.MaxSize.Y = 32767;
+            limits.MaxTrackSize.Y = 32767;
+            Marshal.StructureToPtr(limits, lParam, false);
+        }
+        return IntPtr.Zero;
     }
 
     private void ApplyChrome()

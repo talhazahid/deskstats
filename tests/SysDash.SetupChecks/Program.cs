@@ -26,6 +26,11 @@ internal static class Program
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             if (args.Contains("--website-previews")) { WebsitePreviews.Render(output); return 0; }
             if (args.Contains("--power-probe")) { PowerProbe.Run(output); return 0; }
+            if (args.Contains("--window-checks"))
+            {
+                bool placement = PlacementChecks.Run(output);
+                return WindowPersistenceChecks.Run(output) && placement ? 0 : 1;
+            }
             app.DispatcherUnhandledException += (_, e) =>
             {
                 File.WriteAllText(Path.Combine(output, "dispatcher-error.txt"), e.Exception.ToString());

@@ -26,7 +26,6 @@ public static class FloatingPlacement
         int columns = Math.Min(sizes.Count, Math.Min(3, Math.Max(1, (int)((work.Width - 2 * Margin + Gap) / (220 + Gap)))));
         int rows = (int)Math.Ceiling(sizes.Count / (double)columns);
         double width = Math.Min(320, Math.Max(40, (work.Width - 2 * Margin - (columns - 1) * Gap) / columns));
-        double cap = Math.Max(24, (work.Height - 2 * Margin - (rows - 1) * Gap) / rows);
         var result = new (Rect, double)[sizes.Count];
         for (int column = 0; column < columns; column++)
         {
@@ -35,8 +34,9 @@ public static class FloatingPlacement
             {
                 int i = column * rows + row;
                 if (i >= sizes.Count) break;
-                double height = Math.Min(cap, Math.Max(24, sizes[i].Height));
-                result[i] = (new Rect(work.Right - Margin - width - column * (width + Gap), y, width, height), cap);
+                // Preserve full content height even when a column extends below the screen.
+                double height = Math.Max(24, sizes[i].Height);
+                result[i] = (new Rect(work.Right - Margin - width - column * (width + Gap), y, width, height), 0);
                 y += height + Gap;
             }
         }
