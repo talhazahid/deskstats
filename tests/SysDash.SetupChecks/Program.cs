@@ -15,6 +15,7 @@ internal static class Program
     {
         string output = Path.GetFullPath(args[0]);
         Directory.CreateDirectory(output);
+        if (args.Contains("--log-checks")) return LogChecks.Run(output) ? 0 : 1;
         var checks = new Dictionary<string, bool>();
         try
         {
@@ -31,6 +32,7 @@ internal static class Program
                 e.Handled = true;
                 Environment.Exit(1);
             };
+            checks["LogRetentionScenariosPass"] = LogChecks.Run(output);
             checks["PlacementScenariosPass"] = PlacementChecks.Run(output);
             checks["PowerScenariosPass"] = PowerChecks.Run(output);
             checks["TrayTooltipScenariosPass"] = TrayTooltipChecks.Run(output);

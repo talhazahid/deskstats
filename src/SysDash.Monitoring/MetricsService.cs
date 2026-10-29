@@ -40,6 +40,9 @@ public sealed class MetricsService : IMetricsService
     private int _ticking;
     private bool _firstTickTraced;
     private bool _firstSnapshotTraced;
+    private string? _lastHardwareWarning;
+    private long _hardwareWarningTimestamp;
+    private int _hardwareWarningRepeats;
     private MetricsSnapshot _latest = MetricsSnapshot.Empty;
 
     public MetricsService(MetricsOptions options)
@@ -246,6 +249,22 @@ public sealed class MetricsService : IMetricsService
         }
     }
 
+    private void LogHardwareWarning(string message)
+    {
+        bool same = string.Equals(message, _lastHardwareWarning, StringComparison.Ordinal);
+        if (same)
+        {
+            _hardwareWarningRepeats++;
+            if (Stopwatch.GetElapsedTime(_hardwareWarningTimestamp) < TimeSpan.FromMinutes(5)) return;
+        }
+        if (_hardwareWarningRepeats > 0)
+            Log.Warn($"Hardware read failed: {_lastHardwareWarning} (repeated {_hardwareWarningRepeats} times)");
+        if (!same) Log.Warn($"Hardware read failed: {message}");
+        _lastHardwareWarning = message;
+        _hardwareWarningTimestamp = Stopwatch.GetTimestamp();
+        _hardwareWarningRepeats = 0;
+    }
+
     private MetricsSnapshot BuildSnapshot()
     {
         CpuReading? cpu = null;
@@ -318,7 +337,7 @@ public sealed class MetricsService : IMetricsService
             }
             catch (Exception ex)
             {
-                Log.Warn($"Hardware read failed: {ex.Message}");
+                LogHardwareWarning(ex.Message);
             }
         }
 

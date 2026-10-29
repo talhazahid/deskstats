@@ -5,4 +5,7 @@
     <Description>Domain models, MVVM primitives, units, history buffers, logging.</Description>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SysDash.SetupChecks" />
+  </ItemGroup>
 </Project>
