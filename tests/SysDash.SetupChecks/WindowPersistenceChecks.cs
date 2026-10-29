@@ -27,12 +27,34 @@ internal static class WindowPersistenceChecks
         using (var services = Build(root))
         {
             var controller = services.GetRequiredService<LayoutController>();
+            var appSettings = services.GetRequiredService<AppSettings>();
+            checks["SpacingDefaultsRetainTwentyPixelGaps"] = appSettings.WidgetPaddingLeft == 10 && appSettings.WidgetPaddingRight == 10 && appSettings.WidgetPaddingTop == 10 && appSettings.WidgetPaddingBottom == 10;
+            var spacingDirectory = Path.Combine(root, "spacing-settings");
+            var spacingStore = new AppSettingsService(spacingDirectory);
+            spacingStore.Settings.WidgetPaddingLeft = 15;
+            spacingStore.Settings.WidgetPaddingRight = 35;
+            spacingStore.Settings.WidgetPaddingTop = 5;
+            spacingStore.Settings.WidgetPaddingBottom = 25;
+            spacingStore.Save();
+            var settingsRoundTrip = new AppSettingsService(spacingDirectory).Settings;
+            checks["AllFourSpacingSettingsPersist"] = settingsRoundTrip.WidgetPaddingLeft == 15 && settingsRoundTrip.WidgetPaddingRight == 35 && settingsRoundTrip.WidgetPaddingTop == 5 && settingsRoundTrip.WidgetPaddingBottom == 25;
             controller.ApplyActiveLayout();
             Pump();
             // Simulate content growing after the first sensor snapshot.
             foreach (var instance in controller.Instances) instance.View.MinHeight = 900;
             Pump();
             var windows = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
+            var settingsWindow = new AppSettingsWindow(appSettings, services.GetRequiredService<AppSettingsService>(), controller,
+                services.GetRequiredService<SidebarWindow>(), new AutoStartService(appSettings, services.GetRequiredService<AppSettingsService>()));
+            settingsWindow.Show(); settingsWindow.UpdateLayout();
+            checks["FourSpacingControlsAvailableInAppSettings"] = new[] { "PaddingLeftBox", "PaddingRightBox", "PaddingTopBox", "PaddingBottomBox" }
+                .All(name => settingsWindow.FindName(name) is System.Windows.Controls.TextBox { Text: "10" });
+            var settingsBitmap = new System.Windows.Media.Imaging.RenderTargetBitmap((int)Math.Ceiling(settingsWindow.ActualWidth), (int)Math.Ceiling(settingsWindow.ActualHeight), 96, 96, System.Windows.Media.PixelFormats.Pbgra32);
+            settingsBitmap.Render(settingsWindow);
+            var settingsEncoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+            settingsEncoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(settingsBitmap));
+            using (var file = File.Create(Path.Combine(output, "app-settings-spacing.png"))) settingsEncoder.Save(file);
+            settingsWindow.Close();
             File.WriteAllText(Path.Combine(output, "initial-window-bounds.json"), JsonSerializer.Serialize(windows.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight, MaxHeight = double.IsPositiveInfinity(w.MaxHeight) ? (double?)null : w.MaxHeight }), new JsonSerializerOptions { WriteIndented = true }));
             checks["CreatesAllDefaultWidgets"] = windows.Length == LayoutController.DefaultWidgetIds.Length;
             checks["LiveContentGrowthDoesNotOverlap"] = !windows.SelectMany((a, i) => windows.Skip(i + 1).Select(b =>

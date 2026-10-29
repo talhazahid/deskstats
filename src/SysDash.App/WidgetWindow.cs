@@ -51,6 +51,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private bool _restoringPlacement = true;
     private bool _missingSavedMonitor;
     internal double DesktopScale { get; private set; } = 1;
+    internal bool IsDragging { get; private set; }
     internal MonitorDescriptor? PlacementMonitor => MonitorGeometry.FindById(_savedMonitorDeviceId)
         ?? MonitorGeometry.MonitorAt(new Point(Left + 20, Top + 20));
 
@@ -81,6 +82,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private static extern bool SetWindowPos(IntPtr hwnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+    [DllImport("user32.dll")]
+    private static extern bool GetCursorPos(out PixelPoint point);
 
     private event EventHandler? _hostClosed;
 
@@ -189,7 +192,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             _layout.SetDetachedSize(_instance.Id, Width, ActualHeight);
             CapturePlacement();
         };
-        LocationChanged += (_, _) => { if (!_restoringPlacement) { _placementTimer.Stop(); _placementTimer.Start(); } };
+        LocationChanged += (_, _) => { if (!_restoringPlacement && !IsDragging) { _placementTimer.Stop(); _placementTimer.Start(); } };
         SizeChanged += (_, _) =>
         {
             if (!_restoringPlacement && ActualWidth > 0 && ActualHeight > 0)
@@ -612,7 +615,23 @@ public sealed class WidgetWindow : Window, IWidgetHost
             _layout.BeginManualPlacement();
             _missingSavedMonitor = false;
             e.Handled = true;
+            _placementTimer.Stop();
+            IsDragging = true;
             DragMove();
+            IsDragging = false;
+            // The pointer selects the destination, even when most of a large
+            // widget still occupies the old screen or the displays have different DPI.
+            if (GetCursorPos(out PixelPoint cursor) &&
+                FloatingPlacement.MonitorForPointer(MonitorGeometry.EnumerateMonitors(), new Point(cursor.X, cursor.Y)) is { } target)
+            {
+                _savedMonitorDeviceId = target.DeviceId;
+                if (GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect pixels))
+                {
+                    _savedOffsetX = pixels.Left * 96.0 / target.DpiX - target.WorkAreaDip.X;
+                    _savedOffsetY = pixels.Top * 96.0 / target.DpiY - target.WorkAreaDip.Y;
+                    RestoreSavedDisplayPosition();
+                }
+            }
             double snappedX = SnapAxis(Left);
             double snappedY = SnapAxis(Top);
             // A manual drop obeys the same taskbar boundary as automatic placement.
@@ -630,6 +649,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         {
             // DragMove can throw when the button is already captured; ignore.
         }
+        finally { IsDragging = false; }
     }
 
     // ---- resize mode -------------------------------------------------------
@@ -811,7 +831,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     public void RestoreSavedDisplayPosition()
     {
-        if (!IsLoaded || string.IsNullOrEmpty(_savedMonitorDeviceId)) return;
+        if (IsDragging || !IsLoaded || string.IsNullOrEmpty(_savedMonitorDeviceId)) return;
         if (Mouse.LeftButton == MouseButtonState.Pressed) return;
         var saved = MonitorGeometry.FindById(_savedMonitorDeviceId);
         _missingSavedMonitor = saved is null;
@@ -952,7 +972,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     public void CapturePlacement(bool userMove = false)
     {
-        if (_restoringPlacement || !IsLoaded) return;
+        if (_restoringPlacement || !IsLoaded || (IsDragging && !userMove)) return;
         if (!userMove && !string.IsNullOrEmpty(_savedMonitorDeviceId))
         {
             RestoreSavedDisplayPosition();
@@ -985,8 +1005,9 @@ public sealed class WidgetWindow : Window, IWidgetHost
         {
             var rect = Marshal.PtrToStructure<PixelRect>(lParam);
             var monitors = MonitorGeometry.EnumerateMonitors();
-            var monitor = monitors.FirstOrDefault(m => FloatingPlacement.PixelWorkArea(m).Contains(
-                new Point((rect.Left + rect.Right) / 2.0, rect.Top + 20))) ?? PlacementMonitor;
+            var monitor = GetCursorPos(out PixelPoint cursor)
+                ? FloatingPlacement.MonitorForPointer(monitors, new Point(cursor.X, cursor.Y)) ?? PlacementMonitor
+                : PlacementMonitor;
             if (monitor is not null)
             {
                 Rect work = FloatingPlacement.PixelWorkArea(monitor);

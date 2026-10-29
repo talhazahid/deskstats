@@ -32,6 +32,7 @@ public partial class AppSettingsWindow : Window
         IMetricsService? metrics = null)
     {
         InitializeComponent();
+        MaxHeight = Math.Max(300, MonitorGeometry.PrimaryWorkAreaDip().Height - 32);
 
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
@@ -46,6 +47,10 @@ public partial class AppSettingsWindow : Window
     private void LoadValues()
     {
         PollBox.Text = _settings.PollIntervalMs.ToString();
+        PaddingLeftBox.Text = _settings.WidgetPaddingLeft.ToString();
+        PaddingRightBox.Text = _settings.WidgetPaddingRight.ToString();
+        PaddingTopBox.Text = _settings.WidgetPaddingTop.ToString();
+        PaddingBottomBox.Text = _settings.WidgetPaddingBottom.ToString();
         GpuCheck.IsChecked = _settings.LoadGpu;
         DrivesCheck.IsChecked = _settings.LoadDrives;
         NetworkCheck.IsChecked = _settings.LoadNetwork;
@@ -93,8 +98,14 @@ public partial class AppSettingsWindow : Window
         try
         {
             int poll = int.Parse(PollBox.Text.Trim());
+            int left = ReadPadding(PaddingLeftBox), right = ReadPadding(PaddingRightBox);
+            int top = ReadPadding(PaddingTopBox), bottom = ReadPadding(PaddingBottomBox);
             poll = Math.Clamp(poll, 200, 60_000);
             _settings.PollIntervalMs = poll;
+            _settings.WidgetPaddingLeft = left;
+            _settings.WidgetPaddingRight = right;
+            _settings.WidgetPaddingTop = top;
+            _settings.WidgetPaddingBottom = bottom;
 
             _settings.LoadGpu = GpuCheck.IsChecked == true;
             _settings.LoadDrives = DrivesCheck.IsChecked == true;
@@ -125,6 +136,7 @@ public partial class AppSettingsWindow : Window
             _settings.AutomaticUpdates = AutomaticUpdatesCheck.IsChecked == true;
 
             _settingsService.Save();
+            _layout.RefreshWidgetSpacing();
 
             // Live-applied effects (everything else loads on the next start).
             _metrics?.ChangePollInterval(_settings.PollIntervalMs);
@@ -198,4 +210,11 @@ public partial class AppSettingsWindow : Window
 
     private static string? SelectedText(ComboBox combo)
         => (combo.SelectedItem as ComboBoxItem)?.Content?.ToString();
+
+    private static int ReadPadding(TextBox box)
+    {
+        if (!int.TryParse(box.Text.Trim(), out int value) || value < 0 || value > 100)
+            throw new ArgumentException("Widget spacing must be a whole number from 0 to 100.");
+        return value;
+    }
 }

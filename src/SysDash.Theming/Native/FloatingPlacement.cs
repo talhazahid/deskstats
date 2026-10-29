@@ -8,16 +8,23 @@ public static class FloatingPlacement
     public const double Gap = 20;
     public const double WidgetInset = 10;
     public const double Margin = 16;
-    public static (Rect[] Bounds, double Scale) FitWithin(Rect work, IReadOnlyList<Size> sizes, IReadOnlyList<Point> preferred)
+    public static MonitorDescriptor? MonitorForPointer(IReadOnlyList<MonitorDescriptor> monitors, Point pixelPointer)
+        => monitors.FirstOrDefault(m => new Rect(m.BoundsDip.X * m.DpiX / 96.0,
+            m.BoundsDip.Y * m.DpiY / 96.0, m.PixelWidth, m.PixelHeight).Contains(pixelPointer));
+    public static (Rect[] Bounds, double Scale) FitWithin(Rect work, IReadOnlyList<Size> sizes, IReadOnlyList<Point> preferred, Thickness? padding = null)
     {
         if (sizes.Count == 0) return (Array.Empty<Rect>(), 1);
         Rect area = work;
         area.Inflate(-Margin, -Margin);
+        Thickness edges = padding ?? new Thickness(Gap / 2);
+        double horizontalGap = Math.Clamp(edges.Left, 0, 100) + Math.Clamp(edges.Right, 0, 100);
+        double verticalGap = Math.Clamp(edges.Top, 0, 100) + Math.Clamp(edges.Bottom, 0, 100);
         bool Pack(double scale, out Rect[] bounds)
         {
             // Window chrome already contributes an inset on each side. The
             // requested 20px gap is between visible cards, not transparent HWND edges.
-            double spacing = Math.Max(0, Gap - 2 * WidgetInset * scale);
+            double horizontalSpacing = horizontalGap - 2 * WidgetInset * scale;
+            double verticalSpacing = verticalGap - 2 * WidgetInset * scale;
             bounds = new Rect[sizes.Count];
             // Fill adjacent columns rather than retaining scattered saved positions.
             var columns = new List<List<(int Index, double Width, double Height)>>();
@@ -31,7 +38,7 @@ public static class FloatingPlacement
                 double bestRemaining = double.PositiveInfinity;
                 for (int c = 0; c < columns.Count; c++)
                 {
-                    double remaining = area.Height - heights[c] - spacing - height;
+                    double remaining = area.Height - heights[c] - verticalSpacing - height;
                     if (remaining >= 0 && remaining < bestRemaining)
                     {
                         bestRemaining = remaining;
@@ -44,11 +51,11 @@ public static class FloatingPlacement
                     columns.Add(new());
                     heights.Add(0);
                 }
-                if (columns[column].Count > 0) heights[column] += spacing;
+                if (columns[column].Count > 0) heights[column] += verticalSpacing;
                 columns[column].Add((i, width, height));
                 heights[column] += height;
             }
-            double totalWidth = columns.Sum(c => c.Max(item => item.Width)) + spacing * (columns.Count - 1);
+            double totalWidth = columns.Sum(c => c.Max(item => item.Width)) + horizontalSpacing * (columns.Count - 1);
             if (totalWidth > area.Width) return false;
             double right = area.Right;
             foreach (var column in columns)
@@ -59,9 +66,9 @@ public static class FloatingPlacement
                 foreach (var item in column)
                 {
                     bounds[item.Index] = new Rect(left, top, item.Width, item.Height);
-                    top += item.Height + spacing;
+                    top += item.Height + verticalSpacing;
                 }
-                right = left - spacing;
+                right = left - horizontalSpacing;
             }
             return true;
         }

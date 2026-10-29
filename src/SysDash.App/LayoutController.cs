@@ -919,6 +919,8 @@ public sealed class LayoutController : IDisposable
         }
     }
 
+    public void RefreshWidgetSpacing() => QueueWidgetSpacing();
+
     private void QueueWidgetSpacing()
     {
         if (_tearingDown || _adjustingSpacing || _spacingQueued) return;
@@ -933,7 +935,7 @@ public sealed class LayoutController : IDisposable
                 var windows = _detachedWindows
                     .Where(pair => FindItem(pair.Key) is { Placement.Hidden: false })
                     .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
-                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible)
+                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsDragging)
                     .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
                 foreach (var group in windows.GroupBy(w => w.PlacementMonitor?.DeviceId))
                 {
@@ -945,7 +947,9 @@ public sealed class LayoutController : IDisposable
                         var sizes = members.Select(w => new Size(w.ActualWidth / w.DesktopScale,
                             w.ActualHeight / w.DesktopScale)).ToArray();
                         var preferred = members.Select(w => new Point(w.Left, w.Top)).ToArray();
-                        var plan = FloatingPlacement.FitWithin(work, sizes, preferred);
+                        var plan = FloatingPlacement.FitWithin(work, sizes, preferred, new Thickness(
+                            _settings.WidgetPaddingLeft, _settings.WidgetPaddingTop,
+                            _settings.WidgetPaddingRight, _settings.WidgetPaddingBottom));
                         for (int i = 0; i < members.Length; i++)
                         {
                             members[i].SetDesktopScale(plan.Scale);

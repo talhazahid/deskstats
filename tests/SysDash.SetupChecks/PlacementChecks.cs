@@ -64,6 +64,24 @@ internal static class PlacementChecks
             new[] { new Point(0, 0), new Point(1200, 500), new Point(2400, 0), new Point(3500, 600) });
         var columnXs = compact.Bounds.Select(r => r.Left).Distinct().OrderBy(x => x).ToArray();
         checks["DefaultGapIsTwenty"] = FloatingPlacement.Gap == 20;
+        var primary = new MonitorDescriptor(0, "main", new Rect(0, 0, 1920, 1080), new Rect(0, 0, 1920, 1040), 96, 96, true);
+        var highDpi = new MonitorDescriptor(1, "right", new Rect(1280, 0, 1600, 900), new Rect(1280, 0, 1600, 860), 144, 144, false);
+        var leftScreen = new MonitorDescriptor(2, "left", new Rect(-1280, 0, 1280, 720), new Rect(-1280, 0, 1280, 690), 96, 96, false);
+        var topScreen = new MonitorDescriptor(3, "above", new Rect(0, -1080, 1920, 1080), new Rect(0, -1080, 1920, 1040), 96, 96, false);
+        var screens = new[] { primary, highDpi, leftScreen, topScreen };
+        checks["DragCrossesRightEdgeUsingPointerNotWidgetCenter"] = FloatingPlacement.MonitorForPointer(screens, new Point(1921, 200)) == highDpi;
+        checks["DragReturnsToMainScreen"] = FloatingPlacement.MonitorForPointer(screens, new Point(1919, 200)) == primary;
+        checks["DragSupportsNegativeMonitorCoordinates"] = FloatingPlacement.MonitorForPointer(screens, new Point(-1, 200)) == leftScreen;
+        checks["DragSupportsVerticallyStackedMonitors"] = FloatingPlacement.MonitorForPointer(screens, new Point(200, -1)) == topScreen;
+        var custom = FloatingPlacement.FitWithin(new Rect(0, 0, 3840, 1080), compactSizes,
+            compactSizes.Select(_ => new Point()).ToArray(), new Thickness(15, 5, 35, 25));
+        var customXs = custom.Bounds.Select(r => r.Left).Distinct().OrderBy(x => x).ToArray();
+        checks["CustomLeftRightSpacingApplied"] = customXs.Length == 2 && customXs[1] - customXs[0] - 280 + 20 == 50;
+        checks["CustomTopBottomSpacingApplied"] = custom.Bounds.GroupBy(r => r.Left).All(c =>
+        {
+            var rows = c.OrderBy(r => r.Top).ToArray();
+            return rows.Zip(rows.Skip(1), (a, b) => b.Top - a.Bottom + 20 == 30).All(x => x);
+        });
         checks["ScatteredSavedPositionsBecomeTwoAdjacentColumns"] = compact.Scale == 1 && columnXs.Length == 2 && columnXs[1] - columnXs[0] == 280;
         checks["CompactColumnsUseTwentyPixelVerticalGaps"] = compact.Bounds.GroupBy(r => r.Left).All(column =>
         {

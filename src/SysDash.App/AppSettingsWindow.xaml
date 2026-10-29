@@ -9,6 +9,9 @@
         ShowInTaskbar="False"
         Background="{DynamicResource WindowBackdropBrush}">
 
+    <Grid>
+        <Grid.RowDefinitions><RowDefinition Height="*" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
     <Grid Margin="22,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -72,6 +75,14 @@
                            FontSize="10"
                            Foreground="{DynamicResource TextTertiaryBrush}"
                            Margin="25,2,0,0" />
+                <TextBlock Text="Widget spacing (px per side)" Style="{StaticResource WidgetLabel}" Margin="0,12,0,6" />
+                <UniformGrid Columns="4">
+                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Left" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingLeftBox" Padding="4,2" /></StackPanel>
+                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Right" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingRightBox" Padding="4,2" /></StackPanel>
+                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Top" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingTopBox" Padding="4,2" /></StackPanel>
+                    <StackPanel><TextBlock Text="Bottom" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingBottomBox" Padding="4,2" /></StackPanel>
+                </UniformGrid>
+                <TextBlock Text="0–100 per side. Default 10 + 10 gives a 20px gap. Applies when saved." TextWrapping="Wrap" Style="{StaticResource WidgetLabel}" FontSize="10" Margin="0,6,0,0" />
             </StackPanel>
         </Border>
 
@@ -149,17 +160,20 @@
                            Style="{StaticResource WidgetTitle}" />
                 <CheckBox x:Name="AutostartCheck" Content="Start DeskStats with Windows" Margin="0,10,0,0" />
                 <TextBlock Text="Updates" Style="{StaticResource WidgetTitle}" Margin="0,14,0,0" />
-                <CheckBox x:Name="AutomaticUpdatesCheck" Content="Check and download updates at startup" Margin="0,8,0,0" />
+                <CheckBox x:Name="AutomaticUpdatesCheck" Content="Check for updates before opening widgets" Margin="0,8,0,0" />
                 <TextBlock Text="Install when ready. Your layout is kept; Windows may request administrator approval. Store editions update through Microsoft Store."
                            Style="{StaticResource WidgetLabel}" TextWrapping="Wrap" Margin="0,6,0,0" />
                 <Button Content="Check for updates…" HorizontalAlignment="Left" Margin="0,8,0,0" Click="OnCheckUpdates" />
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="4"
+
+    </Grid>
+    </ScrollViewer>
+        <StackPanel Grid.Row="1"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
-                    Margin="0,18,0,0">
+                    Margin="22,12,22,16">
             <Button Content="Cancel"
                     IsCancel="True"
                     Width="88"
