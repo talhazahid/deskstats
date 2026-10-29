@@ -42,6 +42,8 @@ public sealed class LayoutController : IDisposable
     private readonly HashSet<Guid> _initialArrangement = new();
     private bool _arrangingInitial;
     private bool _tearingDown;
+    private bool _spacingQueued;
+    private bool _adjustingSpacing;
 
     public LayoutController(
         IServiceProvider services,
@@ -101,6 +103,7 @@ public sealed class LayoutController : IDisposable
         _current = _layouts.ActiveLayout;
         EnsureDefaultWidgets();
         Materialize();
+        QueueWidgetSpacing();
     }
 
     /// <summary>The hardware widgets every fresh / empty layout starts with.</summary>
@@ -893,6 +896,7 @@ public sealed class LayoutController : IDisposable
             }
 
             ScheduleSave();
+            QueueWidgetSpacing();
         }
     }
 
@@ -905,7 +909,50 @@ public sealed class LayoutController : IDisposable
             item.Placement.Height = height;
             ScheduleSave();
             if (!_tearingDown && _initialArrangement.Contains(instanceId) && !_arrangingInitial) ArrangeInitialWindows();
+            QueueWidgetSpacing();
         }
+    }
+
+    private void QueueWidgetSpacing()
+    {
+        if (_tearingDown || _adjustingSpacing || _spacingQueued) return;
+        _spacingQueued = true;
+        _sidebar.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ContextIdle, new Action(() =>
+        {
+            _spacingQueued = false;
+            if (_tearingDown) return;
+            _adjustingSpacing = true;
+            try
+            {
+                var windows = _detachedWindows
+                    .Where(pair => FindItem(pair.Key) is { Placement.Hidden: false })
+                    .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
+                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible)
+                    .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
+                var occupied = new List<Rect>();
+                foreach (var window in windows)
+                {
+                    var bounds = new Rect(window.Left, window.Top, window.ActualWidth, window.ActualHeight);
+                    bool moved;
+                    do
+                    {
+                        moved = false;
+                        foreach (var previous in occupied)
+                        {
+                            var padded = previous;
+                            padded.Inflate(FloatingPlacement.Gap - 0.25, FloatingPlacement.Gap - 0.25);
+                            if (!padded.IntersectsWith(bounds)) continue;
+                            // Leave room for WPF's rounding to physical monitor pixels.
+                            bounds.Y = Math.Ceiling(previous.Bottom + FloatingPlacement.Gap) + 1;
+                            moved = true;
+                        }
+                    } while (moved);
+                    if (Math.Abs(bounds.Top - window.Top) > 0.1) window.MoveTo(bounds.Left, bounds.Top);
+                    occupied.Add(bounds);
+                }
+            }
+            finally { _adjustingSpacing = false; }
+        }));
     }
 
     /// <summary>

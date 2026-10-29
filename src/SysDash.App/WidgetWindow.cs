@@ -943,6 +943,9 @@ public sealed class WidgetWindow : Window, IWidgetHost
         Point center = new((pixels.Left + pixels.Right) / 2.0, pixels.Top + Math.Min(40, pixels.Bottom - pixels.Top) / 2.0);
         var monitor = monitors.FirstOrDefault(m =>
             new Rect(m.BoundsDip.X * m.DpiX / 96.0, m.BoundsDip.Y * m.DpiY / 96.0, m.PixelWidth, m.PixelHeight).Contains(center));
+        // Full-height columns may extend below a screen; keep their monitor anchor
+        // and save the new spacing instead of restoring stale overlapping coordinates.
+        monitor ??= MonitorGeometry.FindById(_savedMonitorDeviceId);
         if (monitor is null) return;
         Rect work = FloatingPlacement.PixelWorkArea(monitor);
         _missingSavedMonitor = false;

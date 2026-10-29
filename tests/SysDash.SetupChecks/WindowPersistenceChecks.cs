@@ -65,8 +65,10 @@ internal static class WindowPersistenceChecks
             var disk = new LayoutService(Path.Combine(root, "layouts"));
             disk.EnsureDefaults();
             var items = disk.ActiveLayout.Items;
-            checks["RestartRestoresExactMonitorAndPosition"] = items.Count == expected.Count && items.All(i => expected.TryGetValue(i.InstanceId, out var p) &&
-                p.Screen == i.Placement.MonitorDeviceId && Math.Abs(p.X - i.Placement.MonitorOffsetX) <= 1 && Math.Abs(p.Y - i.Placement.MonitorOffsetY) <= 1);
+            checks["RestartRestoresMonitorsAndRepairsOverlaps"] = items.Count == expected.Count && items.All(i => expected.TryGetValue(i.InstanceId, out var p) &&
+                p.Screen == i.Placement.MonitorDeviceId) && Application.Current.Windows.OfType<WidgetWindow>().All(a =>
+                    Application.Current.Windows.OfType<WidgetWindow>().Where(b => a != b).All(b =>
+                        !new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight).IntersectsWith(new Rect(b.Left, b.Top, b.ActualWidth, b.ActualHeight))));
             CloseSidebar(services);
         }
         using (var services = Build(Path.Combine(root, "docking")))
@@ -103,6 +105,21 @@ internal static class WindowPersistenceChecks
             Pump();
             var tallWindow = Application.Current.Windows.OfType<WidgetWindow>().Single(w => w.InstanceId == tall.Id);
             checks["ContentTallerThanScreenIsNotClipped"] = tallWindow.ActualHeight >= requiredHeight && tall.View.ActualHeight >= requiredHeight;
+            var floatingNow = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
+            // Existing saved/manual positions must reflow when sensor data grows.
+            controller.BeginManualPlacement();
+            foreach (var window in floatingNow) window.MoveTo(tallWindow.Left, tallWindow.Top);
+            tall.View.MinHeight = requiredHeight + 100;
+            Pump();
+            checks["SavedManualLayoutReflowsWithSpacing"] = floatingNow.All(a => floatingNow.Where(b => b != a).All(b =>
+            {
+                var padded = new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight);
+                padded.Inflate(FloatingPlacement.Gap / 2 - 0.1, FloatingPlacement.Gap / 2 - 0.1);
+                var other = new Rect(b.Left, b.Top, b.ActualWidth, b.ActualHeight);
+                other.Inflate(FloatingPlacement.Gap / 2 - 0.1, FloatingPlacement.Gap / 2 - 0.1);
+                return !padded.IntersectsWith(other);
+            }));
+            File.WriteAllText(Path.Combine(output, "reflow-bounds.json"), JsonSerializer.Serialize(floatingNow.Select(w => new { w.Title, w.Left, w.Top, w.ActualWidth, w.ActualHeight }), new JsonSerializerOptions { WriteIndented = true }));
             File.WriteAllText(Path.Combine(output, "tall-widget-bounds.json"), JsonSerializer.Serialize(new { requiredHeight, WindowHeight = tallWindow.ActualHeight, ContentHeight = tall.View.ActualHeight }));
             tall.View.MinHeight = previousMinHeight;
             Pump();
