@@ -947,7 +947,7 @@ public sealed class LayoutController : IDisposable
                             moved = true;
                         }
                     } while (moved);
-                    if (Math.Abs(bounds.Top - window.Top) > 0.1) window.MoveTo(bounds.Left, bounds.Top);
+                    if (Math.Abs(bounds.Top - window.Top) > 0.1) window.MoveForSpacing(bounds.Left, bounds.Top);
                     occupied.Add(bounds);
                 }
             }

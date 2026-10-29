@@ -50,6 +50,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private TextBlock? _resizeHint;
     private bool _restoringPlacement = true;
     private bool _missingSavedMonitor;
+    private bool _spacingPosition;
     private string? _savedMonitorDeviceId;
     private double _savedOffsetX, _savedOffsetY;
     private readonly DispatcherTimer _placementTimer;
@@ -495,6 +496,12 @@ public sealed class WidgetWindow : Window, IWidgetHost
         CapturePlacement(userMove: true);
     }
 
+    public void MoveForSpacing(double x, double y)
+    {
+        _spacingPosition = true;
+        MoveTo(x, y);
+    }
+
     public void ApplyContentSizing(bool large)
     {
         MaxHeight = double.PositiveInfinity;
@@ -799,7 +806,10 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _restoringPlacement = true;
         try
         {
-            Point pixels = FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
+            Point pixels = _spacingPosition
+                ? new Point((saved.WorkAreaDip.X + _savedOffsetX) * saved.DpiX / 96.0,
+                    (saved.WorkAreaDip.Y + _savedOffsetY) * saved.DpiY / 96.0)
+                : FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
             if (GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect current) &&
                 Math.Abs(current.Left - pixels.X) <= 1 && Math.Abs(current.Top - pixels.Y) <= 1) return;
             SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);

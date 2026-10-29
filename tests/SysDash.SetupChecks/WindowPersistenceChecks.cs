@@ -111,6 +111,10 @@ internal static class WindowPersistenceChecks
             foreach (var window in floatingNow) window.MoveTo(tallWindow.Left, tallWindow.Top);
             tall.View.MinHeight = requiredHeight + 100;
             Pump();
+            // Let the delayed placement capture run too; it must not undo reflow.
+            Pump();
+            Pump();
+            Pump();
             checks["SavedManualLayoutReflowsWithSpacing"] = floatingNow.All(a => floatingNow.Where(b => b != a).All(b =>
             {
                 var padded = new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight);
