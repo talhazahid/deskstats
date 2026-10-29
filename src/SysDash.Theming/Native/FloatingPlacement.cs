@@ -5,7 +5,8 @@ namespace SysDash.Theming.Native;
 /// <summary>Monitor-relative placement avoids ambiguous global DIPs on mixed-DPI desktops.</summary>
 public static class FloatingPlacement
 {
-    public const double Gap = 12;
+    public const double Gap = 20;
+    public const double WidgetInset = 10;
     public const double Margin = 16;
     public static (Rect[] Bounds, double Scale) FitWithin(Rect work, IReadOnlyList<Size> sizes, IReadOnlyList<Point> preferred)
     {
@@ -14,40 +15,53 @@ public static class FloatingPlacement
         area.Inflate(-Margin, -Margin);
         bool Pack(double scale, out Rect[] bounds)
         {
+            // Window chrome already contributes an inset on each side. The
+            // requested 20px gap is between visible cards, not transparent HWND edges.
+            double spacing = Math.Max(0, Gap - 2 * WidgetInset * scale);
             bounds = new Rect[sizes.Count];
-            var occupied = new List<Rect>();
-            foreach (int i in Enumerable.Range(0, sizes.Count).OrderByDescending(i => sizes[i].Height * sizes[i].Width))
+            // Fill adjacent columns rather than retaining scattered saved positions.
+            var columns = new List<List<(int Index, double Width, double Height)>>();
+            var heights = new List<double>();
+            foreach (int i in Enumerable.Range(0, sizes.Count).OrderByDescending(i => sizes[i].Height))
             {
                 double width = Math.Ceiling(sizes[i].Width * scale);
                 double height = Math.Ceiling(sizes[i].Height * scale);
-                bool Free(Rect candidate) => area.Contains(candidate) && occupied.All(other =>
+                if (width > area.Width || height > area.Height) return false;
+                int column = -1;
+                double bestRemaining = double.PositiveInfinity;
+                for (int c = 0; c < columns.Count; c++)
                 {
-                    other.Inflate(Gap + 1, Gap + 1);
-                    return !other.IntersectsWith(candidate);
-                });
-                Rect chosen = new(preferred[i], new Size(width, height));
-                if (!Free(chosen))
-                {
-                    var xs = occupied.SelectMany(r => new[] { r.Right + Gap + 2, r.Left - width - Gap - 2 })
-                        .Append(area.Left).Append(area.Right - width).Distinct().OrderByDescending(x => x);
-                    var ys = occupied.Select(r => r.Bottom + Gap + 2).Append(area.Top).Distinct().OrderBy(y => y);
-                    Rect? found = null;
-                    foreach (double y in ys)
+                    double remaining = area.Height - heights[c] - spacing - height;
+                    if (remaining >= 0 && remaining < bestRemaining)
                     {
-                        foreach (double x in xs)
-                        {
-                            var candidate = new Rect(x, y, width, height);
-                            if (!Free(candidate)) continue;
-                            found = candidate;
-                            break;
-                        }
-                        if (found.HasValue) break;
+                        bestRemaining = remaining;
+                        column = c;
                     }
-                    if (!found.HasValue) return false;
-                    chosen = found.Value;
                 }
-                bounds[i] = chosen;
-                occupied.Add(chosen);
+                if (column < 0)
+                {
+                    column = columns.Count;
+                    columns.Add(new());
+                    heights.Add(0);
+                }
+                if (columns[column].Count > 0) heights[column] += spacing;
+                columns[column].Add((i, width, height));
+                heights[column] += height;
+            }
+            double totalWidth = columns.Sum(c => c.Max(item => item.Width)) + spacing * (columns.Count - 1);
+            if (totalWidth > area.Width) return false;
+            double right = area.Right;
+            foreach (var column in columns)
+            {
+                double columnWidth = column.Max(item => item.Width);
+                double left = right - columnWidth;
+                double top = area.Top;
+                foreach (var item in column)
+                {
+                    bounds[item.Index] = new Rect(left, top, item.Width, item.Height);
+                    top += item.Height + spacing;
+                }
+                right = left - spacing;
             }
             return true;
         }

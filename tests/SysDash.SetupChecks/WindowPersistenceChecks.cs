@@ -121,8 +121,12 @@ internal static class WindowPersistenceChecks
             checks["SavedManualLayoutReflowsWithSpacing"] = floatingNow.All(a => floatingNow.Where(b => b != a).All(b =>
             {
                 var padded = new Rect(a.Left, a.Top, a.ActualWidth, a.ActualHeight);
+                double insetA = FloatingPlacement.WidgetInset * ((FrameworkElement)a.Content).LayoutTransform.Value.M11;
+                padded.Inflate(-insetA, -insetA);
                 padded.Inflate(FloatingPlacement.Gap / 2 - 0.1, FloatingPlacement.Gap / 2 - 0.1);
                 var other = new Rect(b.Left, b.Top, b.ActualWidth, b.ActualHeight);
+                double insetB = FloatingPlacement.WidgetInset * ((FrameworkElement)b.Content).LayoutTransform.Value.M11;
+                other.Inflate(-insetB, -insetB);
                 other.Inflate(FloatingPlacement.Gap / 2 - 0.1, FloatingPlacement.Gap / 2 - 0.1);
                 return !padded.IntersectsWith(other);
             }));
@@ -169,6 +173,7 @@ internal static class WindowPersistenceChecks
             controller.SetWidgetLarge(controller.Instances.First(i => i.WidgetId == "cpu").Id, true);
             controller.HideInstance(controller.Instances.First(i => i.WidgetId == "gpu").Id);
             controller.RemoveInstance(controller.Instances.First(i => i.WidgetId == "ram").Id);
+            Pump(); // Finish compact reflow before simulating an unrelated Windows relocation.
             var window = Application.Current.Windows.OfType<WidgetWindow>().First();
             var location = new Point(window.Left, window.Top);
             // Windows can move a window without a user drag when displays change.

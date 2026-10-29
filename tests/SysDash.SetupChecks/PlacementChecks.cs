@@ -52,11 +52,24 @@ internal static class PlacementChecks
             for (int i = 0; i < fit.Bounds.Length; i++)
                 for (int j = i + 1; j < fit.Bounds.Length; j++)
                 {
-                    Rect padded = fit.Bounds[i]; padded.Inflate(FloatingPlacement.Gap, FloatingPlacement.Gap);
-                    valid &= !padded.IntersectsWith(fit.Bounds[j]);
+                    Rect padded = fit.Bounds[i]; padded.Inflate(-FloatingPlacement.WidgetInset * fit.Scale, -FloatingPlacement.WidgetInset * fit.Scale);
+                    padded.Inflate(FloatingPlacement.Gap - 0.1, FloatingPlacement.Gap - 0.1);
+                    Rect other = fit.Bounds[j]; other.Inflate(-FloatingPlacement.WidgetInset * fit.Scale, -FloatingPlacement.WidgetInset * fit.Scale);
+                    valid &= !padded.IntersectsWith(other);
                 }
             checks[$"BalancedInsideTaskbarBoundary{screen.Width}x{screen.Height}"] = valid;
         }
+        var compactSizes = new[] { new Size(280, 500), new Size(280, 400), new Size(280, 450), new Size(280, 350) };
+        var compact = FloatingPlacement.FitWithin(new Rect(0, 0, 3840, 1080), compactSizes,
+            new[] { new Point(0, 0), new Point(1200, 500), new Point(2400, 0), new Point(3500, 600) });
+        var columnXs = compact.Bounds.Select(r => r.Left).Distinct().OrderBy(x => x).ToArray();
+        checks["DefaultGapIsTwenty"] = FloatingPlacement.Gap == 20;
+        checks["ScatteredSavedPositionsBecomeTwoAdjacentColumns"] = compact.Scale == 1 && columnXs.Length == 2 && columnXs[1] - columnXs[0] == 280;
+        checks["CompactColumnsUseTwentyPixelVerticalGaps"] = compact.Bounds.GroupBy(r => r.Left).All(column =>
+        {
+            var rows = column.OrderBy(r => r.Top).ToArray();
+            return rows.Zip(rows.Skip(1), (a, b) => b.Top - a.Bottom + 2 * FloatingPlacement.WidgetInset == 20).All(x => x);
+        });
         File.WriteAllText(Path.Combine(output, "placement-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
     }

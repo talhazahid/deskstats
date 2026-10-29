@@ -534,7 +534,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         // the card itself) so the widget's text keeps crisp ClearType rendering.
         var shadow = new Border
         {
-            Margin = new Thickness(10),
+            Margin = new Thickness(FloatingPlacement.WidgetInset),
             CornerRadius = new CornerRadius(18),
         };
         shadow.SetResourceReference(Border.BackgroundProperty, CardAppearance.CardBackgroundKey);
@@ -544,7 +544,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
         var card = new Border
         {
-            Margin = new Thickness(10),
+            Margin = new Thickness(FloatingPlacement.WidgetInset),
             Background = Brushes.Transparent,
         };
         ViewParenting.Release(_instance.View);
