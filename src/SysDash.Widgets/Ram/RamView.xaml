@@ -77,7 +77,8 @@
             </Border>
             <Border Style="{StaticResource WidgetSection}" Margin="0" Visibility="{Binding ShowProcesses, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
-                    <TextBlock Style="{StaticResource SectionHeader}" Text="PROCESS MEMORY" />
+                    <TextBlock Style="{StaticResource SectionHeader}" Text="APP MEMORY" />
+                    <TextBlock Text="Working set · includes shared memory" FontSize="10" Opacity="0.65" Margin="0,0,0,6" />
                     <ItemsControl ItemsSource="{Binding Processes}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -86,7 +87,7 @@
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Style="{StaticResource RowLabel}" Text="{Binding Name}" />
+                                    <StackPanel Margin="0,0,8,6"><TextBlock Style="{StaticResource RowLabel}" Text="{Binding Name}" FontWeight="SemiBold" /><TextBlock Text="{Binding Details}" FontSize="10" Opacity="0.65" TextWrapping="Wrap" /></StackPanel>
                                     <TextBlock Grid.Column="1" Style="{StaticResource RowValue}" Text="{Binding ValueText}" />
                                 </Grid>
                             </DataTemplate>

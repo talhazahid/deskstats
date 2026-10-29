@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Windows.Threading;
 using SysDash.Core.Models;
 using SysDash.Core.Threading;
@@ -9,7 +8,7 @@ namespace SysDash.Widgets.Ram;
 
 /// <summary>
 /// Detailed memory widget: usage + commit rings, a usage history strip, a
-/// breakdown list and the top memory-using processes (grouped by name).
+/// breakdown list and the top memory-using processes (grouped by app, with visible process details).
 /// </summary>
 public sealed class RamViewModel : HardwareWidgetViewModel
 {
@@ -25,7 +24,7 @@ public sealed class RamViewModel : HardwareWidgetViewModel
     private string _freeBytesText = "—";
     private string _virtualBytesText = "—";
     private string _totalBytesText = "—";
-    private IReadOnlyList<ProcessRow> _processes = Array.Empty<ProcessRow>();
+    private IReadOnlyList<AppMemoryRow> _processes = Array.Empty<AppMemoryRow>();
 
     public RamViewModel(IThreadMarshaller marshaller, RamSettings settings)
         : base(marshaller, settings, settings.HistoryCapacity)
@@ -48,7 +47,7 @@ public sealed class RamViewModel : HardwareWidgetViewModel
         else
         {
             _processTimer.Stop();
-            Processes = Array.Empty<ProcessRow>();
+            Processes = Array.Empty<AppMemoryRow>();
         }
     }
 
@@ -82,7 +81,7 @@ public sealed class RamViewModel : HardwareWidgetViewModel
 
     public string TotalBytesText { get => _totalBytesText; private set => SetProperty(ref _totalBytesText, value); }
 
-    public IReadOnlyList<ProcessRow> Processes { get => _processes; private set => SetProperty(ref _processes, value); }
+    public IReadOnlyList<AppMemoryRow> Processes { get => _processes; private set => SetProperty(ref _processes, value); }
 
     protected override void OnActivated()
     {
@@ -146,7 +145,7 @@ public sealed class RamViewModel : HardwareWidgetViewModel
         try
         {
             int count = Math.Clamp(Options.ProcessCount, 1, 30);
-            List<ProcessRow> rows = await Task.Run(() => SampleTopProcesses(count));
+            IReadOnlyList<AppMemoryRow> rows = await Task.Run(() => AppMemorySampler.Sample(count));
             Processes = rows;
         }
         catch
@@ -159,32 +158,4 @@ public sealed class RamViewModel : HardwareWidgetViewModel
         }
     }
 
-    private static List<ProcessRow> SampleTopProcesses(int count)
-    {
-        var totals = new Dictionary<string, long>(StringComparer.OrdinalIgnoreCase);
-        foreach (Process process in Process.GetProcesses())
-        {
-            try
-            {
-                string name = process.ProcessName;
-                long bytes = process.WorkingSet64;
-                totals[name] = totals.TryGetValue(name, out long existing) ? existing + bytes : bytes;
-            }
-            catch
-            {
-                // Access denied / process exited — skip it.
-            }
-            finally
-            {
-                process.Dispose();
-            }
-        }
-
-        return totals
-            .Where(kv => !kv.Key.Equals("Idle", StringComparison.OrdinalIgnoreCase))
-            .OrderByDescending(kv => kv.Value)
-            .Take(count)
-            .Select(kv => new ProcessRow(kv.Key, UnitFormat.Bytes(kv.Value)))
-            .ToList();
-    }
 }

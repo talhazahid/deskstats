@@ -12,4 +12,5 @@
     <ProjectReference Include="..\SysDash.Theming\SysDash.Theming.csproj" />
   </ItemGroup>
 
+  <ItemGroup><InternalsVisibleTo Include="SysDash.SetupChecks" /></ItemGroup>
 </Project>
