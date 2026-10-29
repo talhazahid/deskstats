@@ -12,6 +12,8 @@ public sealed class UpdateWindow : Window
     private readonly Button _later = new() { Content = "Dismiss", Margin = new Thickness(0, 8, 0, 0) };
     private TaskCompletionSource<bool>? _answer;
     private bool _canClose;
+    private readonly CancellationTokenSource _dismissed = new();
+    public CancellationToken DismissalToken => _dismissed.Token;
     public UpdateWindow()
     {
         Title = "DeskStats updates"; Width = 390; SizeToContent = SizeToContent.Height;
@@ -26,8 +28,8 @@ public sealed class UpdateWindow : Window
         panel.Children.Add(title); panel.Children.Add(_status); panel.Children.Add(_progress); panel.Children.Add(_install); panel.Children.Add(_later);
         Content = panel;
         _install.Click += (_, _) => _answer?.TrySetResult(true);
-        _later.Click += (_, _) => { _answer?.TrySetResult(false); if (_canClose) Close(); else Hide(); };
-        Closing += (_, e) => { if (!_canClose) { e.Cancel = true; _answer?.TrySetResult(false); Hide(); } };
+        _later.Click += (_, _) => { _answer?.TrySetResult(false); _dismissed.Cancel(); if (_canClose) Close(); else Hide(); };
+        Closing += (_, e) => { if (!_canClose) { e.Cancel = true; _answer?.TrySetResult(false); _dismissed.Cancel(); Hide(); } };
         SetStatus("Checking for updates…");
     }
     public void SetStatus(string text, double? percent = null)
@@ -44,6 +46,21 @@ public sealed class UpdateWindow : Window
         ShowInTaskbar = true; ShowActivated = true; Topmost = true;
         Show(); Activate();
         return await _answer.Task;
+    }
+    public async Task<bool> AskBeforeStartupAsync(string version)
+    {
+        _answer = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        SetStatus($"DeskStats {version} is available. Update now, or choose Later to open your widgets. Your widgets and positions will be kept.");
+        _progress.Visibility = Visibility.Collapsed;
+        _install.Content = "Update now"; _install.Visibility = Visibility.Visible;
+        _later.Content = "Later";
+        ShowInTaskbar = true; ShowActivated = true; Topmost = true;
+        Show(); Activate();
+        bool install = await _answer.Task;
+        _install.Visibility = Visibility.Collapsed;
+        _progress.Visibility = Visibility.Visible;
+        _later.Content = "Cancel update";
+        return install;
     }
     public void ShowResult(string text)
     {

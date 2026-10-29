@@ -36,7 +36,7 @@ public partial class App : Application
     private IMetricsService? _metrics;
     private System.Threading.Mutex? _singleInstance;
 
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
@@ -88,7 +88,7 @@ public partial class App : Application
 
         try
         {
-            Bootstrap();
+            await BootstrapAsync();
         }
         catch (Exception ex)
         {
@@ -98,7 +98,7 @@ public partial class App : Application
         }
     }
 
-    private void Bootstrap()
+    private async Task BootstrapAsync()
     {
         StartupTrace.Mark("bootstrap begin");
 
@@ -152,6 +152,11 @@ public partial class App : Application
             : ThemeKind.Dark);
         StartupTrace.Mark($"theme applied ({settings.Theme})");
 
+        // Decide about updates before creating sensors, the tray or any widgets.
+        if (settings.AutomaticUpdates && !PawnIOInstaller.IsPackaged &&
+            await UpdateService.CheckAsync(false, () => { }, () => Shutdown(), startup: true))
+            return;
+
         _metrics = _provider.GetRequiredService<IMetricsService>();
         StartupTrace.Mark("metrics resolved (LHM init inside ctor)");
         _metrics.Start();
@@ -204,7 +209,7 @@ public partial class App : Application
         }
 
         // Registry reconciliation is not needed for the first frame.
-        Dispatcher.BeginInvoke(
+        _ = Dispatcher.BeginInvoke(
             DispatcherPriority.ApplicationIdle,
             new Action(() =>
             {
@@ -216,14 +221,12 @@ public partial class App : Application
         // hidden it based on its docked content (floating-first), so there is
         // deliberately no unconditional Show() here.
         StartupTrace.Mark("startup sequence complete");
-        if (settings.AutomaticUpdates && !PawnIOInstaller.IsPackaged)
-            _ = CheckStartupUpdateAsync();
         // EXE setup installs PawnIO. MSIX offers it after the widgets load;
         // installation starts only when the user chooses the install action.
         SensorDriver.Installed += () => Dispatcher.BeginInvoke(new Action(RestartApp));
         if (PawnIOInstaller.IsPackaged && !SensorDriver.IsPawnIOInstalled && !settings.SensorDriverChoiceMade)
         {
-            Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            _ = Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
                 var dialog = new SensorSetupWindow();
                 dialog.Loaded += (_, _) =>
@@ -236,12 +239,6 @@ public partial class App : Application
         }
 
         Log.Info($"DeskStats started — layout '{_layout.CurrentLayoutName}'.");
-    }
-
-    private async Task CheckStartupUpdateAsync()
-    {
-        await Task.Delay(1000);
-        if (_layout is not null) await CheckUpdatesAsync(false);
     }
 
     internal Task CheckUpdatesAsync(bool manual) => UpdateService.CheckAsync(manual,

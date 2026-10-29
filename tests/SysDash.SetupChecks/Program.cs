@@ -26,6 +26,7 @@ internal static class Program
             SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext(Dispatcher.CurrentDispatcher));
             if (args.Contains("--website-previews")) { WebsitePreviews.Render(output); return 0; }
             if (args.Contains("--power-probe")) { PowerProbe.Run(output); return 0; }
+            if (args.Contains("--startup-update-checks")) return StartupUpdateChecks.Run(output) ? 0 : 1;
             if (args.Contains("--window-checks"))
             {
                 bool placement = PlacementChecks.Run(output);

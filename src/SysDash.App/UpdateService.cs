@@ -27,14 +27,14 @@ public static class UpdateService
         return release;
     }
 
-    public static async Task CheckAsync(bool manual, Action saveState, Action exit)
+    public static async Task<bool> CheckAsync(bool manual, Action saveState, Action exit, bool startup = false)
     {
         if (PawnIOInstaller.IsPackaged)
         {
             if (manual) MessageBox.Show("This edition receives updates through Microsoft Store.", "DeskStats updates");
-            return;
+            return false;
         }
-        if (!await Gate.WaitAsync(0)) return;
+        if (!await Gate.WaitAsync(0)) return false;
         string? download = null;
         var status = new UpdateWindow();
         status.Show();
@@ -44,20 +44,23 @@ public static class UpdateService
             using var handler = new HttpClientHandler { AllowAutoRedirect = false };
             using var client = new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(5) };
             client.DefaultRequestHeaders.UserAgent.ParseAdd("DeskStats/" + Assembly.GetExecutingAssembly().GetName().Version);
-            var release = Parse(await client.GetStringAsync("https://talhazahid.github.io/deskstats/updates.json"));
+            using var checkTimeout = CancellationTokenSource.CreateLinkedTokenSource(status.DismissalToken);
+            checkTimeout.CancelAfter(TimeSpan.FromSeconds(10));
+            var release = Parse(await client.GetStringAsync("https://talhazahid.github.io/deskstats/updates.json", checkTimeout.Token));
             var current = Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0);
             var latest = Version.Parse(release.Version);
             if (new Version(latest.Major, latest.Minor, Math.Max(0, latest.Build)) <= new Version(current.Major, current.Minor, Math.Max(0, current.Build)))
             {
-                status.ShowResult("You have the latest version of DeskStats.");
+                if (manual) status.ShowResult("You have the latest version of DeskStats.");
                 keepStatus = manual;
-                return;
+                return false;
             }
+            if (startup && !await status.AskBeforeStartupAsync(release.Version)) return false;
             string folder = Path.Combine(AppPaths.DataDirectory, "updates", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(folder);
             download = Path.Combine(folder, "DeskStats-Setup-" + release.Version + ".exe");
             status.SetStatus($"Downloading DeskStats {release.Version}…");
-            using var response = await client.GetAsync(release.Url, HttpCompletionOption.ResponseHeadersRead);
+            using var response = await client.GetAsync(release.Url, HttpCompletionOption.ResponseHeadersRead, status.DismissalToken);
             response.EnsureSuccessStatusCode();
             if (response.Content.Headers.ContentLength > 250 * 1024 * 1024) throw new InvalidDataException("Update is larger than expected.");
             await using (var input = await response.Content.ReadAsStreamAsync())
@@ -66,7 +69,7 @@ public static class UpdateService
                 byte[] buffer = new byte[81920];
                 long total = 0;
                 int count;
-                while ((count = await input.ReadAsync(buffer)) > 0)
+                while ((count = await input.ReadAsync(buffer, status.DismissalToken)) > 0)
                 {
                     total += count;
                     if (total > 250 * 1024 * 1024) throw new InvalidDataException("Update is larger than expected.");
@@ -79,7 +82,8 @@ public static class UpdateService
             await using (var file = File.OpenRead(download))
                 if (!Convert.ToHexString(await SHA256.HashDataAsync(file)).Equals(release.Sha256, StringComparison.OrdinalIgnoreCase))
                     throw new InvalidDataException("Update checksum does not match. Installation was stopped.");
-            if (!await status.AskToInstallAsync(release.Version)) return;
+            if (!startup && !await status.AskToInstallAsync(release.Version)) return false;
+            status.DismissalToken.ThrowIfCancellationRequested();
             status.SetStatus("Starting the update installer…");
             saveState();
             string installLog = Path.Combine(folder, "install.log");
@@ -89,17 +93,22 @@ public static class UpdateService
             if (process is null) throw new InvalidOperationException("The update installer could not start.");
             download = null; // Installer still needs the file; retain it until later cleanup.
             exit();
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            Log.Info("Update check or download canceled/timed out; continuing startup.");
         }
         catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
         {
-            status.ShowResult("Update canceled. DeskStats will keep running.");
-            keepStatus = true;
+            if (!startup) status.ShowResult("Update canceled. DeskStats will keep running.");
+            keepStatus = !startup;
         }
         catch (Exception ex)
         {
             Log.Warn("Update check failed: " + ex.Message);
-            status.ShowResult("Could not update DeskStats. " + ex.Message);
-            keepStatus = true;
+            if (!startup) status.ShowResult("Could not update DeskStats. " + ex.Message);
+            keepStatus = !startup;
         }
         finally
         {
@@ -107,5 +116,6 @@ public static class UpdateService
             if (download is not null) { try { File.Delete(download); } catch (IOException) { } }
             Gate.Release();
         }
+        return false;
     }
 }
