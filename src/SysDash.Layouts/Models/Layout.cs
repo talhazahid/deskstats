@@ -42,6 +42,7 @@ public sealed class Layout
                     AlwaysOnTop = i.Placement.AlwaysOnTop,
                     Layer = i.Placement.Layer,
                     AutoPlace = i.Placement.AutoPlace,
+                    ManuallyPositioned = i.Placement.ManuallyPositioned,
                     ClickThrough = i.Placement.ClickThrough,
                     SnapToGrid = i.Placement.SnapToGrid,
                     MonitorIndex = i.Placement.MonitorIndex,

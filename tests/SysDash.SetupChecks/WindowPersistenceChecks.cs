@@ -252,6 +252,31 @@ internal static class WindowPersistenceChecks
             installationLayouts.ActiveLayout.Items.Count == 1 && installationLayouts.ActiveLayout.Items[0].Placement.LargeSize &&
             installationLayouts.ActiveLayout.Items[0].Placement.MonitorDeviceId == "retained-screen";
         checks["ReinstallGetsFreshDefaults"] = InstallationState.Apply("install-two", installationSettings, installationLayouts) && installationLayouts.ActiveLayout.Items.Count == LayoutController.DefaultWidgetIds.Length;
+        string manualRoot = Path.Combine(root, "manual-drop");
+        Guid manuallyPlacedId;
+        Point desiredDrop;
+        using (var services = Build(manualRoot))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump();
+            var window = Application.Current.Windows.OfType<WidgetWindow>().First();
+            manuallyPlacedId = window.InstanceId;
+            Rect work = MonitorGeometry.WorkAreaFor(new Point(window.Left + 20, window.Top + 20), 0);
+            desiredDrop = new Point(work.Left + 32, work.Top + 64);
+            window.MoveTo(desiredDrop.X, desiredDrop.Y);
+            controller.KeepManualPosition(window.InstanceId);
+            Pump(); Pump(); Pump();
+            checks["ManualDropIsNotRepackedToRight"] = Math.Abs(window.Left - desiredDrop.X) <= 1 && Math.Abs(window.Top - desiredDrop.Y) <= 1;
+            controller.Dispose(); CloseSidebar(services);
+        }
+        using (var services = Build(manualRoot))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump(); Pump();
+            var window = Application.Current.Windows.OfType<WidgetWindow>().Single(w => w.InstanceId == manuallyPlacedId);
+            checks["ManualDropSurvivesRestartAndLayoutClone"] = Math.Abs(window.Left - desiredDrop.X) <= 1 && Math.Abs(window.Top - desiredDrop.Y) <= 1;
+            controller.Dispose(); CloseSidebar(services);
+        }
         string hash = new string('A', 64);
         checks["UpdateAcceptsVersionedRelease"] = UpdateService.Parse(System.Text.Json.JsonSerializer.Serialize(new { version = "1.0.14", url = "https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", sha256 = hash })).Version == "1.0.14";
         checks["UpdateRejectsUntrustedHost"] = RejectUpdate("https://example.com/deskstats/downloads/DeskStats-Setup-1.0.14.exe", hash);

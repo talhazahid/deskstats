@@ -920,6 +920,13 @@ public sealed class LayoutController : IDisposable
     }
 
     public void RefreshWidgetSpacing() => QueueWidgetSpacing();
+    public void KeepManualPosition(Guid id)
+    {
+        if (FindItem(id) is not { } item) return;
+        item.Placement.ManuallyPositioned = true;
+        ScheduleSave();
+        QueueWidgetSpacing();
+    }
 
     private void QueueWidgetSpacing()
     {
@@ -949,7 +956,8 @@ public sealed class LayoutController : IDisposable
                         var preferred = members.Select(w => new Point(w.Left, w.Top)).ToArray();
                         var plan = FloatingPlacement.FitWithin(work, sizes, preferred, new Thickness(
                             _settings.WidgetPaddingLeft, _settings.WidgetPaddingTop,
-                            _settings.WidgetPaddingRight, _settings.WidgetPaddingBottom));
+                            _settings.WidgetPaddingRight, _settings.WidgetPaddingBottom),
+                            members.Select(w => FindItem(w.InstanceId)?.Placement.ManuallyPositioned == true).ToArray());
                         for (int i = 0; i < members.Length; i++)
                         {
                             members[i].SetDesktopScale(plan.Scale);

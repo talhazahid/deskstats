@@ -11,7 +11,7 @@ public static class FloatingPlacement
     public static MonitorDescriptor? MonitorForPointer(IReadOnlyList<MonitorDescriptor> monitors, Point pixelPointer)
         => monitors.FirstOrDefault(m => new Rect(m.BoundsDip.X * m.DpiX / 96.0,
             m.BoundsDip.Y * m.DpiY / 96.0, m.PixelWidth, m.PixelHeight).Contains(pixelPointer));
-    public static (Rect[] Bounds, double Scale) FitWithin(Rect work, IReadOnlyList<Size> sizes, IReadOnlyList<Point> preferred, Thickness? padding = null)
+    public static (Rect[] Bounds, double Scale) FitWithin(Rect work, IReadOnlyList<Size> sizes, IReadOnlyList<Point> preferred, Thickness? padding = null, IReadOnlyList<bool>? manual = null)
     {
         if (sizes.Count == 0) return (Array.Empty<Rect>(), 1);
         Rect area = work;
@@ -26,6 +26,39 @@ public static class FloatingPlacement
             double horizontalSpacing = horizontalGap - 2 * WidgetInset * scale;
             double verticalSpacing = verticalGap - 2 * WidgetInset * scale;
             bounds = new Rect[sizes.Count];
+            if (manual?.Any(value => value) == true)
+            {
+                var occupied = new List<Rect>();
+                foreach (int i in Enumerable.Range(0, sizes.Count).OrderByDescending(i => manual[i]).ThenByDescending(i => sizes[i].Height))
+                {
+                    double width = Math.Ceiling(sizes[i].Width * scale), height = Math.Ceiling(sizes[i].Height * scale);
+                    if (width > area.Width || height > area.Height) return false;
+                    Rect Visible(Rect r) { r.Inflate(-WidgetInset * scale, -WidgetInset * scale); return r; }
+                    bool Free(Rect r) => area.Contains(r) && occupied.All(other =>
+                    {
+                        other = Visible(other);
+                        other.Inflate(Math.Max(0, horizontalGap - 0.1), Math.Max(0, verticalGap - 0.1));
+                        return !other.IntersectsWith(Visible(r));
+                    });
+                    Point wanted = new(Math.Clamp(preferred[i].X, area.Left, area.Right - width),
+                        Math.Clamp(preferred[i].Y, area.Top, area.Bottom - height));
+                    var chosen = new Rect(wanted, new Size(width, height));
+                    if (!Free(chosen))
+                    {
+                        var xs = occupied.SelectMany(r => new[] { r.Left, r.Right + horizontalSpacing, r.Left - width - horizontalSpacing })
+                            .Append(wanted.X).Append(area.Left).Append(area.Right - width).Distinct();
+                        var ys = occupied.SelectMany(r => new[] { r.Top, r.Bottom + verticalSpacing, r.Top - height - verticalSpacing })
+                            .Append(wanted.Y).Append(area.Top).Append(area.Bottom - height).Distinct();
+                        var candidates = (from x in xs from y in ys select new Rect(x, y, width, height))
+                            .Where(Free).OrderBy(r => (r.TopLeft - wanted).LengthSquared).ToArray();
+                        if (candidates.Length == 0) return false;
+                        chosen = candidates[0];
+                    }
+                    bounds[i] = chosen;
+                    occupied.Add(chosen);
+                }
+                return true;
+            }
             // Fill adjacent columns rather than retaining scattered saved positions.
             var columns = new List<List<(int Index, double Width, double Height)>>();
             var heights = new List<double>();

@@ -38,6 +38,7 @@ public sealed class WidgetPlacement
     /// item is materialized, then clears the flag. Used by presets and new widgets.
     /// </summary>
     public bool AutoPlace { get; set; }
+    public bool ManuallyPositioned { get; set; }
 
     public bool ClickThrough { get; set; }
 

@@ -64,6 +64,12 @@ internal static class PlacementChecks
             new[] { new Point(0, 0), new Point(1200, 500), new Point(2400, 0), new Point(3500, 600) });
         var columnXs = compact.Bounds.Select(r => r.Left).Distinct().OrderBy(x => x).ToArray();
         checks["DefaultGapIsTwenty"] = FloatingPlacement.Gap == 20;
+        var leftDrop = FloatingPlacement.FitWithin(new Rect(0, 0, 1920, 1080),
+            new[] { new Size(320, 400) }, new[] { new Point(32, 64) }, manual: new[] { true });
+        checks["ManualLeftDropDoesNotJumpToRightEdge"] = leftDrop.Bounds[0].TopLeft == new Point(32, 64);
+        var middleDrop = FloatingPlacement.FitWithin(new Rect(0, 0, 1920, 1080),
+            new[] { new Size(320, 400), new Size(320, 300) }, new[] { new Point(600, 200), new Point(1500, 30) }, manual: new[] { true, false });
+        checks["ManualMiddleDropAndOtherWidgetsStayPut"] = middleDrop.Bounds[0].TopLeft == new Point(600, 200) && middleDrop.Bounds[1].TopLeft == new Point(1500, 30);
         var primary = new MonitorDescriptor(0, "main", new Rect(0, 0, 1920, 1080), new Rect(0, 0, 1920, 1040), 96, 96, true);
         var highDpi = new MonitorDescriptor(1, "right", new Rect(1280, 0, 1600, 900), new Rect(1280, 0, 1600, 860), 144, 144, false);
         var leftScreen = new MonitorDescriptor(2, "left", new Rect(-1280, 0, 1280, 720), new Rect(-1280, 0, 1280, 690), 96, 96, false);

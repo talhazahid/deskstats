@@ -644,6 +644,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             int monitor = MonitorGeometry.MonitorAt(center)?.Number ?? 0;
             _layout.SetDetachedPosition(_instance.Id, snappedX, snappedY, monitor);
             CapturePlacement(userMove: true);
+            _layout.KeepManualPosition(_instance.Id);
         }
         catch (InvalidOperationException)
         {
