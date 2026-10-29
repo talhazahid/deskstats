@@ -77,12 +77,12 @@
                            Margin="25,2,0,0" />
                 <TextBlock Text="Widget spacing (px per side)" Style="{StaticResource WidgetLabel}" Margin="0,12,0,6" />
                 <UniformGrid Columns="4">
-                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Left" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingLeftBox" Padding="4,2" /></StackPanel>
-                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Right" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingRightBox" Padding="4,2" /></StackPanel>
-                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Top" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingTopBox" Padding="4,2" /></StackPanel>
-                    <StackPanel><TextBlock Text="Bottom" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingBottomBox" Padding="4,2" /></StackPanel>
+                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Left" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingLeftBox" TextChanged="OnSpacingChanged" Padding="4,2" /></StackPanel>
+                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Right" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingRightBox" TextChanged="OnSpacingChanged" Padding="4,2" /></StackPanel>
+                    <StackPanel Margin="0,0,8,0"><TextBlock Text="Top" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingTopBox" TextChanged="OnSpacingChanged" Padding="4,2" /></StackPanel>
+                    <StackPanel><TextBlock Text="Bottom" Style="{StaticResource WidgetLabel}" /><TextBox x:Name="PaddingBottomBox" TextChanged="OnSpacingChanged" Padding="4,2" /></StackPanel>
                 </UniformGrid>
-                <TextBlock Text="0–100 per side. Default 10 + 10 gives a 20px gap. Applies when saved." TextWrapping="Wrap" Style="{StaticResource WidgetLabel}" FontSize="10" Margin="0,6,0,0" />
+                <TextBlock x:Name="SpacingSummary" Text="0–100 per side. Applies when saved." TextWrapping="Wrap" Style="{StaticResource WidgetLabel}" FontSize="10" Margin="0,6,0,0" />
             </StackPanel>
         </Border>
 

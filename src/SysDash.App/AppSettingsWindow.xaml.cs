@@ -100,6 +100,8 @@ public partial class AppSettingsWindow : Window
             int poll = int.Parse(PollBox.Text.Trim());
             int left = ReadPadding(PaddingLeftBox), right = ReadPadding(PaddingRightBox);
             int top = ReadPadding(PaddingTopBox), bottom = ReadPadding(PaddingBottomBox);
+            bool spacingChanged = left != _settings.WidgetPaddingLeft || right != _settings.WidgetPaddingRight ||
+                top != _settings.WidgetPaddingTop || bottom != _settings.WidgetPaddingBottom;
             poll = Math.Clamp(poll, 200, 60_000);
             _settings.PollIntervalMs = poll;
             _settings.WidgetPaddingLeft = left;
@@ -136,7 +138,7 @@ public partial class AppSettingsWindow : Window
             _settings.AutomaticUpdates = AutomaticUpdatesCheck.IsChecked == true;
 
             _settingsService.Save();
-            _layout.RefreshWidgetSpacing();
+            _layout.RefreshWidgetSpacing(compact: spacingChanged);
 
             // Live-applied effects (everything else loads on the next start).
             _metrics?.ChangePollInterval(_settings.PollIntervalMs);
@@ -216,5 +218,14 @@ public partial class AppSettingsWindow : Window
         if (!int.TryParse(box.Text.Trim(), out int value) || value < 0 || value > 100)
             throw new ArgumentException("Widget spacing must be a whole number from 0 to 100.");
         return value;
+    }
+
+    private void OnSpacingChanged(object sender, TextChangedEventArgs e)
+    {
+        if (SpacingSummary is null || PaddingLeftBox is null || PaddingRightBox is null || PaddingTopBox is null || PaddingBottomBox is null) return;
+        if (int.TryParse(PaddingLeftBox.Text, out int left) && int.TryParse(PaddingRightBox.Text, out int right) &&
+            int.TryParse(PaddingTopBox.Text, out int top) && int.TryParse(PaddingBottomBox.Text, out int bottom))
+            SpacingSummary.Text = $"Horizontal gap: {left + right}px · Vertical gap: {top + bottom}px. Applies on Save.";
+        else SpacingSummary.Text = "Enter 0–100 per side. Applies on Save.";
     }
 }

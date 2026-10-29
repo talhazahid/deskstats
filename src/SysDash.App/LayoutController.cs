@@ -45,6 +45,7 @@ public sealed class LayoutController : IDisposable
     private bool _spacingQueued;
     private bool _adjustingSpacing;
     private readonly HashSet<Guid> _droppedWidgets = new();
+    private bool _forceCompactSpacing;
 
     public LayoutController(
         IServiceProvider services,
@@ -914,14 +915,18 @@ public sealed class LayoutController : IDisposable
             if (Math.Abs(item.Placement.Width - width) < 0.1 && Math.Abs(item.Placement.Height - height) < 0.1) return;
             item.Placement.Width = width;
             item.Placement.Height = height;
-            if (item.Placement.ManuallyPositioned) _droppedWidgets.Add(instanceId);
+            if (item.Placement.ManuallyPositioned && !_adjustingSpacing) _droppedWidgets.Add(instanceId);
             ScheduleSave();
             if (!_tearingDown && !_adjustingSpacing && _initialArrangement.Contains(instanceId) && !_arrangingInitial) ArrangeInitialWindows();
             QueueWidgetSpacing();
         }
     }
 
-    public void RefreshWidgetSpacing() => QueueWidgetSpacing();
+    public void RefreshWidgetSpacing(bool compact = false)
+    {
+        if (compact) { _forceCompactSpacing = true; _droppedWidgets.Clear(); }
+        QueueWidgetSpacing();
+    }
     public void KeepManualPosition(Guid id)
     {
         if (FindItem(id) is not { } item) return;
@@ -929,6 +934,17 @@ public sealed class LayoutController : IDisposable
         _droppedWidgets.Add(id);
         ScheduleSave();
         QueueWidgetSpacing();
+    }
+
+    private Rect FloatingWorkArea(Rect work)
+    {
+        if (!_sidebar.IsVisible || _sidebar.ActualWidth <= 0) return work;
+        Rect sidebar = new(_sidebar.Left, _sidebar.Top, _sidebar.ActualWidth, _sidebar.ActualHeight);
+        if (!work.IntersectsWith(sidebar)) return work;
+        double left = work.Left, right = work.Right;
+        if (sidebar.Left + sidebar.Width / 2 > work.Left + work.Width / 2) right = Math.Min(right, sidebar.Left - FloatingPlacement.Gap);
+        else left = Math.Max(left, sidebar.Right + FloatingPlacement.Gap);
+        return right - left > 64 ? new Rect(left, work.Top, right - left, work.Height) : work;
     }
 
     private void QueueWidgetSpacing()
@@ -941,6 +957,9 @@ public sealed class LayoutController : IDisposable
             if (_tearingDown) return;
             if (_detachedWindows.Values.Any(id => _widgetWindows.TryGetHost(id, out var host) && host is WidgetWindow { IsInteracting: true })) return;
             _adjustingSpacing = true;
+            bool compact = _forceCompactSpacing;
+            _forceCompactSpacing = false;
+            if (compact) _droppedWidgets.Clear();
             try
             {
                 var windows = _detachedWindows
@@ -952,7 +971,7 @@ public sealed class LayoutController : IDisposable
                 {
                     foreach (var moving in windows.Where(w => _droppedWidgets.Contains(w.InstanceId) && !w.FluidPlacement))
                     {
-                        Rect work = moving.PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip();
+                        Rect work = FloatingWorkArea(moving.PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip());
                         var fixedCards = windows.Where(w => w != moving && !w.FluidPlacement && w.PlacementMonitor?.DeviceId == moving.PlacementMonitor?.DeviceId)
                             .Select(w => w.VisibleCardBounds).ToArray();
                         var plan = FloatingPlacement.FitDropped(work, new Size(moving.ActualWidth, moving.ActualHeight),
@@ -972,7 +991,7 @@ public sealed class LayoutController : IDisposable
                 foreach (var group in windows.Where(w => !w.FluidPlacement).GroupBy(w => w.PlacementMonitor?.DeviceId))
                 {
                     var members = group.ToArray();
-                    Rect work = members[0].PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip();
+                    Rect work = FloatingWorkArea(members[0].PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip());
                     // Iterate because wrapping text can change height after fitting the width.
                     for (int pass = 0; pass < 3; pass++)
                     {
@@ -982,7 +1001,7 @@ public sealed class LayoutController : IDisposable
                         var plan = FloatingPlacement.FitWithin(work, sizes, preferred, new Thickness(
                             _settings.WidgetPaddingLeft, _settings.WidgetPaddingTop,
                             _settings.WidgetPaddingRight, _settings.WidgetPaddingBottom),
-                            members.Select(w => FindItem(w.InstanceId)?.Placement.ManuallyPositioned == true).ToArray());
+                            compact ? null : members.Select(w => FindItem(w.InstanceId)?.Placement.ManuallyPositioned == true).ToArray());
                         for (int i = 0; i < members.Length; i++)
                         {
                             members[i].SetDesktopScale(plan.Scale);

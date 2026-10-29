@@ -308,6 +308,24 @@ internal static class WindowPersistenceChecks
             editor.Close();
             controller.Dispose(); CloseSidebar(services);
         }
+        using (var services = Build(Path.Combine(root, "measured-spacing")))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump();
+            foreach (var instance in controller.Instances.Where(i => i.WidgetId is not ("cpu" or "gpu")).ToArray()) controller.HideInstance(instance.Id);
+            Pump();
+            var settings = services.GetRequiredService<AppSettings>();
+            settings.WidgetPaddingLeft = settings.WidgetPaddingRight = settings.WidgetPaddingTop = settings.WidgetPaddingBottom = 2;
+            foreach (var instance in controller.Instances) controller.KeepManualPosition(instance.Id);
+            controller.RefreshWidgetSpacing(compact: true);
+            Pump(); Pump(); Pump();
+            var windows = Application.Current.Windows.OfType<WidgetWindow>().Where(w => w.IsVisible).OrderBy(w => w.Top).ToArray();
+            var painted = windows.Select(PaintedBounds).ToArray();
+            checks["FramelessCardsHaveNoInvisibleOuterPadding"] = windows.All(w =>
+                controller.Instances.Single(i => i.Id == w.InstanceId).View is System.Windows.Controls.ContentControl { Content: System.Windows.Controls.Border { Padding: var p, BorderThickness: var b } } && p == new Thickness(0) && b == new Thickness(0));
+            checks["TwoPixelsPerSideRendersFourPixelGap"] = windows.Length == 2 && Math.Abs(painted[1].Top - painted[0].Bottom - 4) <= 1;
+            controller.Dispose(); CloseSidebar(services);
+        }
         string hash = new string('A', 64);
         checks["UpdateAcceptsVersionedRelease"] = UpdateService.Parse(System.Text.Json.JsonSerializer.Serialize(new { version = "1.0.14", url = "https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", sha256 = hash })).Version == "1.0.14";
         checks["UpdateRejectsUntrustedHost"] = RejectUpdate("https://example.com/deskstats/downloads/DeskStats-Setup-1.0.14.exe", hash);
@@ -315,6 +333,23 @@ internal static class WindowPersistenceChecks
         checks["UpdateRejectsInvalidChecksum"] = RejectUpdate("https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", "bad");
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
+    }
+
+    private static Rect PaintedBounds(WidgetWindow window)
+    {
+        Rect bounds = Rect.Empty;
+        void Visit(DependencyObject node)
+        {
+            if (node is System.Windows.Controls.Border border && border.IsVisible &&
+                ReferenceEquals(border.Style, window.TryFindResource("WidgetSection")))
+            {
+                Rect local = border.TransformToAncestor(window).TransformBounds(new Rect(border.RenderSize));
+                local.Offset(window.Left, window.Top); bounds.Union(local);
+            }
+            for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(node); i++) Visit(System.Windows.Media.VisualTreeHelper.GetChild(node, i));
+        }
+        Visit(window);
+        return bounds;
     }
 
     private static bool HasText(DependencyObject root, string text)

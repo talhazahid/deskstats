@@ -466,6 +466,19 @@ public sealed class WidgetWindow : Window, IWidgetHost
     public void RefreshCardAppearance()
     {
         CardAppearance.Apply(this, _cardOpacity, _settings.ShowCardFrame);
+        if (_instance.View is ContentControl { Content: Border outer })
+        {
+            if (_settings.ShowCardFrame)
+            {
+                outer.ClearValue(Border.PaddingProperty);
+                outer.ClearValue(Border.BorderThicknessProperty);
+            }
+            else
+            {
+                outer.Padding = new Thickness(0);
+                outer.BorderThickness = new Thickness(0);
+            }
+        }
         _contrast?.Refresh();
     }
 
