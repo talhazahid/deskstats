@@ -914,6 +914,7 @@ public sealed class LayoutController : IDisposable
             if (Math.Abs(item.Placement.Width - width) < 0.1 && Math.Abs(item.Placement.Height - height) < 0.1) return;
             item.Placement.Width = width;
             item.Placement.Height = height;
+            if (item.Placement.ManuallyPositioned) _droppedWidgets.Add(instanceId);
             ScheduleSave();
             if (!_tearingDown && !_adjustingSpacing && _initialArrangement.Contains(instanceId) && !_arrangingInitial) ArrangeInitialWindows();
             QueueWidgetSpacing();
@@ -938,14 +939,14 @@ public sealed class LayoutController : IDisposable
         {
             _spacingQueued = false;
             if (_tearingDown) return;
-            if (_detachedWindows.Values.Any(id => _widgetWindows.TryGetHost(id, out var host) && host is WidgetWindow { IsDragging: true })) return;
+            if (_detachedWindows.Values.Any(id => _widgetWindows.TryGetHost(id, out var host) && host is WidgetWindow { IsInteracting: true })) return;
             _adjustingSpacing = true;
             try
             {
                 var windows = _detachedWindows
                     .Where(pair => FindItem(pair.Key) is { Placement.Hidden: false })
                     .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
-                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsDragging)
+                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsInteracting)
                     .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
                 if (_droppedWidgets.Count > 0)
                 {

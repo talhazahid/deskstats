@@ -52,6 +52,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private bool _missingSavedMonitor;
     internal double DesktopScale { get; private set; } = 1;
     internal bool IsDragging { get; private set; }
+    internal bool IsInteracting => IsDragging || _dragResizing;
     internal bool FluidPlacement => _instance.Settings.FluidPlacement;
     internal Rect VisibleCardBounds
     {
@@ -197,7 +198,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             _layout.SetDetachedSize(_instance.Id, Width, ActualHeight);
             CapturePlacement();
         };
-        LocationChanged += (_, _) => { if (!_restoringPlacement && !IsDragging) { _placementTimer.Stop(); _placementTimer.Start(); } };
+        LocationChanged += (_, _) => { if (!_restoringPlacement && !IsInteracting) { _placementTimer.Stop(); _placementTimer.Start(); } };
         SizeChanged += (_, _) =>
         {
             if (!_restoringPlacement && ActualWidth > 0 && ActualHeight > 0)
@@ -606,6 +607,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
              node is not null && !ReferenceEquals(node, sender);
              node = node is Visual ? VisualTreeHelper.GetParent(node) : null)
         {
+            if (ReferenceEquals(node, _leftHandle) || ReferenceEquals(node, _rightHandle)) return;
             if (node is System.Windows.Controls.Primitives.ButtonBase or
                 System.Windows.Controls.Primitives.ScrollBar or TextBox or Slider)
                 return;
@@ -795,6 +797,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _layout.SetDetachedSize(_instance.Id, Width, ActualHeight);
         _layout.SetDetachedPosition(_instance.Id, Left, Top);
         CapturePlacement();
+        _layout.KeepManualPosition(_instance.Id);
         Dispatcher.BeginInvoke(new Action(UpdateResizeHint), System.Windows.Threading.DispatcherPriority.Loaded);
         e.Handled = true;
     }
@@ -837,7 +840,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     public void RestoreSavedDisplayPosition()
     {
-        if (IsDragging || !IsLoaded || string.IsNullOrEmpty(_savedMonitorDeviceId)) return;
+        if (IsInteracting || !IsLoaded || string.IsNullOrEmpty(_savedMonitorDeviceId)) return;
         if (Mouse.LeftButton == MouseButtonState.Pressed) return;
         var saved = MonitorGeometry.FindById(_savedMonitorDeviceId);
         _missingSavedMonitor = saved is null;
@@ -983,7 +986,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     public void CapturePlacement(bool userMove = false)
     {
-        if (_restoringPlacement || !IsLoaded || (IsDragging && !userMove)) return;
+        if (_restoringPlacement || !IsLoaded || (IsInteracting && !userMove)) return;
         if (!userMove && !string.IsNullOrEmpty(_savedMonitorDeviceId))
         {
             RestoreSavedDisplayPosition();
