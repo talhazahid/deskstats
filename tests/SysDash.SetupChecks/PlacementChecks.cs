@@ -64,6 +64,10 @@ internal static class PlacementChecks
             new[] { new Point(0, 0), new Point(1200, 500), new Point(2400, 0), new Point(3500, 600) });
         var columnXs = compact.Bounds.Select(r => r.Left).Distinct().OrderBy(x => x).ToArray();
         checks["DefaultGapIsTwenty"] = FloatingPlacement.Gap == 20;
+        var fixedCard = new Rect(810, 110, 300, 380);
+        var dropped = FloatingPlacement.FitDropped(new Rect(0, 0, 1920, 1080), new Size(320, 400),
+            new Point(780, 100), new[] { fixedCard }, new Thickness(10));
+        checks["OnlyDraggedWidgetAdjustsBesideFixedCard"] = fixedCard == new Rect(810, 110, 300, 380) && dropped.Bounds.Right <= fixedCard.Left;
         var leftDrop = FloatingPlacement.FitWithin(new Rect(0, 0, 1920, 1080),
             new[] { new Size(320, 400) }, new[] { new Point(32, 64) }, manual: new[] { true });
         checks["ManualLeftDropDoesNotJumpToRightEdge"] = leftDrop.Bounds[0].TopLeft == new Point(32, 64);

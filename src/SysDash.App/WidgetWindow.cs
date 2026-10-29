@@ -52,6 +52,11 @@ public sealed class WidgetWindow : Window, IWidgetHost
     private bool _missingSavedMonitor;
     internal double DesktopScale { get; private set; } = 1;
     internal bool IsDragging { get; private set; }
+    internal bool FluidPlacement => _instance.Settings.FluidPlacement;
+    internal Rect VisibleCardBounds
+    {
+        get { var bounds = new Rect(Left, Top, ActualWidth, ActualHeight); bounds.Inflate(-FloatingPlacement.WidgetInset * DesktopScale, -FloatingPlacement.WidgetInset * DesktopScale); return bounds; }
+    }
     internal MonitorDescriptor? PlacementMonitor => MonitorGeometry.FindById(_savedMonitorDeviceId)
         ?? MonitorGeometry.MonitorAt(new Point(Left + 20, Top + 20));
 
@@ -508,8 +513,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _missingSavedMonitor = false;
         Rect work = (MonitorGeometry.MonitorAt(new Point(x + 20, y + 20)) ?? PlacementMonitor)?.WorkAreaDip
             ?? MonitorGeometry.PrimaryWorkAreaDip();
-        Left = Math.Clamp(x, work.Left + FloatingPlacement.Margin, Math.Max(work.Left + FloatingPlacement.Margin, work.Right - ActualWidth - FloatingPlacement.Margin));
-        Top = Math.Clamp(y, work.Top + FloatingPlacement.Margin, Math.Max(work.Top + FloatingPlacement.Margin, work.Bottom - ActualHeight - FloatingPlacement.Margin));
+        Left = FluidPlacement ? x : Math.Clamp(x, work.Left + FloatingPlacement.Margin, Math.Max(work.Left + FloatingPlacement.Margin, work.Right - ActualWidth - FloatingPlacement.Margin));
+        Top = FluidPlacement ? y : Math.Clamp(y, work.Top + FloatingPlacement.Margin, Math.Max(work.Top + FloatingPlacement.Margin, work.Bottom - ActualHeight - FloatingPlacement.Margin));
         CapturePlacement(userMove: true);
     }
 
@@ -816,7 +821,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private double SnapAxis(double value)
     {
-        if (!_layout.IsGridSnapEnabled(_instance.Id))
+        if (FluidPlacement || !_layout.IsGridSnapEnabled(_instance.Id))
         {
             return value;
         }
@@ -842,7 +847,9 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _restoringPlacement = true;
         try
         {
-            Point pixels = FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
+            Point pixels = FluidPlacement
+                ? new Point((saved.WorkAreaDip.X + _savedOffsetX) * saved.DpiX / 96.0, (saved.WorkAreaDip.Y + _savedOffsetY) * saved.DpiY / 96.0)
+                : FloatingPlacement.RestorePixels(saved, _savedOffsetX, _savedOffsetY, ActualWidth, ActualHeight);
             if (GetWindowRect(new WindowInteropHelper(this).Handle, out PixelRect current) &&
                 Math.Abs(current.Left - pixels.X) <= 1 && Math.Abs(current.Top - pixels.Y) <= 1) return;
             SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
@@ -967,7 +974,10 @@ public sealed class WidgetWindow : Window, IWidgetHost
         _missingSavedMonitor = saved is null;
         var monitor = saved ?? monitors.FirstOrDefault(m => m.IsPrimary) ?? monitors.FirstOrDefault();
         if (monitor is null) return;
-        Point pixels = FloatingPlacement.RestorePixels(monitor, spec.MonitorOffsetX, spec.MonitorOffsetY, Width, ActualHeight);
+        Point pixels = FluidPlacement
+            ? new Point((monitor.WorkAreaDip.X + spec.MonitorOffsetX) * monitor.DpiX / 96.0,
+                (monitor.WorkAreaDip.Y + spec.MonitorOffsetY) * monitor.DpiY / 96.0)
+            : FloatingPlacement.RestorePixels(monitor, spec.MonitorOffsetX, spec.MonitorOffsetY, Width, ActualHeight);
         SetWindowPos(new WindowInteropHelper(this).Handle, IntPtr.Zero, (int)Math.Round(pixels.X), (int)Math.Round(pixels.Y), 0, 0, 0x0015);
     }
 
@@ -1002,7 +1012,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     private IntPtr ContentHeightWindowProc(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (message == 0x0216) // WM_MOVING: enforce the boundary during the drag, not only after release.
+        if (message == 0x0216 && !FluidPlacement) // WM_MOVING: fluid widgets opt out of edge locks.
         {
             var rect = Marshal.PtrToStructure<PixelRect>(lParam);
             var monitors = MonitorGeometry.EnumerateMonitors();

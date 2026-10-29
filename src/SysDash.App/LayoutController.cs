@@ -44,6 +44,7 @@ public sealed class LayoutController : IDisposable
     private bool _tearingDown;
     private bool _spacingQueued;
     private bool _adjustingSpacing;
+    private readonly HashSet<Guid> _droppedWidgets = new();
 
     public LayoutController(
         IServiceProvider services,
@@ -924,6 +925,7 @@ public sealed class LayoutController : IDisposable
     {
         if (FindItem(id) is not { } item) return;
         item.Placement.ManuallyPositioned = true;
+        _droppedWidgets.Add(id);
         ScheduleSave();
         QueueWidgetSpacing();
     }
@@ -936,6 +938,7 @@ public sealed class LayoutController : IDisposable
         {
             _spacingQueued = false;
             if (_tearingDown) return;
+            if (_detachedWindows.Values.Any(id => _widgetWindows.TryGetHost(id, out var host) && host is WidgetWindow { IsDragging: true })) return;
             _adjustingSpacing = true;
             try
             {
@@ -944,7 +947,23 @@ public sealed class LayoutController : IDisposable
                     .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
                     .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsDragging)
                     .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
-                foreach (var group in windows.GroupBy(w => w.PlacementMonitor?.DeviceId))
+                if (_droppedWidgets.Count > 0)
+                {
+                    foreach (var moving in windows.Where(w => _droppedWidgets.Contains(w.InstanceId) && !w.FluidPlacement))
+                    {
+                        Rect work = moving.PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip();
+                        var fixedCards = windows.Where(w => w != moving && !w.FluidPlacement && w.PlacementMonitor?.DeviceId == moving.PlacementMonitor?.DeviceId)
+                            .Select(w => w.VisibleCardBounds).ToArray();
+                        var plan = FloatingPlacement.FitDropped(work, new Size(moving.ActualWidth, moving.ActualHeight),
+                            new Point(moving.Left, moving.Top), fixedCards, new Thickness(_settings.WidgetPaddingLeft,
+                                _settings.WidgetPaddingTop, _settings.WidgetPaddingRight, _settings.WidgetPaddingBottom), moving.DesktopScale);
+                        moving.SetDesktopScale(moving.DesktopScale * plan.Scale);
+                        moving.MoveForSpacing(plan.Bounds.Left, plan.Bounds.Top);
+                    }
+                    _droppedWidgets.Clear();
+                    return;
+                }
+                foreach (var group in windows.Where(w => !w.FluidPlacement).GroupBy(w => w.PlacementMonitor?.DeviceId))
                 {
                     var members = group.ToArray();
                     Rect work = members[0].PlacementMonitor?.WorkAreaDip ?? MonitorGeometry.PrimaryWorkAreaDip();
@@ -1097,6 +1116,8 @@ public sealed class LayoutController : IDisposable
         }
 
         ScheduleSave();
+        _droppedWidgets.Add(instance.Id);
+        QueueWidgetSpacing();
     }
 
     // ---- persistence -------------------------------------------------------
@@ -1437,6 +1458,7 @@ public sealed class LayoutController : IDisposable
 
     private void ClearRuntime()
     {
+        _droppedWidgets.Clear();
         // Rehosting and shutdown must never remove the persisted layout items.
         foreach (Guid id in _detachedWindows.Values.ToArray())
             if (_widgetWindows.TryGetHost(id, out var host)) host.Closed -= OnHostClosed;

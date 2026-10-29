@@ -277,6 +277,37 @@ internal static class WindowPersistenceChecks
             checks["ManualDropSurvivesRestartAndLayoutClone"] = Math.Abs(window.Left - desiredDrop.X) <= 1 && Math.Abs(window.Top - desiredDrop.Y) <= 1;
             controller.Dispose(); CloseSidebar(services);
         }
+        using (var services = Build(Path.Combine(root, "drop-near-fixed")))
+        {
+            var controller = services.GetRequiredService<LayoutController>();
+            controller.ApplyActiveLayout(); Pump(); Pump();
+            var windows = Application.Current.Windows.OfType<WidgetWindow>().ToArray();
+            var moving = windows[0]; var target = windows[1];
+            var stationary = windows.Where(w => w != moving).ToDictionary(w => w.InstanceId, w => new Point(w.Left, w.Top));
+            moving.MoveTo(target.Left - 10, target.Top);
+            controller.KeepManualPosition(moving.InstanceId);
+            Pump(); Pump(); Pump();
+            checks["DroppingNearbyNeverMovesPlacedWidgets"] = windows.Where(w => w != moving).All(w =>
+                (new Point(w.Left, w.Top) - stationary[w.InstanceId]).Length <= 1);
+            checks["DraggedWidgetMovesOutOfCollision"] = Math.Abs(moving.Left - target.Left) > 10 || Math.Abs(moving.Top - target.Top) > 10;
+            var instance = controller.Instances.Single(i => i.Id == moving.InstanceId);
+            instance.Settings.FluidPlacement = true;
+            instance.ViewModel.NotifySettingsChanged();
+            moving.MoveTo(target.Left, target.Top);
+            controller.KeepManualPosition(moving.InstanceId);
+            Pump(); Pump(); Pump();
+            checks["FluidPlacementAllowsOverlapWithoutMovingNeighbors"] = Math.Abs(moving.Left - target.Left) <= 1 && Math.Abs(moving.Top - target.Top) <= 1 &&
+                windows.Where(w => w != moving).All(w => (new Point(w.Left, w.Top) - stationary[w.InstanceId]).Length <= 1);
+            var snap = typeof(WidgetWindow).GetMethod("SnapAxis", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!;
+            checks["FluidPlacementDisablesGridSnap"] = (double)snap.Invoke(moving, new object[] { 123.45 })! == 123.45;
+            var copied = instance.Widget.DeserializeSettings(instance.Widget.SerializeSettings(instance.Settings));
+            checks["FluidPlacementPersistsInWidgetSettings"] = copied?.FluidPlacement == true;
+            var editor = new SettingsEditorWindow(instance);
+            editor.Show(); editor.UpdateLayout();
+            checks["FluidPlacementHasSettingsControl"] = HasText(editor, "Fluid placement");
+            editor.Close();
+            controller.Dispose(); CloseSidebar(services);
+        }
         string hash = new string('A', 64);
         checks["UpdateAcceptsVersionedRelease"] = UpdateService.Parse(System.Text.Json.JsonSerializer.Serialize(new { version = "1.0.14", url = "https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", sha256 = hash })).Version == "1.0.14";
         checks["UpdateRejectsUntrustedHost"] = RejectUpdate("https://example.com/deskstats/downloads/DeskStats-Setup-1.0.14.exe", hash);
@@ -284,6 +315,14 @@ internal static class WindowPersistenceChecks
         checks["UpdateRejectsInvalidChecksum"] = RejectUpdate("https://talhazahid.github.io/deskstats/downloads/DeskStats-Setup-1.0.14.exe", "bad");
         File.WriteAllText(Path.Combine(output, "window-persistence-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
         return checks.Values.All(x => x);
+    }
+
+    private static bool HasText(DependencyObject root, string text)
+    {
+        if (root is System.Windows.Controls.TextBlock block && block.Text == text) return true;
+        for (int i = 0; i < System.Windows.Media.VisualTreeHelper.GetChildrenCount(root); i++)
+            if (HasText(System.Windows.Media.VisualTreeHelper.GetChild(root, i), text)) return true;
+        return false;
     }
 
     private static bool HasScrollViewer(DependencyObject root)

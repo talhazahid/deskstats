@@ -8,6 +8,40 @@ public static class FloatingPlacement
     public const double Gap = 20;
     public const double WidgetInset = 10;
     public const double Margin = 16;
+    public static (Rect Bounds, double Scale) FitDropped(Rect work, Size size, Point wanted,
+        IReadOnlyList<Rect> fixedCards, Thickness padding, double currentScale = 1)
+    {
+        Rect area = work; area.Inflate(-Margin, -Margin);
+        double gapX = Math.Clamp(padding.Left, 0, 100) + Math.Clamp(padding.Right, 0, 100);
+        double gapY = Math.Clamp(padding.Top, 0, 100) + Math.Clamp(padding.Bottom, 0, 100);
+        for (double factor = 1; factor >= 0.01; factor *= 0.9)
+        {
+            double width = Math.Ceiling(size.Width * factor), height = Math.Ceiling(size.Height * factor);
+            if (width > area.Width || height > area.Height) continue;
+            double inset = WidgetInset * currentScale * factor;
+            Point preferred = new(Math.Clamp(wanted.X, area.Left, area.Right - width), Math.Clamp(wanted.Y, area.Top, area.Bottom - height));
+            bool Free(Rect candidate)
+            {
+                if (!area.Contains(candidate)) return false;
+                candidate.Inflate(-inset, -inset);
+                return fixedCards.All(card =>
+                {
+                    card.Inflate(Math.Max(0, gapX - 0.25), Math.Max(0, gapY - 0.25));
+                    return !card.IntersectsWith(candidate);
+                });
+            }
+            Rect chosen = new(preferred, new Size(width, height));
+            if (Free(chosen)) return (chosen, factor);
+            var xs = fixedCards.SelectMany(r => new[] { r.Left - gapX - width + inset, r.Right + gapX - inset })
+                .Append(preferred.X).Append(area.Left).Append(area.Right - width).Distinct();
+            var ys = fixedCards.SelectMany(r => new[] { r.Top - gapY - height + inset, r.Bottom + gapY - inset })
+                .Append(preferred.Y).Append(area.Top).Append(area.Bottom - height).Distinct();
+            var candidates = (from x in xs from y in ys select new Rect(x, y, width, height))
+                .Where(Free).OrderBy(r => (r.TopLeft - preferred).LengthSquared).ToArray();
+            if (candidates.Length > 0) return (candidates[0], factor);
+        }
+        return (new Rect(area.TopLeft, new Size(1, 1)), 0.01);
+    }
     public static MonitorDescriptor? MonitorForPointer(IReadOnlyList<MonitorDescriptor> monitors, Point pixelPointer)
         => monitors.FirstOrDefault(m => new Rect(m.BoundsDip.X * m.DpiX / 96.0,
             m.BoundsDip.Y * m.DpiY / 96.0, m.PixelWidth, m.PixelHeight).Contains(pixelPointer));
