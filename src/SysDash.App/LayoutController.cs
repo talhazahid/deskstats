@@ -958,6 +958,11 @@ public sealed class LayoutController : IDisposable
                         var plan = FloatingPlacement.FitDropped(work, new Size(moving.ActualWidth, moving.ActualHeight),
                             new Point(moving.Left, moving.Top), fixedCards, new Thickness(_settings.WidgetPaddingLeft,
                                 _settings.WidgetPaddingTop, _settings.WidgetPaddingRight, _settings.WidgetPaddingBottom), moving.DesktopScale);
+                        if (plan.Bounds.IsEmpty)
+                        {
+                            if (moving.DragOrigin is { } origin) moving.MoveForSpacing(origin.X, origin.Y);
+                            continue;
+                        }
                         moving.SetDesktopScale(moving.DesktopScale * plan.Scale);
                         moving.MoveForSpacing(plan.Bounds.Left, plan.Bounds.Top);
                     }

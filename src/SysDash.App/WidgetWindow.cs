@@ -53,6 +53,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
     internal double DesktopScale { get; private set; } = 1;
     internal bool IsDragging { get; private set; }
     internal bool IsInteracting => IsDragging || _dragResizing;
+    internal Point? DragOrigin { get; private set; }
     internal bool FluidPlacement => _instance.Settings.FluidPlacement;
     internal Rect VisibleCardBounds
     {
@@ -623,6 +624,7 @@ public sealed class WidgetWindow : Window, IWidgetHost
             _missingSavedMonitor = false;
             e.Handled = true;
             _placementTimer.Stop();
+            DragOrigin = new Point(Left, Top);
             IsDragging = true;
             DragMove();
             IsDragging = false;

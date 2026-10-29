@@ -14,7 +14,7 @@ public static class FloatingPlacement
         Rect area = work; area.Inflate(-Margin, -Margin);
         double gapX = Math.Clamp(padding.Left, 0, 100) + Math.Clamp(padding.Right, 0, 100);
         double gapY = Math.Clamp(padding.Top, 0, 100) + Math.Clamp(padding.Bottom, 0, 100);
-        for (double factor = 1; factor >= 0.01; factor *= 0.9)
+        for (double factor = 1; factor >= 0.5; factor *= 0.9)
         {
             double width = Math.Ceiling(size.Width * factor), height = Math.Ceiling(size.Height * factor);
             if (width > area.Width || height > area.Height) continue;
@@ -40,7 +40,7 @@ public static class FloatingPlacement
                 .Where(Free).OrderBy(r => (r.TopLeft - preferred).LengthSquared).ToArray();
             if (candidates.Length > 0) return (candidates[0], factor);
         }
-        return (new Rect(area.TopLeft, new Size(1, 1)), 0.01);
+        return (Rect.Empty, 1);
     }
     public static MonitorDescriptor? MonitorForPointer(IReadOnlyList<MonitorDescriptor> monitors, Point pixelPointer)
         => monitors.FirstOrDefault(m => new Rect(m.BoundsDip.X * m.DpiX / 96.0,
