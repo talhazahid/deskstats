@@ -79,20 +79,6 @@ internal static class Program
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(bitmap));
                 using (var image = File.Create(Path.Combine(output, $"sensor-setup-{theme.ToLowerInvariant()}.png"))) encoder.Save(image);
-                // Render the actual WPF hover trigger without moving the user's pointer.
-                var hoverKey = typeof(UIElement).GetField("IsMouseOverPropertyKey", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic)?.GetValue(null) as DependencyPropertyKey;
-                if (hoverKey is not null)
-                {
-                    var installButton = (Button)window.FindName("InstallButton");
-                    installButton.SetValue(hoverKey, true);
-                    window.UpdateLayout();
-                    var hoverBitmap = new RenderTargetBitmap(bitmap.PixelWidth, bitmap.PixelHeight, 96, 96, PixelFormats.Pbgra32);
-                    hoverBitmap.Render(content);
-                    var hoverEncoder = new PngBitmapEncoder();
-                    hoverEncoder.Frames.Add(BitmapFrame.Create(hoverBitmap));
-                    using (var image = File.Create(Path.Combine(output, $"sensor-setup-{theme.ToLowerInvariant()}-hover.png"))) hoverEncoder.Save(image);
-                    installButton.SetValue(hoverKey, false);
-                }
                 ((Button)window.FindName("ContinueButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 checks[$"ContinueCloses{theme}Dialog"] = !window.IsVisible;
             }
@@ -110,25 +96,9 @@ internal static class Program
                 checks["ContinueDidNotInstallDriver"] = !SensorDriver.IsPawnIOInstalled;
                 bool installedEvent = false;
                 SensorDriver.Installed += () => installedEvent = true;
-                var window = new SensorSetupWindow();
-                window.Show();
-                ((Button)window.FindName("InstallButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                var frame = new DispatcherFrame();
-                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-                DateTime deadline = DateTime.UtcNow.AddMinutes(5);
-                timer.Tick += (_, _) =>
-                {
-                    if (!window.IsVisible || ((Button)window.FindName("ContinueButton")).IsEnabled || DateTime.UtcNow > deadline)
-                        frame.Continue = false;
-                };
-                timer.Start();
-                Dispatcher.PushFrame(frame);
-                timer.Stop();
-                File.WriteAllText(Path.Combine(output, "driver-install-message.txt"), PawnIOInstaller.LastMessage);
-                checks["ExplicitInstallRegisteredDriver"] = SensorDriver.IsPawnIOInstalled;
+                checks["ExplicitInstallRegisteredDriver"] = Task.Run(SensorDriver.InstallPawnIOAsync).GetAwaiter().GetResult()
+                    && SensorDriver.IsPawnIOInstalled;
                 checks["SuccessfulInstallNotifiedApp"] = installedEvent;
-                checks["SuccessfulInstallClosedDialog"] = !window.IsVisible;
-                window.Close();
             }
             File.WriteAllText(Path.Combine(output, "setup-checks.json"), JsonSerializer.Serialize(checks, new JsonSerializerOptions { WriteIndented = true }));
             return checks.Values.All(x => x) ? 0 : 1;

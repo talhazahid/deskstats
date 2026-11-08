@@ -39,8 +39,8 @@ public sealed class AppSettings
     /// <summary>The one-time "install sensor driver" tip was shown.</summary>
     public bool SensorDriverPromptShown { get; set; }
 
-    /// <summary>The user made the first-launch sensor setup choice.</summary>
-    public bool SensorDriverChoiceMade { get; set; }
+    /// <summary>The first-launch Microsoft Store sensor notice was shown.</summary>
+    public bool StoreSensorNoticeShown { get; set; }
 
     /// <summary>
     /// Screen the sidebar docks to: empty = main screen (automatic), otherwise the

@@ -37,6 +37,7 @@ public sealed class SensorsViewModel : WidgetViewModel
     public string DriverHint { get => _driverHint; private set => SetProperty(ref _driverHint, value); }
 
     public bool HasDriverHint => _driverHint.Length > 0;
+    public bool CanInstallDriver { get; } = !SensorDriver.IsPackaged;
 
     /// <summary>Installs the PawnIO sensor driver (DeskStats restarts afterwards).</summary>
     public RelayCommand InstallDriverCommand { get; }

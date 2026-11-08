@@ -15,6 +15,8 @@ namespace SysDash.Core.Diagnostics;
 /// </summary>
 public static class SensorDriver
 {
+    public const string StoreSensorLimit = "Some CPU temperature, hardware clock and power readings may be unavailable. The Microsoft Store edition cannot install the sensor driver.";
+
     public const string DownloadPage = "https://pawnio.eu/";
 
     /// <summary>Raised (on a worker thread) after PawnIO was installed successfully.</summary>
@@ -88,9 +90,7 @@ public static class SensorDriver
         {
             if (IsPackaged)
             {
-                return !IsPawnIOInstalled
-                    ? "Additional sensor readings need the PawnIO driver. You can install it from the tray menu."
-                    : (!IsElevated ? "PawnIO is installed; some hardware readings may also require administrator permissions." : null);
+                return StoreSensorLimit;
             }
 
             if (!IsElevated)

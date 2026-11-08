@@ -11,7 +11,8 @@
             <Border Style="{StaticResource WidgetSection}" s:ResponsiveColumns.FullRow="True" Visibility="{Binding HasDriverHint, Converter={StaticResource BoolToVisibility}}">
                 <s:SectionLayout>
                     <TextBlock Style="{StaticResource RowLabel}" TextWrapping="Wrap" TextTrimming="None" Text="{Binding DriverHint}" />
-                    <Button HorizontalAlignment="Left" Margin="0,8,0,0" Command="{Binding InstallDriverCommand}" Content="{Binding InstallButtonText}" />
+                    <Button HorizontalAlignment="Left" Margin="0,8,0,0" Command="{Binding InstallDriverCommand}" Content="{Binding InstallButtonText}"
+                            Visibility="{Binding CanInstallDriver, Converter={StaticResource BoolToVisibility}}" />
                 </s:SectionLayout>
             </Border>
             <Border Style="{StaticResource WidgetSection}">

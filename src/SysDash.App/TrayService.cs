@@ -267,7 +267,7 @@ public sealed class TrayService : IDisposable
         menu.Items.Add(new Separator());
 
         // ---- Sensor driver (CPU temperature / clock / power) -----------------
-        if (SensorDriver.MissingReason is not null)
+        if (!SensorDriver.IsPackaged && SensorDriver.MissingReason is not null)
         {
             if (SensorDriver.IsElevated)
             {

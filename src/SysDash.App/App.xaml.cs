@@ -221,17 +221,16 @@ public partial class App : Application
         // hidden it based on its docked content (floating-first), so there is
         // deliberately no unconditional Show() here.
         StartupTrace.Mark("startup sequence complete");
-        // EXE setup installs PawnIO. MSIX offers it after the widgets load;
-        // installation starts only when the user chooses the install action.
+        // EXE setup installs PawnIO. MSIX explains sensor limits after the widgets load.
         SensorDriver.Installed += () => Dispatcher.BeginInvoke(new Action(RestartApp));
-        if (PawnIOInstaller.IsPackaged && !SensorDriver.IsPawnIOInstalled && !settings.SensorDriverChoiceMade)
+        if (PawnIOInstaller.IsPackaged && !settings.StoreSensorNoticeShown)
         {
             _ = Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
                 var dialog = new SensorSetupWindow();
                 dialog.Loaded += (_, _) =>
                 {
-                    settings.SensorDriverChoiceMade = true;
+                    settings.StoreSensorNoticeShown = true;
                     settingsService.Save();
                 };
                 dialog.Show();

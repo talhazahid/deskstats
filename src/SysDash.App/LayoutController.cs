@@ -965,7 +965,7 @@ public sealed class LayoutController : IDisposable
                 var windows = _detachedWindows
                     .Where(pair => FindItem(pair.Key) is { Placement.Hidden: false })
                     .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
-                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsInteracting)
+                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsInteracting && !w.HasMissingMonitorAnchor)
                     .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
                 if (_droppedWidgets.Count > 0)
                 {

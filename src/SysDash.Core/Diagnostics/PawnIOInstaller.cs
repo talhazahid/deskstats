@@ -31,6 +31,12 @@ public static class PawnIOInstaller
 
     public static async Task<bool> InstallAsync()
     {
+        if (IsPackaged)
+        {
+            LastMessage = SensorDriver.StoreSensorLimit;
+            return false;
+        }
+
         if (!await Gate.WaitAsync(0)) return false;
         try
         {

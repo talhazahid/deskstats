@@ -3,10 +3,8 @@
     Builds the Microsoft Store (MSIX) package of DeskStats.
 
 .DESCRIPTION
-    The Store build runs as a normal user (an MSIX cannot request administrator rights or
-    install a driver), so sensors that need the PawnIO driver (CPU temperature / clock / power)
-    are not available in it. Everything else works. The EXE installer from build-release.ps1
-    remains the full-featured build.
+    The Store build runs without elevation and does not ship or install PawnIO.
+    Hardware readings that require the driver or elevation may be unavailable.
 
     Get the three identity values from Partner Center → your product → Product management →
     Product identity: "Package/Identity/Name", "Package/Identity/Publisher" and
@@ -69,11 +67,6 @@ Get-ChildItem -LiteralPath (Join-Path $Stage 'Assets') -Filter '*.scale-100.png'
     Copy-Item -LiteralPath $_.FullName -Destination (Join-Path $_.DirectoryName ($_.Name.Replace('.scale-100', '')))
 }
 
-$driver = Join-Path $Root 'installer\PawnIO_setup.exe'
-if ((Get-FileHash -LiteralPath $driver).Hash -ne '1F519A22E47187F70A1379A48CA604981C4FCF694F4E65B734AAA74A9FBA3032') { throw 'PawnIO hash mismatch.' }
-if ((Get-AuthenticodeSignature -LiteralPath $driver).Status -ne 'Valid') { throw 'PawnIO signature invalid.' }
-New-Item -ItemType Directory -Path (Join-Path $Stage 'Dependencies') | Out-Null
-Copy-Item -LiteralPath $driver -Destination (Join-Path $Stage 'Dependencies\PawnIO_setup.exe')
 Copy-Item -LiteralPath (Join-Path $Root 'LICENSE'),(Join-Path $Root 'NOTICE') -Destination $Stage
 $IdentityName = [Security.SecurityElement]::Escape($IdentityName)
 $Publisher = [Security.SecurityElement]::Escape($Publisher)

@@ -55,6 +55,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
     internal bool IsInteracting => IsDragging || _dragResizing;
     internal Point? DragOrigin { get; private set; }
     internal bool FluidPlacement => _instance.Settings.FluidPlacement;
+    internal bool HasMissingMonitorAnchor => !string.IsNullOrEmpty(_savedMonitorDeviceId)
+        && MonitorGeometry.FindById(_savedMonitorDeviceId) is null;
     internal Rect VisibleCardBounds
     {
         get { var bounds = new Rect(Left, Top, ActualWidth, ActualHeight); bounds.Inflate(-FloatingPlacement.WidgetInset * DesktopScale, -FloatingPlacement.WidgetInset * DesktopScale); return bounds; }
@@ -535,6 +537,8 @@ public sealed class WidgetWindow : Window, IWidgetHost
 
     public void MoveForSpacing(double x, double y)
     {
+        // An automatic reflow must not turn a temporary fallback into a saved move.
+        if (HasMissingMonitorAnchor || (Math.Abs(x - Left) < 0.5 && Math.Abs(y - Top) < 0.5)) return;
         MoveTo(x, y);
     }
 
