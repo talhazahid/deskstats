@@ -186,9 +186,6 @@ public sealed class WidgetWindow : Window, IWidgetHost
             ApplyChrome();
         };
 
-        // Monitor plugged / unplugged / resolution changed: keep the widget reachable.
-        Microsoft.Win32.SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
-        base.Closed += (_, _) => Microsoft.Win32.SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         WindowLayerHelper.Attach(this, () => _layer);
         Loaded += (_, _) =>
         {
@@ -852,9 +849,9 @@ public sealed class WidgetWindow : Window, IWidgetHost
         return Math.Round(value / step) * step;
     }
 
-    private void OnDisplaySettingsChanged(object? sender, EventArgs e)
+    internal void RestorePendingDisplayPosition()
     {
-        Dispatcher.BeginInvoke(DispatcherPriority.ApplicationIdle, new Action(RestoreSavedDisplayPosition));
+        if (_placementTimer.IsEnabled) RestoreSavedDisplayPosition();
     }
 
     public void RestoreSavedDisplayPosition()

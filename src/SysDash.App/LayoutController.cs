@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Threading;
+using Microsoft.Win32;
 using SysDash.Core.Diagnostics;
 using SysDash.Layouts;
 using SysDash.Layouts.Models;
@@ -46,6 +48,7 @@ public sealed class LayoutController : IDisposable
     private bool _adjustingSpacing;
     private readonly HashSet<Guid> _droppedWidgets = new();
     private bool _forceCompactSpacing;
+    private readonly DispatcherTimer _displayRestoreTimer;
 
     public LayoutController(
         IServiceProvider services,
@@ -66,6 +69,18 @@ public sealed class LayoutController : IDisposable
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         _current = _layouts.ActiveLayout;
+        _displayRestoreTimer = new DispatcherTimer(DispatcherPriority.ApplicationIdle, _sidebar.Dispatcher)
+        {
+            Interval = TimeSpan.FromMilliseconds(750),
+        };
+        _displayRestoreTimer.Tick += (_, _) =>
+        {
+            _displayRestoreTimer.Stop();
+            foreach (var window in VisibleDetachedWindows())
+                window.RestoreSavedDisplayPosition();
+            QueueWidgetSpacing();
+        };
+        SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
     }
 
     // ---- status ------------------------------------------------------------
@@ -949,12 +964,12 @@ public sealed class LayoutController : IDisposable
 
     private void QueueWidgetSpacing()
     {
-        if (_tearingDown || _adjustingSpacing || _spacingQueued) return;
+        if (_tearingDown || _adjustingSpacing || _spacingQueued || _displayRestoreTimer.IsEnabled) return;
         _spacingQueued = true;
         _sidebar.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.ContextIdle, new Action(() =>
         {
             _spacingQueued = false;
-            if (_tearingDown) return;
+            if (_tearingDown || _displayRestoreTimer.IsEnabled) return;
             if (_detachedWindows.Values.Any(id => _widgetWindows.TryGetHost(id, out var host) && host is WidgetWindow { IsInteracting: true })) return;
             _adjustingSpacing = true;
             bool compact = _forceCompactSpacing;
@@ -962,10 +977,11 @@ public sealed class LayoutController : IDisposable
             if (compact) _droppedWidgets.Clear();
             try
             {
-                var windows = _detachedWindows
-                    .Where(pair => FindItem(pair.Key) is { Placement.Hidden: false })
-                    .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
-                    .OfType<WidgetWindow>().Where(w => w.IsLoaded && w.IsVisible && !w.IsInteracting && !w.HasMissingMonitorAnchor)
+                var visible = VisibleDetachedWindows().ToArray();
+                // A resize can queue spacing before the window's placement timer
+                // restores a native move. Fit from the restored positions.
+                foreach (var window in visible) window.RestorePendingDisplayPosition();
+                var windows = visible.Where(w => !w.HasMissingMonitorAnchor)
                     .OrderBy(w => w.Top).ThenBy(w => w.Left).ToArray();
                 if (_droppedWidgets.Count > 0)
                 {
@@ -1013,6 +1029,20 @@ public sealed class LayoutController : IDisposable
             finally { _adjustingSpacing = false; }
         }));
     }
+
+    private IEnumerable<WidgetWindow> VisibleDetachedWindows() => _detachedWindows
+        .Where(pair => FindItem(pair.Key) is { Placement.Hidden: false })
+        .Select(pair => _widgetWindows.TryGetHost(pair.Value, out var host) ? host as WidgetWindow : null)
+        .OfType<WidgetWindow>()
+        .Where(w => w.IsLoaded && w.IsVisible && !w.IsInteracting);
+
+    private void OnDisplaySettingsChanged(object? sender, EventArgs e)
+        => _sidebar.Dispatcher.BeginInvoke(DispatcherPriority.Normal, new Action(() =>
+        {
+            if (_tearingDown) return;
+            _displayRestoreTimer.Stop();
+            _displayRestoreTimer.Start();
+        }));
 
     /// <summary>
     /// Card frame on/off for every widget (floating + sidebar), applied live and saved.
@@ -1196,6 +1226,8 @@ public sealed class LayoutController : IDisposable
     {
         if (_tearingDown) return;
         _tearingDown = true;
+        SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
+        _displayRestoreTimer.Stop();
         foreach (Guid windowId in _detachedWindows.Values.ToArray())
             if (_widgetWindows.TryGetHost(windowId, out var host) && host is WidgetWindow window) window.CapturePlacement();
         _saveCts?.Cancel();

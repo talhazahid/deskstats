@@ -202,6 +202,21 @@ internal static class WindowPersistenceChecks
             SetWindowPos(new WindowInteropHelper(window).Handle, IntPtr.Zero, 0, 0, 0, 0, 0x0015);
             window.CapturePlacement(); Pump();
             checks["AutomaticRelocationRestoresUserAnchor"] = Math.Abs(window.Left - location.X) <= 1 && Math.Abs(window.Top - location.Y) <= 1;
+
+            var neighbor = Application.Current.Windows.OfType<WidgetWindow>().First(w => w != window);
+            var monitor = MonitorGeometry.MonitorAt(new Point(neighbor.Left + 20, neighbor.Top + 20))!;
+            var placement = controller.LayoutItems.Single(item => item.InstanceId == window.InstanceId).Placement;
+            var anchor = (placement.MonitorDeviceId, placement.MonitorOffsetX, placement.MonitorOffsetY);
+            // Simulate Windows moving a window on top of another, followed by
+            // content-driven spacing before the placement timer has run.
+            SetWindowPos(new WindowInteropHelper(window).Handle, IntPtr.Zero,
+                (int)Math.Round(neighbor.Left * monitor.DpiX / 96.0),
+                (int)Math.Round(neighbor.Top * monitor.DpiY / 96.0), 0, 0, 0x0015);
+            controller.RefreshWidgetSpacing();
+            Pump();
+            checks["SpacingPreservesAnchorAfterNativeRelocation"] =
+                anchor == (placement.MonitorDeviceId, placement.MonitorOffsetX, placement.MonitorOffsetY) &&
+                Math.Abs(window.Left - location.X) <= 1 && Math.Abs(window.Top - location.Y) <= 1;
             controller.Dispose(); CloseSidebar(services);
         }
         using (var services = Build(stateRoot))
