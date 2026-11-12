@@ -63,7 +63,7 @@ RestartIfNeededByRun=no
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"
+Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Check: ShouldCreateDesktopShortcut
 
 [Files]
 ; App binaries (self-contained single-file EXE plus any side files the publish produced)
@@ -81,7 +81,7 @@ Source: "..\docs\THIRD_PARTY\*";              DestDir: "{app}\docs\third_party";
 
 [Icons]
 Name: "{group}\DeskStats"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\DeskStats"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autodesktop}\DeskStats"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon; Check: ShouldCreateDesktopShortcut
 
 [Run]
 ; The required driver is installed and verified in PrepareToInstall before app files change.
@@ -97,6 +97,11 @@ Type: files; Name: "{app}\install-instance.txt"
 [Code]
 var
   FreshInstallation: Boolean;
+
+function ShouldCreateDesktopShortcut(): Boolean;
+begin
+  Result := FreshInstallation or FileExists(ExpandConstant('{autodesktop}\DeskStats.lnk'));
+end;
 
 function IsUpdateLaunch(): Boolean;
 begin
